@@ -282,7 +282,7 @@ function icoLoad(file,id){var r=new FileReader();r.onload=function(){var im=new 
     var it=db.items.filter(function(i){return i.id==id})[0];if(it){it.img=u;save();render()}};
   im.src=r.result};r.onerror=function(){showToast("Image illisible.")};r.readAsDataURL(file)}
 function stale(){return db.stale||60}
-var TAX=12,prevSig=null,page="market",cv=null,ED=false,pubRev=0,EDIT={qe:1,qesave:1,qex:1,pst:1,pstx:1,pstgo:1,pstback:1,pstok:1,syn:1,synx:1,syngo:1,synoff:1,synnow:1,add:1,create:1,newcat:1,mancat:1,delcat:1,savecat:1,addpt:1,delpt:1,saveinfo:1,delitem:1,qu:1,io:1,reset:1,fav:1,clean:1,ioload:1,chk:1,ico:1,icodel:1};
+var TAX=12,prevSig=null,page="market",cv=null,ED=false,pubRev=0,EDIT={psmode:1,psadd:1,psdel:1,psok:1,pst:1,pstx:1,pstgo:1,pstback:1,pstok:1,syn:1,synx:1,syngo:1,synoff:1,synnow:1,add:1,create:1,newcat:1,mancat:1,delcat:1,savecat:1,addpt:1,delpt:1,saveinfo:1,delitem:1,qu:1,io:1,reset:1,fav:1,clean:1,ioload:1,chk:1,ico:1,icodel:1};
 function sigp(){return db.sig||15}
 function sg(it){var s=stats(it),p=s.p,lo=it.lo,hi=it.hi;if(lo||hi)return lo&&p<=lo?-1:hi&&p>=hi?1:0;if(s.n<3||!s.med)return 0;var x=sigp()/100;return p<=s.med*(1-x)?-1:p>=s.med*(1+x)?1:0}
 function isAl(it){return sg(it)!=0}
@@ -315,7 +315,7 @@ function list(){
   var form=adding?'<div class="panel form" style="margin-bottom:12px"><label>Nom<input id="nn" placeholder="Nom de l\'objet"></label><label>Catégorie<select id="nc">'+catOpts(filter)+'</select></label><label>Rareté<select id="nr">'+rarOpts(0)+'</select></label><label>Prix<input id="np" type="number" min="0"></label><div style="align-self:end;display:flex;gap:8px"><button class="pri" data-a="create">Ajouter</button><button data-a="cancel">Annuler</button></div></div>':"";
   return'<header><div><h1 class="brand">HDV Nano</h1><p>'+(ED?"":"Prix partagés par la guilde (lecture seule).")+'</p>'+upd()+'</div><div class="bar">'+(SA&&ED?'<button data-a="syn" class="'+(syn.st=="err"?"del":syn.tok?"":"pri")+'">'+synLabel()+"</button>":"")+(ED&&!(SA&&syn.tok)?'<button class="pri" data-a="pub">'+(db.rev>pubRev?(window.claude?"Publier pour la guilde":"Télécharger la mise à jour"):"Publié ✓")+"</button>":"")+(SA&&!ED?'<button data-a="adm">🔒 Admin</button>':"")+(SA&&ED?'<button data-a="out">Quitter le mode admin</button>':"")+'<button data-a="snd" class="'+(db.snd?"on":"")+'">Son : '+(db.snd?"activé":"désactivé")+'</button><button data-a="io">Sauvegarde</button><button data-a="reset" class="del">'+(conf=="reset"?"Confirmer":"Réinitialiser")+'</button></div></header>'+admPanel()+synPanel()+
   '<div class="bar">'+nav()+'</div>'+deals()+'<div class="bar">'+tabs()+"</div>"+
-  iop()+pstPanel()+qePanel()+'<div class="bar"><input id="q" type="search" placeholder="Rechercher…" value="'+esc(q)+'" style="min-width:220px"><button class="pri" data-a="add">+ Nouvel objet</button><button data-a="qu" class="'+(qu?"on":"")+'">Mise à jour rapide</button>'+(ED?'<button data-a="qe" class="'+(qe.open?"on":"")+'">✎ Saisir un prix</button><button data-a="pst" class="'+(pst.open?"on":"")+'">⚡ Collage rapide</button>':"")+(qu?'<button data-a="chk" title="Marque tous les prix comme vérifiés à l\'instant">Tout est à jour</button>':"")+'<label class="cat">Relevé périmé après <input id="sa" type="number" min="1" value="'+stale()+'" style="width:70px"> min</label><label class="cat">Signal auto : ±<input id="sp" type="number" min="1" value="'+sigp()+'" style="width:60px">% de la médiane 7j</label></div>'+form+
+  iop()+pstPanel()+'<div class="bar"><input id="q" type="search" placeholder="Rechercher…" value="'+esc(q)+'" style="min-width:220px"><button class="pri" data-a="add">+ Nouvel objet</button><button data-a="qu" class="'+(qu?"on":"")+'">Mise à jour rapide</button>'+(ED?'<button data-a="pst" class="'+(pst.open?"on":"")+'">⚡ Collage rapide</button>':"")+(qu?'<button data-a="chk" title="Marque tous les prix comme vérifiés à l\'instant">Tout est à jour</button>':"")+'<label class="cat">Relevé périmé après <input id="sa" type="number" min="1" value="'+stale()+'" style="width:70px"> min</label><label class="cat">Signal auto : ±<input id="sp" type="number" min="1" value="'+sigp()+'" style="width:60px">% de la médiane 7j</label></div>'+form+
   cb()+'<div class="hint"><b>Astuce :</b> clique sur un objet pour ouvrir sa fiche (graphique, historique, meilleures heures).</div><div class="panel scroll cards'+(CP?" cp":"")+'"><table style="min-width:'+(360+80*visN())+'px"><thead>'+hd()+'</thead><tbody>'+
   (rows||'<tr><td colspan="8"><div class="empty">Aucun objet. Ajoutez-en un avec « Nouvel objet ».</div></td></tr>')+"</tbody></table></div>";
 }
@@ -351,10 +351,11 @@ document.addEventListener("click",function(e){
   else if(a=="filter"){filter=v;lsc=-1}
   else if(a=="range")range=v;
   else if(a=="qu")qu=!qu;
-  else if(a=="qe"){qe.open=!qe.open;if(qe.open){pst.open=false;qe.focus=true;if(!qeList().length)qe.open=false;else if(qeList().indexOf(qe.id)<0)qe.id=qeList()[0]}}
-  else if(a=="qex"){qe.open=false}
-  else if(a=="qesave"){qeSave()}
-  else if(a=="pst"){pst.open=!pst.open;pst.rows=null;if(pst.open)qe.open=false}
+  else if(a=="pst"){pst.open=!pst.open;pst.rows=null;if(pst.open){pst.mode="menu";if(!pst.lines.length||!pst.lines[0].id)pst.lines=[{id:qeList()[0]||"",p:""}];pst.fi=0}}
+  else if(a=="psmode"){pSync();pst.mode=v;pst.rows=null;if(v=="menu")pst.fi=0}
+  else if(a=="psadd"){pSync();var ql=qeList(),ll=pst.lines[pst.lines.length-1],qk=ql.indexOf(ll.id);pst.lines.push({id:ql[qk+1]||ll.id,p:""});pst.fi=pst.lines.length-1}
+  else if(a=="psdel"){pSync();pst.lines.splice(+v,1);if(!pst.lines.length)pst.lines=[{id:qeList()[0]||"",p:""}]}
+  else if(a=="psok"){pSync();pApplyM()}
   else if(a=="pstx"){pst.open=false;pst.rows=null;pst.txt=""}
   else if(a=="pstgo"){pst.txt=val("ptx");pst.rows=pParse(pst.txt)}
   else if(a=="pstback"){pst.rows=null}
@@ -396,9 +397,9 @@ document.addEventListener("click",function(e){
   else if(a=="delpt"){it=cur();if(it.h.length>1){it.h.splice(+v,1);save()}}
   else if(a=="saveinfo"){it=cur();it.name=val("in").trim()||it.name;it.cat=val("ic");it.rar=+val("ir");it.lo=+val("il")||0;it.hi=+val("ih")||0;save()}
   else if(a=="delitem"){if(pc=="delitem"){db.items=db.items.filter(function(i){return i.id!=view});view=null;save()}else conf="delitem"}
-  render();qeFocus();
+  render();pFocus();
 });
-document.addEventListener("change",function(e){var t=e.target;if(t.id=="qes"){qe.id=t.value;qe.focus=true;render();qeFocus();return}if(t.id=="ci"){var itm=db.items.filter(function(i){return i.id==t.value})[0];cv.i=t.value;if(itm){var ss=stats(itm);document.getElementById("cb").value=ss.p;document.getElementById("cs").value=Math.round(ss.med)||""}calcUpdate();return}if(t.id=="sp"){db.sig=Math.max(1,+t.value||15);save();render();return}if(t.id=="sa"){db.stale=Math.max(1,+t.value||60);save();render();return}if(!t.classList.contains("qi"))return;
+document.addEventListener("change",function(e){var t=e.target;if(t.classList.contains("rs")){pSync();pst.fi=+t.dataset.i;render();pFocus();return}if(t.id=="ci"){var itm=db.items.filter(function(i){return i.id==t.value})[0];cv.i=t.value;if(itm){var ss=stats(itm);document.getElementById("cb").value=ss.p;document.getElementById("cs").value=Math.round(ss.med)||""}calcUpdate();return}if(t.id=="sp"){db.sig=Math.max(1,+t.value||15);save();render();return}if(t.id=="sa"){db.stale=Math.max(1,+t.value||60);save();render();return}if(!t.classList.contains("qi"))return;
   var ix=[].slice.call(document.querySelectorAll(".qi")).indexOf(t),it=db.items.filter(function(i){return i.id==t.dataset.id})[0],p=+t.value;
   if(it&&t.value!==""&&p>=0){if(p!==stats(it).p)it.h.push({t:Date.now(),p:p});db.chk=Date.now();save()}
   render();var n=document.querySelectorAll(".qi")[ix+1];if(n){n.focus();n.select()}});
@@ -415,7 +416,7 @@ function admGo(){var p=val("apw");admMsg="";
   render();var f=document.getElementById("apw");if(f&&f.focus)f.focus()}
 function admOut(){try{localStorage.removeItem("hdv_admin")}catch(e){}ED=false;document.body.classList.add("ro");load();render()}
 
-var pst={open:false,rows:null,txt:""};
+var pst={open:false,rows:null,txt:"",mode:"menu",lines:[],fi:null};
 function nrm(t){return String(t).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[’‘´`]/g,"'").replace(/[^a-z0-9' ]+/g," ").replace(/\s+/g," ").trim()}
 function pNum(t){var re=/\d+[.,]\d+(?=\s*[km](?![a-z]))|\d{1,3}(?:[   .,]\d{3})+(?!\d)|\d+/g,m=re.exec(t);if(!m)return null;
   var x=m[0],suf=t.charAt(m.index+x.length),sp=t.slice(m.index+x.length).match(/^\s*([km])(?![a-z])/),mul=sp?(sp[1]=="k"?1e3:1e6):1,v;
@@ -433,27 +434,28 @@ function pParse(txt){var names=db.items.map(function(i){return{i:i,n:nrm(i.name)
 function pApply(){var n=0,now=Date.now();[].slice.call(document.querySelectorAll(".pp")).forEach(function(inp){var it=db.items.filter(function(i){return i.id==inp.dataset.id})[0],p=+inp.value;if(!it||inp.value===""||!(p>=0))return;
     var last=it.h.length?Math.max.apply(0,it.h.map(function(x){return x.t})):0;if(p!==stats(it).p||now-last>36e5){it.h.push({t:now,p:p});n++}});
   pst.open=false;pst.rows=null;pst.txt="";if(n)save();showToast(n?n+" prix mis à jour.":"Rien à changer : les prix collés sont déjà à jour.")}
+function qeList(){var o=[];db.cats.forEach(function(c){db.items.forEach(function(i){if(i.cat==c)o.push(i.id)})});db.items.forEach(function(i){if(o.indexOf(i.id)<0)o.push(i.id)});return o}
+var lsc=0,wyl=0,lastV="",lastScroll=0;
+function pSync(){var s=document.querySelectorAll(".rs"),p=document.querySelectorAll(".rp");if(!s.length)return;pst.lines=[].slice.call(s).map(function(e,i){return{id:e.value,p:p[i]?p[i].value:""}})}
+function pFocus(){if(pst.fi!=null){var e=document.querySelectorAll(".rp")[pst.fi];pst.fi=null;if(e)e.focus()}}
+function pApplyM(){var n=0,now=Date.now();pst.lines.forEach(function(l){var it=db.items.filter(function(i){return i.id==l.id})[0],p=+l.p;if(!it||l.p===""||!(p>=0))return;
+    var last=it.h.length?Math.max.apply(0,it.h.map(function(x){return x.t})):0;if(p!==stats(it).p||now-last>36e5){it.h.push({t:now,p:p});n++}});
+  pst.open=false;pst.rows=null;pst.lines=[];if(n)save();showToast(n?n+" prix mis à jour.":"Rien à changer : ces prix sont déjà à jour.")}
+function pMenu(){var opts=function(sel){var o="";db.cats.concat(db.items.some(function(i){return db.cats.indexOf(i.cat)<0})?[null]:[]).forEach(function(c){var li=db.items.filter(function(i){return c===null?db.cats.indexOf(i.cat)<0:i.cat==c});if(!li.length)return;
+      o+='<optgroup label="'+esc(c===null?"Autres":c)+'">'+li.map(function(i){return'<option value="'+i.id+'"'+(i.id==sel?" selected":"")+">"+esc(i.name)+"</option>"}).join("")+"</optgroup>"});return o},
+    n=pst.lines.filter(function(l){return l.p!==""&&+l.p>=0}).length;
+  return'<div class="cat">Choisis l\'objet dans le menu, tape son prix, puis <b>Entrée</b> : une nouvelle ligne s\'ajoute avec l\'objet suivant. Applique tout à la fin.</div>'+
+    pst.lines.map(function(l,k){var it=db.items.filter(function(i){return i.id==l.id})[0],cur=it?stats(it).p:0,p=+l.p,d=cur&&l.p!==""?(p/cur-1)*100:null;
+      return'<div class="qe"><label>Objet<select class="rs" data-i="'+k+'">'+opts(l.id)+'</select></label><label>Nouveau prix<input class="rp" type="number" min="0" inputmode="numeric" data-i="'+k+'" value="'+esc(l.p)+'" placeholder="'+(cur?fmt(cur):"")+'" aria-label="Nouveau prix"></label><span class="cat" style="min-width:150px;padding-bottom:10px">Actuel : <b>'+fmt(cur)+"</b>"+(d==null?"":' · <span class="'+(d>.05?"dn":d<-.05?"up":"")+'">'+(p==cur?"inchangé":(d>0?"+":"")+d.toFixed(1).replace(".",",")+" %")+"</span>")+'</span><button class="del" data-a="psdel" data-v="'+k+'" title="Retirer cette ligne" aria-label="Retirer cette ligne">✕</button></div>'}).join("")+
+    '<div class="bar" style="margin:0"><button data-a="psadd">+ Ajouter une ligne</button><button class="pri" data-a="psok">Appliquer'+(n?" ("+n+")":"")+'</button><button data-a="pstx">Fermer</button></div>'}
 function pstPanel(){if(!(ED&&pst.open))return"";
-  var h='<div class="panel form" style="margin-bottom:12px;flex-direction:column"><div class="cat"><b>Collage rapide</b> : colle une liste avec <b>une ligne par objet</b> (le nom, puis le prix), ou un tableau copié. Les objets sont reconnus par leur nom. Tu vérifies l\'aperçu avant d\'appliquer.</div>';
-  if(!pst.rows)return h+'<textarea id="ptx" rows="8" placeholder="Pierre de raffinage 2 000&#10;Bois d\'Yggdrasil pur 59 995" style="width:100%;font:13px monospace;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:8px">'+esc(pst.txt)+'</textarea><div class="bar" style="margin:0"><button class="pri" data-a="pstgo">Analyser</button><button data-a="pstx">Fermer</button></div></div>';
+  var h='<div class="panel form" style="margin-bottom:12px;flex-direction:column"><div class="cat"><b>Collage rapide</b> : mets à jour plusieurs prix d\'un coup.</div><div class="tabs" style="align-self:flex-start"><button data-a="psmode" data-v="menu" class="'+(pst.mode=="menu"?"on":"")+'">Menu déroulant</button><button data-a="psmode" data-v="texte" class="'+(pst.mode=="texte"?"on":"")+'">Coller du texte</button></div>';
+  if(pst.mode=="menu")return h+pMenu()+"</div>";
+  if(!pst.rows)return h+'<div class="cat">Colle une liste avec <b>une ligne par objet</b> (le nom, puis le prix), ou un tableau copié. Les objets sont reconnus par leur nom. Tu vérifies l\'aperçu avant d\'appliquer.</div><textarea id="ptx" rows="8" placeholder="Pierre de raffinage 2 000&#10;Bois d\'Yggdrasil pur 59 995" style="width:100%;font:13px monospace;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:8px">'+esc(pst.txt)+'</textarea><div class="bar" style="margin:0"><button class="pri" data-a="pstgo">Analyser</button><button data-a="pstx">Fermer</button></div></div>';
   var r=pst.rows;
   h+=r.ok.length?'<div class="scroll"><table><thead><tr><th style="text-align:left">Objet reconnu</th><th>Prix actuel</th><th>Nouveau prix</th><th>Écart</th></tr></thead><tbody>'+r.ok.map(function(x){var o=stats(x.it).p,d=o?(x.p/o-1)*100:0;return'<tr><td style="text-align:left">'+esc(x.it.name)+'</td><td>'+fmt(o)+'</td><td><input class="pp" type="number" min="0" data-id="'+x.it.id+'" value="'+x.p+'" style="width:120px" aria-label="Nouveau prix"></td><td class="'+(d>.05?"dn":d<-.05?"up":"")+'">'+(x.p==o?"inchangé":(d>0?"+":"")+d.toFixed(1).replace(".",",")+" %")+"</td></tr>"}).join("")+"</tbody></table></div>":'<div class="cat">Aucun objet reconnu. Vérifie que les noms collés sont les mêmes que sur le site.</div>';
   if(r.unk.length)h+='<div class="cat"><b>Non reconnus ('+r.unk.length+')</b> : '+r.unk.slice(0,8).map(esc).join(" · ")+(r.unk.length>8?" …":"")+"</div>";
   return h+'<div class="bar" style="margin:0">'+(r.ok.length?'<button class="pri" data-a="pstok">Appliquer ('+r.ok.length+")</button>":"")+'<button data-a="pstback">Modifier le texte</button><button data-a="pstx">Fermer</button></div></div>'}
-var qe={open:false,id:"",focus:false},lsc=0,wyl=0,lastV="",lastScroll=0;
-function qeList(){var o=[];db.cats.forEach(function(c){db.items.forEach(function(i){if(i.cat==c)o.push(i.id)})});db.items.forEach(function(i){if(o.indexOf(i.id)<0)o.push(i.id)});return o}
-function qeFocus(){if(qe.focus){qe.focus=false;var e=document.getElementById("qep");if(e){e.focus()}}}
-function qeSave(){var it=db.items.filter(function(i){return i.id==qe.id})[0],e=document.getElementById("qep"),v=e?e.value:"",p=+v;
-  if(!it){showToast("Choisis d'abord un objet.");return}
-  if(v===""||!(p>=0)){showToast("Entre un prix.");qe.focus=true;return}
-  var last=it.h.length?Math.max.apply(0,it.h.map(function(x){return x.t})):0;
-  if(p!==stats(it).p||Date.now()-last>36e5){it.h.push({t:Date.now(),p:p});save();showToast(it.name+" : "+fmt(p)+" enregistré.")}else showToast(it.name+" : prix identique, déjà à jour.");
-  var l=qeList(),k=l.indexOf(it.id);qe.id=l[k+1]||it.id;qe.focus=true}
-function qePanel(){if(!(ED&&qe.open))return"";var it=db.items.filter(function(i){return i.id==qe.id})[0],sel="";
-  db.cats.concat(db.items.some(function(i){return db.cats.indexOf(i.cat)<0})?[null]:[]).forEach(function(c){var li=db.items.filter(function(i){return c===null?db.cats.indexOf(i.cat)<0:i.cat==c});if(!li.length)return;
-    sel+='<optgroup label="'+esc(c===null?"Autres":c)+'">'+li.map(function(i){return'<option value="'+i.id+'"'+(i.id==qe.id?" selected":"")+">"+esc(i.name)+" — "+fmt(stats(i).p)+"</option>"}).join("")+"</optgroup>"});
-  var s=it?stats(it):null;
-  return'<div class="panel form" style="margin-bottom:12px;flex-direction:column"><div class="cat"><b>Saisir un prix</b> : choisis l\'objet, tape son prix, puis Entrée. Le menu passe tout seul à l\'objet suivant.</div><div class="qe"><label>Objet<select id="qes">'+sel+'</select></label><label>Nouveau prix<input id="qep" type="number" min="0" inputmode="numeric" placeholder="'+(s?fmt(s.p):"")+'" aria-label="Nouveau prix"></label><button class="pri" data-a="qesave">Enregistrer</button><button data-a="qex">Fermer</button></div>'+(s?'<div class="cat">Prix actuel : <b>'+fmt(s.p)+"</b> "+ag(s.h)+"</div>":"")+"</div>"}
 var totop=document.createElement("button");totop.className="totop";totop.textContent="↑";totop.title="Remonter en haut";totop.setAttribute("aria-label","Remonter en haut");document.body.appendChild(totop);
 totop.addEventListener("click",function(){var b=document.querySelector(".cards.panel");if(b)b.scrollTo({top:0,behavior:"smooth"});window.scrollTo({top:0,behavior:"smooth"})});
 document.addEventListener("scroll",function(e){lastScroll=Date.now();var b=document.querySelector(".cards.panel");totop.classList.toggle("on",window.scrollY>500||(!!b&&b.scrollTop>300))},{capture:true,passive:true});
@@ -502,7 +504,7 @@ document.body.classList.toggle("ro",!ED);
 load();render();synInit();if(SA&&!ED&&location.hash=="#admin"){admOpen=true;render()}if(!SA&&!ED&&window.claude&&claude.use){claude.use("user").then(function(u){if(u&&(u.isOwner()||u.canEdit()))setEd()}).catch(function(){})}
 var icoT=null,icf=document.createElement("input");icf.type="file";icf.accept="image/*";icf.style.display="none";document.body.appendChild(icf);
 icf.addEventListener("change",function(){var f=icf.files&&icf.files[0];if(f&&icoT)icoLoad(f,icoT)});
-document.addEventListener("keydown",function(e){if(e.key=="Enter"&&e.target&&e.target.matches&&e.target.matches('tr[data-a="open"]'))e.target.click();if(e.key=="Enter"&&e.target&&e.target.id=="qep"){var qb=document.querySelector('[data-a="qesave"]');if(qb)qb.click()}if(e.key=="Enter"&&e.target&&e.target.id=="cn"){var sb=document.querySelector('[data-a="savecat"]');if(sb)sb.click()}if(e.key=="Enter"&&e.target&&(e.target.id=="apw"||e.target.id=="apw2"))admGo()});
+document.addEventListener("keydown",function(e){if(e.key=="Enter"&&e.target&&e.target.matches&&e.target.matches('tr[data-a="open"]'))e.target.click();if(e.key=="Enter"&&e.target&&e.target.classList&&e.target.classList.contains("rp")){var rps=document.querySelectorAll(".rp"),ix=[].indexOf.call(rps,e.target);if(ix<rps.length-1)rps[ix+1].focus();else if(e.target.value!==""){var ab=document.querySelector('[data-a="psadd"]');if(ab)ab.click()}}if(e.key=="Enter"&&e.target&&e.target.id=="cn"){var sb=document.querySelector('[data-a="savecat"]');if(sb)sb.click()}if(e.key=="Enter"&&e.target&&(e.target.id=="apw"||e.target.id=="apw2"))admGo()});
 setInterval(function(){var f=document.activeElement;if(!view&&Date.now()-lastScroll>4000&&!(f&&(f.tagName=="INPUT"||f.tagName=="SELECT"||f.tagName=="TEXTAREA")))render()},6e4);
 </script>
 </body>
