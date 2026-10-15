@@ -113,8 +113,8 @@ function seedItems(){
 var db,view=null,filter="Tout",q="",range="7d",adding=false,conf=null,addingCat=false,manCat=false,sort={k:"",d:1},qu=false,io=false,ioMsg="";
 function load(){var emb=null;try{emb=JSON.parse(document.getElementById("data").textContent)}catch(e){}
   db=emb&&emb.items?emb:{cats:["Gather Resource","Craft Resource","Conversion Resource"],items:seedItems()};pubRev=db.rev||0;
-  if(ED){try{var r=JSON.parse(localStorage.getItem(KEY));if(r&&r.items&&r.cats&&(r.rev||0)>=pubRev)db=r}catch(e){}}if(emb&&emb.ph)db.ph=emb.ph}
-function save(){db.rev=Date.now();if(ED){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}}}
+  if(ED){try{var r=JSON.parse(localStorage.getItem(KEY));if(r&&r.items&&r.cats&&(r.rev||0)>=pubRev)db=r}catch(e){}}if(emb&&emb.ph){db.ph=emb.ph;EMBPH=emb.ph}}
+function save(){db.rev=Date.now();if(ED){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}if(syn.tok){syn.dirty=true;clearTimeout(syn.t);syn.t=setTimeout(synPush,2500);synPaint()}}}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function fmt(n){return Number(n).toLocaleString("fr-FR")}
 function med(a){a=a.slice().sort(function(x,y){return x-y});var m=a.length>>1;return a.length%2?a[m]:(a[m-1]+a[m])/2}
@@ -270,7 +270,7 @@ function icoLoad(file,id){var r=new FileReader();r.onload=function(){var im=new 
     var it=db.items.filter(function(i){return i.id==id})[0];if(it){it.img=u;save();render()}};
   im.src=r.result};r.onerror=function(){showToast("Image illisible.")};r.readAsDataURL(file)}
 function stale(){return db.stale||60}
-var prevSig=null,page="market",cv=null,ED=false,pubRev=0,EDIT={add:1,create:1,newcat:1,mancat:1,delcat:1,savecat:1,addpt:1,delpt:1,saveinfo:1,delitem:1,qu:1,io:1,reset:1,fav:1,clean:1,ioload:1,chk:1,ico:1,icodel:1};
+var prevSig=null,page="market",cv=null,ED=false,pubRev=0,EDIT={syn:1,synx:1,syngo:1,synoff:1,synnow:1,add:1,create:1,newcat:1,mancat:1,delcat:1,savecat:1,addpt:1,delpt:1,saveinfo:1,delitem:1,qu:1,io:1,reset:1,fav:1,clean:1,ioload:1,chk:1,ico:1,icodel:1};
 function sigp(){return db.sig||15}
 function sg(it){var s=stats(it),p=s.p,lo=it.lo,hi=it.hi;if(lo||hi)return lo&&p<=lo?-1:hi&&p>=hi?1:0;if(s.n<3||!s.med)return 0;var x=sigp()/100;return p<=s.med*(1-x)?-1:p>=s.med*(1+x)?1:0}
 function isAl(it){return sg(it)!=0}
@@ -301,7 +301,7 @@ function list(){
     return'<tr data-a="open" data-v="'+it.id+'" tabindex="0" title="Ouvrir la fiche de cet objet"><td><div style="display:flex;gap:8px;align-items:center"><button class="star" data-a="fav" data-v="'+it.id+'" aria-label="Favori">'+(it.fav?"★":"☆")+'</button>'+ico(it)+'<div><div class="name r'+it.rar+'">'+esc(it.name)+'<span class="go" aria-hidden="true">›</span></div><div class="cat">'+esc(it.cat)+'</div></div></div></td>'+
     '<td class="price'+fx+'">'+(qu?'<input class="qi" type="number" min="0" data-id="'+it.id+'" value="'+s.p+'" aria-label="Nouveau prix">':fmt(s.p)+am(it,s.p))+ag(s.h)+"</td>"+cells(s)+"</tr>"}).join("");markSeen(items);
   var form=adding?'<div class="panel form" style="margin-bottom:12px"><label>Nom<input id="nn" placeholder="Nom de l\'objet"></label><label>Catégorie<select id="nc">'+catOpts(filter)+'</select></label><label>Rareté<select id="nr">'+rarOpts(0)+'</select></label><label>Prix<input id="np" type="number" min="0"></label><div style="align-self:end;display:flex;gap:8px"><button class="pri" data-a="create">Ajouter</button><button data-a="cancel">Annuler</button></div></div>':"";
-  return'<header><div><h1 class="brand">HDV Nano</h1><p>'+(ED?"":"Prix partagés par la guilde (lecture seule).")+'</p>'+upd()+'</div><div class="bar">'+(ED?'<button class="pri" data-a="pub">'+(db.rev>pubRev?(window.claude?"Publier pour la guilde":"Télécharger la mise à jour"):"Publié ✓")+"</button>":"")+(SA&&!ED?'<button data-a="adm">🔒 Admin</button>':"")+(SA&&ED?'<button data-a="out">Quitter le mode admin</button>':"")+'<button data-a="snd" class="'+(db.snd?"on":"")+'">Son : '+(db.snd?"activé":"désactivé")+'</button><button data-a="io">Sauvegarde</button><button data-a="theme">Thème</button><button data-a="reset" class="del">'+(conf=="reset"?"Confirmer":"Réinitialiser")+'</button></div></header>'+admPanel()+
+  return'<header><div><h1 class="brand">HDV Nano</h1><p>'+(ED?"":"Prix partagés par la guilde (lecture seule).")+'</p>'+upd()+'</div><div class="bar">'+(SA&&ED?'<button data-a="syn" class="'+(syn.st=="err"?"del":syn.tok?"":"pri")+'">'+synLabel()+"</button>":"")+(ED&&!(SA&&syn.tok)?'<button class="pri" data-a="pub">'+(db.rev>pubRev?(window.claude?"Publier pour la guilde":"Télécharger la mise à jour"):"Publié ✓")+"</button>":"")+(SA&&!ED?'<button data-a="adm">🔒 Admin</button>':"")+(SA&&ED?'<button data-a="out">Quitter le mode admin</button>':"")+'<button data-a="snd" class="'+(db.snd?"on":"")+'">Son : '+(db.snd?"activé":"désactivé")+'</button><button data-a="io">Sauvegarde</button><button data-a="theme">Thème</button><button data-a="reset" class="del">'+(conf=="reset"?"Confirmer":"Réinitialiser")+'</button></div></header>'+admPanel()+synPanel()+
   '<div class="bar">'+nav()+'</div>'+deals()+'<div class="bar">'+tabs()+"</div>"+
   iop()+'<div class="bar"><input id="q" type="search" placeholder="Rechercher…" value="'+esc(q)+'" style="min-width:220px"><button class="pri" data-a="add">+ Nouvel objet</button><button data-a="qu" class="'+(qu?"on":"")+'">Mise à jour rapide</button>'+(qu?'<button data-a="chk" title="Marque tous les prix comme vérifiés à l\'instant">Tout est à jour</button>':"")+'<label class="cat">Relevé périmé après <input id="sa" type="number" min="1" value="'+stale()+'" style="width:70px"> min</label><label class="cat">Signal auto : ±<input id="sp" type="number" min="1" value="'+sigp()+'" style="width:60px">% de la médiane 7j</label></div>'+form+
   cb()+'<div class="hint"><b>Astuce :</b> clique sur un objet pour ouvrir sa fiche (graphique, historique, meilleures heures).</div><div class="panel scroll cards'+(CP?" cp":"")+'"><table style="min-width:'+(360+80*visN())+'px"><thead>'+hd()+'</thead><tbody>'+
@@ -339,6 +339,11 @@ document.addEventListener("click",function(e){
   else if(a=="chk"){db.chk=Date.now();save()}
   else if(a=="ico"){icoT=v;icf.value="";icf.click();return}
   else if(a=="icodel"){it=cur();if(it){delete it.img;save()}}
+  else if(a=="syn"){synOpen=!synOpen;syn.msg=""}
+  else if(a=="synx"){synOpen=false}
+  else if(a=="syngo"){synGo();return}
+  else if(a=="synnow"){syn.msg="Envoi en cours…";synPush(function(ok,m){syn.msg=ok?"Envoyé ✓":m;render()})}
+  else if(a=="synoff"){syn.tok="";syn.st="";syn.dirty=false;clearTimeout(syn.t);try{localStorage.removeItem("hdv_tok")}catch(e){}syn.msg="Synchronisation désactivée."}
   else if(a=="adm"){admOpen=!admOpen;admMsg=""}
   else if(a=="admx"){admOpen=false;admMsg=""}
   else if(a=="admgo"){admGo();return}
@@ -387,10 +392,50 @@ function admGo(){var p=val("apw");admMsg="";
   else admMsg="Mot de passe incorrect.";
   render();var f=document.getElementById("apw");if(f&&f.focus)f.focus()}
 function admOut(){try{localStorage.removeItem("hdv_admin")}catch(e){}ED=false;document.body.classList.add("ro");load();render()}
+
+var syn={tok:"",repo:"",st:"",msg:"",t:null,busy:false,dirty:false},synOpen=false,EMBPH="";
+try{syn.tok=localStorage.getItem("hdv_tok")||"";syn.repo=localStorage.getItem("hdv_repo")||""}catch(e){}
+function synRepo(){if(syn.repo)return syn.repo;var m=location.hostname.match(/^([^.]+)\.github\.io$/),p=location.pathname.split("/")[1];return m&&p?m[1]+"/"+decodeURIComponent(p):""}
+function synOk(){return SA&&/^https?:$/.test(location.protocol)&&!!synRepo()}
+function synLabel(){return!syn.tok?"☁ Activer la synchro":syn.st=="busy"?"☁ Envoi…":syn.st=="err"?"⚠ Synchro en erreur":syn.st=="ok"?"☁ Synchronisé ✓":"☁ Synchro activée"}
+function synPaint(){var b=document.querySelector('[data-a="syn"]');if(b){b.textContent=synLabel();b.className=syn.st=="err"?"del":syn.tok?"":"pri"}}
+function synMsg(s){return s==401?"Jeton refusé ou expiré : génère-en un nouveau.":s==403||s==404?"Dépôt introuvable, ou jeton sans le droit d'écriture (Contents : Read and write).":s==0?"Pas de connexion à GitHub : nouvel essai automatique.":"Erreur GitHub ("+s+")."}
+function b64(t){var b=new TextEncoder().encode(t),o="",i;for(i=0;i<b.length;i+=8192)o+=String.fromCharCode.apply(null,b.subarray(i,i+8192));return btoa(o)}
+function synPush(cb){if(!ED||!syn.tok||!synOk()){cb&&cb(false,"Synchronisation non configurée.");return}
+  if(syn.busy){syn.dirty=true;cb&&cb(false,"Un envoi est déjà en cours, réessaie dans un instant.");return}
+  clearTimeout(syn.t);syn.busy=true;syn.dirty=false;syn.st="busy";synPaint();
+  var o={},k;for(k in db)if(k!="ph")o[k]=db[k];
+  var rev=db.rev,body=b64(JSON.stringify(o)),u="https://api.github.com/repos/"+synRepo()+"/contents/data.json",H={Authorization:"Bearer "+syn.tok,Accept:"application/vnd.github+json"};
+  function end(ok,s){syn.busy=false;syn.st=ok?"ok":"err";if(ok){syn.msg="";if(db.rev!==rev){syn.dirty=true;syn.t=setTimeout(synPush,2500)}}else{syn.msg=synMsg(s);syn.dirty=true}synPaint();cb&&cb(ok,syn.msg)}
+  function go(retry){fetch(u,{headers:H,cache:"no-store"}).then(function(r){if(r.status==404)return{};if(!r.ok)throw r.status;return r.json()}).then(function(m){
+    return fetch(u,{method:"PUT",headers:H,body:JSON.stringify({message:"Mise à jour des prix",content:body,sha:m.sha})})}).then(function(r){if(r.ok)end(true);else if((r.status==409||r.status==422)&&retry)go(false);else end(false,r.status)}).catch(function(e){end(false,typeof e=="number"?e:0)})}
+  go(true)}
+function synPull(done){if(!synOk()){done&&done();return}
+  var H={Accept:"application/vnd.github.raw+json"};if(syn.tok)H.Authorization="Bearer "+syn.tok;
+  fetch("https://api.github.com/repos/"+synRepo()+"/contents/data.json?t="+Date.now(),{headers:H,cache:"no-store"}).then(function(r){if(r.status==404)return null;if(!r.ok)throw r.status;return r.text()}).then(function(t){
+    var d=t?JSON.parse(t):null;
+    if(d&&Array.isArray(d.items)&&Array.isArray(d.cats)&&(d.rev||0)>(db.rev||0)&&!syn.dirty&&!syn.busy){
+      if(EMBPH)d.ph=EMBPH;else delete d.ph;db=d;if(ED){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}}
+      var f=document.activeElement;if(!(f&&/^(INPUT|SELECT|TEXTAREA)$/.test(f.tagName)))render()}
+    else if(ED&&syn.tok&&!syn.dirty&&!syn.busy&&(!d||(d.rev||0)<(db.rev||0)))synPush();
+    done&&done()}).catch(function(){done&&done()})}
+function synTick(){if(document.hidden)return;if(ED&&syn.tok&&syn.dirty&&!syn.busy)synPush();else synPull()}
+function synInit(){if(!SA)return;synPull();setInterval(synTick,12e4);document.addEventListener("visibilitychange",function(){if(!document.hidden)synTick()})}
+function synGo(){var t=val("syt").trim(),r=val("syr").trim();syn.msg="";
+  if(!/^[\w.-]+\/[\w.-]+$/.test(r)){syn.msg="Dépôt invalide : écris-le sous la forme nom/dépôt.";render();return}
+  if(t.length<20){syn.msg="Colle le jeton complet (il est long).";render();return}
+  syn.tok=t;syn.repo=r;try{localStorage.setItem("hdv_tok",t);localStorage.setItem("hdv_repo",r)}catch(e){}
+  syn.msg="Test en cours…";render();
+  synPush(function(ok,m){if(ok){syn.msg="";synOpen=false;showToast("Synchronisation activée : tes prix sont publiés automatiquement.")}else{syn.msg=m;syn.tok="";syn.st="";try{localStorage.removeItem("hdv_tok")}catch(e){}}render()})}
+function synPanel(){if(!(SA&&ED&&synOpen))return"";
+  var h='<div class="panel form" style="margin-bottom:12px;flex-direction:column"><div class="cat"><b>Synchronisation en direct</b> : tes prix sont enregistrés automatiquement dans ton dépôt GitHub et la guilde les voit en quelques secondes, sans renvoyer de fichier.</div>';
+  if(syn.tok)h+='<div class="cat">Active pour <b>'+esc(synRepo())+'</b>. Le jeton reste uniquement dans ce navigateur.</div><div class="bar" style="margin:0"><button class="pri" data-a="synnow">Envoyer maintenant</button><button class="del" data-a="synoff">Désactiver</button><button data-a="synx">Fermer</button></div>';
+  else h+='<ol class="cat" style="margin:0;padding-left:18px;line-height:1.7"><li>Ouvre <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a>.</li><li>Nom : <b>HDV Nano</b>. Expiration : la plus longue proposée.</li><li><b>Repository access</b> : Only select repositories, puis ton dépôt.</li><li><b>Permissions</b>, puis Repository permissions, puis <b>Contents : Read and write</b>.</li><li>Clique sur Generate token, copie-le et colle-le ci-dessous.</li></ol><div class="bar" style="margin:0"><input id="syr" placeholder="nom/dépôt" value="'+esc(synRepo())+'" aria-label="Dépôt"><input id="syt" type="password" autocomplete="off" placeholder="Jeton GitHub" aria-label="Jeton GitHub"><button class="pri" data-a="syngo">Activer</button><button data-a="synx">Annuler</button></div>';
+  return h+(syn.msg?'<div class="'+(/✓|activée/.test(syn.msg)?"up":"dn")+'" role="alert">'+esc(syn.msg)+"</div>":"")+"</div>"}
 var SA=!(window.claude&&claude.use);
 if(SA){ED=false;load();try{ED=!!db.ph&&localStorage.getItem("hdv_admin")==db.ph}catch(e){}}
 document.body.classList.toggle("ro",!ED);
-load();render();if(SA&&!ED&&location.hash=="#admin"){admOpen=true;render()}if(!SA&&!ED&&window.claude&&claude.use){claude.use("user").then(function(u){if(u&&(u.isOwner()||u.canEdit()))setEd()}).catch(function(){})}
+load();render();synInit();if(SA&&!ED&&location.hash=="#admin"){admOpen=true;render()}if(!SA&&!ED&&window.claude&&claude.use){claude.use("user").then(function(u){if(u&&(u.isOwner()||u.canEdit()))setEd()}).catch(function(){})}
 var icoT=null,icf=document.createElement("input");icf.type="file";icf.accept="image/*";icf.style.display="none";document.body.appendChild(icf);
 icf.addEventListener("change",function(){var f=icf.files&&icf.files[0];if(f&&icoT)icoLoad(f,icoT)});
 document.addEventListener("keydown",function(e){if(e.key=="Enter"&&e.target&&e.target.matches&&e.target.matches('tr[data-a="open"]'))e.target.click();if(e.key=="Enter"&&e.target&&e.target.id=="cn"){var sb=document.querySelector('[data-a="savecat"]');if(sb)sb.click()}if(e.key=="Enter"&&e.target&&(e.target.id=="apw"||e.target.id=="apw2"))admGo()});
