@@ -97,6 +97,8 @@ tbody tr{transition:background-color .15s ease}
 .totop{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--tx);font-size:20px;line-height:1;padding:0;box-shadow:0 4px 14px rgba(0,0,0,.45);opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .2s ease,transform .2s ease;z-index:15}
 .totop.on{opacity:1;pointer-events:auto;transform:none}
 .qe{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}.qe label{flex:1;min-width:160px}
+select option,select optgroup{background:var(--panel);color:var(--tx)}
+.qi.pend{outline:2px solid var(--ac)}
 </style>
 </head>
 <body class="ro">
@@ -315,7 +317,7 @@ function list(){
   var form=adding?'<div class="panel form" style="margin-bottom:12px"><label>Nom<input id="nn" placeholder="Nom de l\'objet"></label><label>Catégorie<select id="nc">'+catOpts(filter)+'</select></label><label>Rareté<select id="nr">'+rarOpts(0)+'</select></label><label>Prix<input id="np" type="number" min="0"></label><div style="align-self:end;display:flex;gap:8px"><button class="pri" data-a="create">Ajouter</button><button data-a="cancel">Annuler</button></div></div>':"";
   return'<header><div><h1 class="brand">HDV Nano</h1><p>'+(ED?"":"Prix partagés par la guilde (lecture seule).")+'</p>'+upd()+'</div><div class="bar">'+(SA&&ED?'<button data-a="syn" class="'+(syn.st=="err"?"del":syn.tok?"":"pri")+'">'+synLabel()+"</button>":"")+(ED&&!(SA&&syn.tok)?'<button class="pri" data-a="pub">'+(db.rev>pubRev?(window.claude?"Publier pour la guilde":"Télécharger la mise à jour"):"Publié ✓")+"</button>":"")+(SA&&!ED?'<button data-a="adm">🔒 Admin</button>':"")+(SA&&ED?'<button data-a="out">Quitter le mode admin</button>':"")+'<button data-a="snd" class="'+(db.snd?"on":"")+'">Son : '+(db.snd?"activé":"désactivé")+'</button><button data-a="io">Sauvegarde</button><button data-a="reset" class="del">'+(conf=="reset"?"Confirmer":"Réinitialiser")+'</button></div></header>'+admPanel()+synPanel()+
   '<div class="bar">'+nav()+'</div>'+deals()+'<div class="bar">'+tabs()+"</div>"+
-  iop()+pstPanel()+'<div class="bar"><input id="q" type="search" placeholder="Rechercher…" value="'+esc(q)+'" style="min-width:220px"><button class="pri" data-a="add">+ Nouvel objet</button><button data-a="qu" class="'+(qu?"on":"")+'">Mise à jour rapide</button>'+(ED?'<button data-a="pst" class="'+(pst.open?"on":"")+'">⚡ Collage rapide</button>':"")+(qu?'<button data-a="chk" title="Marque tous les prix comme vérifiés à l\'instant">Tout est à jour</button>':"")+'<label class="cat">Relevé périmé après <input id="sa" type="number" min="1" value="'+stale()+'" style="width:70px"> min</label><label class="cat">Signal auto : ±<input id="sp" type="number" min="1" value="'+sigp()+'" style="width:60px">% de la médiane 7j</label></div>'+form+
+  iop()+pstPanel()+'<div class="bar"><input id="q" type="search" placeholder="Rechercher…" value="'+esc(q)+'" style="min-width:220px"><button class="pri" data-a="add">+ Nouvel objet</button><button data-a="qu" class="'+(qu?"on":"")+'">Mise à jour rapide</button>'+(ED?'<button data-a="pst" class="'+(pst.open?"on":"")+'">⚡ Ajout rapide</button>':"")+(qu?'<button data-a="chk" title="Marque tous les prix comme vérifiés à l\'instant">Tout est à jour</button><span class="cat">Tape le prix puis Entrée (ou Tab) pour valider.</span>':"")+'<label class="cat">Relevé périmé après <input id="sa" type="number" min="1" value="'+stale()+'" style="width:70px"> min</label><label class="cat">Signal auto : ±<input id="sp" type="number" min="1" value="'+sigp()+'" style="width:60px">% de la médiane 7j</label></div>'+form+
   cb()+'<div class="hint"><b>Astuce :</b> clique sur un objet pour ouvrir sa fiche (graphique, historique, meilleures heures).</div><div class="panel scroll cards'+(CP?" cp":"")+'"><table style="min-width:'+(360+80*visN())+'px"><thead>'+hd()+'</thead><tbody>'+
   (rows||'<tr><td colspan="8"><div class="empty">Aucun objet. Ajoutez-en un avec « Nouvel objet ».</div></td></tr>')+"</tbody></table></div>";
 }
@@ -345,9 +347,9 @@ function val(id){return document.getElementById(id).value}
 function cur(){return db.items.filter(function(i){return i.id==view})[0]}
 document.addEventListener("input",function(e){if(e.target.id==="q"){q=e.target.value;lsc=-1;render()}else if(e.target.closest("#calc"))calcUpdate()});
 document.addEventListener("click",function(e){
-  if(e.target.closest(".qi"))return;var el=e.target.closest("[data-a]");if(!el)return;var a=el.dataset.a,v=el.dataset.v,it,pc=conf;conf=null;if(!ED&&EDIT[a])return;
+  if(e.target.closest(".qi"))return;var el=e.target.closest("[data-a]");if(!el)return;var a=el.dataset.a,v=el.dataset.v,it,pc=conf;conf=null;if(!ED&&EDIT[a])return;var pv=view,pp=page;
   if(a=="open"){view=v;range="24h"}
-  else if(a=="back")view=null;
+  else if(a=="back"){if(history.state&&history.state.v){history.back();return}view=null}
   else if(a=="filter"){filter=v;lsc=-1}
   else if(a=="range")range=v;
   else if(a=="qu")qu=!qu;
@@ -397,12 +399,9 @@ document.addEventListener("click",function(e){
   else if(a=="delpt"){it=cur();if(it.h.length>1){it.h.splice(+v,1);save()}}
   else if(a=="saveinfo"){it=cur();it.name=val("in").trim()||it.name;it.cat=val("ic");it.rar=+val("ir");it.lo=+val("il")||0;it.hi=+val("ih")||0;save()}
   else if(a=="delitem"){if(pc=="delitem"){db.items=db.items.filter(function(i){return i.id!=view});view=null;save()}else conf="delitem"}
-  render();pFocus();
+  hNav(pv,pp);render();pFocus();
 });
-document.addEventListener("change",function(e){var t=e.target;if(t.classList.contains("rs")){pSync();pst.fi=+t.dataset.i;render();pFocus();return}if(t.id=="ci"){var itm=db.items.filter(function(i){return i.id==t.value})[0];cv.i=t.value;if(itm){var ss=stats(itm);document.getElementById("cb").value=ss.p;document.getElementById("cs").value=Math.round(ss.med)||""}calcUpdate();return}if(t.id=="sp"){db.sig=Math.max(1,+t.value||15);save();render();return}if(t.id=="sa"){db.stale=Math.max(1,+t.value||60);save();render();return}if(!t.classList.contains("qi"))return;
-  var ix=[].slice.call(document.querySelectorAll(".qi")).indexOf(t),it=db.items.filter(function(i){return i.id==t.dataset.id})[0],p=+t.value;
-  if(it&&t.value!==""&&p>=0){if(p!==stats(it).p)it.h.push({t:Date.now(),p:p});db.chk=Date.now();save()}
-  render();var n=document.querySelectorAll(".qi")[ix+1];if(n){n.focus();n.select()}});
+document.addEventListener("change",function(e){var t=e.target;if(t.classList.contains("rs")){pSync();pst.fi=+t.dataset.i;render();pFocus();return}if(t.id=="ci"){var itm=db.items.filter(function(i){return i.id==t.value})[0];cv.i=t.value;if(itm){var ss=stats(itm);document.getElementById("cb").value=ss.p;document.getElementById("cs").value=Math.round(ss.med)||""}calcUpdate();return}if(t.id=="sp"){db.sig=Math.max(1,+t.value||15);save();render();return}if(t.id=="sa"){db.stale=Math.max(1,+t.value||60);save();render();return}return});
 function setEd(){ED=true;document.body.classList.remove("ro");load();render()}
 function hh(s){var h1=0xdeadbeef,h2=0x41c6ce57;for(var i=0,c;i<s.length;i++){c=s.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677)}h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);return String(4294967296*(2097151&h2)+(h1>>>0))}
 var admOpen=false,admMsg="";
@@ -442,14 +441,14 @@ function pApplyM(){var n=0,now=Date.now();pst.lines.forEach(function(l){var it=d
     var last=it.h.length?Math.max.apply(0,it.h.map(function(x){return x.t})):0;if(p!==stats(it).p||now-last>36e5){it.h.push({t:now,p:p});n++}});
   pst.open=false;pst.rows=null;pst.lines=[];if(n)save();showToast(n?n+" prix mis à jour.":"Rien à changer : ces prix sont déjà à jour.")}
 function pMenu(){var opts=function(sel){var o="";db.cats.concat(db.items.some(function(i){return db.cats.indexOf(i.cat)<0})?[null]:[]).forEach(function(c){var li=db.items.filter(function(i){return c===null?db.cats.indexOf(i.cat)<0:i.cat==c});if(!li.length)return;
-      o+='<optgroup label="'+esc(c===null?"Autres":c)+'">'+li.map(function(i){return'<option value="'+i.id+'"'+(i.id==sel?" selected":"")+">"+esc(i.name)+"</option>"}).join("")+"</optgroup>"});return o},
+      o+='<optgroup label="'+esc(c===null?"Autres":c)+'">'+li.map(function(i){return'<option value="'+i.id+'" style="color:var(--r'+(+i.rar||0)+')"'+(i.id==sel?" selected":"")+">"+esc(i.name)+"</option>"}).join("")+"</optgroup>"});return o},
     n=pst.lines.filter(function(l){return l.p!==""&&+l.p>=0}).length;
   return'<div class="cat">Choisis l\'objet dans le menu, tape son prix, puis <b>Entrée</b> : une nouvelle ligne s\'ajoute avec l\'objet suivant. Applique tout à la fin.</div>'+
     pst.lines.map(function(l,k){var it=db.items.filter(function(i){return i.id==l.id})[0],cur=it?stats(it).p:0,p=+l.p,d=cur&&l.p!==""?(p/cur-1)*100:null;
-      return'<div class="qe"><label>Objet<select class="rs" data-i="'+k+'">'+opts(l.id)+'</select></label><label>Nouveau prix<input class="rp" type="number" min="0" inputmode="numeric" data-i="'+k+'" value="'+esc(l.p)+'" placeholder="'+(cur?fmt(cur):"")+'" aria-label="Nouveau prix"></label><span class="cat" style="min-width:150px;padding-bottom:10px">Actuel : <b>'+fmt(cur)+"</b>"+(d==null?"":' · <span class="'+(d>.05?"dn":d<-.05?"up":"")+'">'+(p==cur?"inchangé":(d>0?"+":"")+d.toFixed(1).replace(".",",")+" %")+"</span>")+'</span><button class="del" data-a="psdel" data-v="'+k+'" title="Retirer cette ligne" aria-label="Retirer cette ligne">✕</button></div>'}).join("")+
+      return'<div class="qe"><label>Objet<select class="rs" data-i="'+k+'" style="color:var(--r'+(it?+it.rar||0:0)+')">'+opts(l.id)+'</select></label><label>Nouveau prix<input class="rp" type="number" min="0" inputmode="numeric" data-i="'+k+'" value="'+esc(l.p)+'" placeholder="'+(cur?fmt(cur):"")+'" aria-label="Nouveau prix"></label><span class="cat" style="min-width:150px;padding-bottom:10px">Actuel : <b>'+fmt(cur)+"</b>"+(d==null?"":' · <span class="'+(d>.05?"dn":d<-.05?"up":"")+'">'+(p==cur?"inchangé":(d>0?"+":"")+d.toFixed(1).replace(".",",")+" %")+"</span>")+'</span><button class="del" data-a="psdel" data-v="'+k+'" title="Retirer cette ligne" aria-label="Retirer cette ligne">✕</button></div>'}).join("")+
     '<div class="bar" style="margin:0"><button data-a="psadd">+ Ajouter une ligne</button><button class="pri" data-a="psok">Appliquer'+(n?" ("+n+")":"")+'</button><button data-a="pstx">Fermer</button></div>'}
 function pstPanel(){if(!(ED&&pst.open))return"";
-  var h='<div class="panel form" style="margin-bottom:12px;flex-direction:column"><div class="cat"><b>Collage rapide</b> : mets à jour plusieurs prix d\'un coup.</div><div class="tabs" style="align-self:flex-start"><button data-a="psmode" data-v="menu" class="'+(pst.mode=="menu"?"on":"")+'">Menu déroulant</button><button data-a="psmode" data-v="texte" class="'+(pst.mode=="texte"?"on":"")+'">Coller du texte</button></div>';
+  var h='<div class="panel form" style="margin-bottom:12px;flex-direction:column"><div class="cat"><b>Ajout rapide</b> : mets à jour plusieurs prix d\'un coup.</div><div class="tabs" style="align-self:flex-start"><button data-a="psmode" data-v="menu" class="'+(pst.mode=="menu"?"on":"")+'">Menu déroulant</button><button data-a="psmode" data-v="texte" class="'+(pst.mode=="texte"?"on":"")+'">Coller du texte</button></div>';
   if(pst.mode=="menu")return h+pMenu()+"</div>";
   if(!pst.rows)return h+'<div class="cat">Colle une liste avec <b>une ligne par objet</b> (le nom, puis le prix), ou un tableau copié. Les objets sont reconnus par leur nom. Tu vérifies l\'aperçu avant d\'appliquer.</div><textarea id="ptx" rows="8" placeholder="Pierre de raffinage 2 000&#10;Bois d\'Yggdrasil pur 59 995" style="width:100%;font:13px monospace;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:8px">'+esc(pst.txt)+'</textarea><div class="bar" style="margin:0"><button class="pri" data-a="pstgo">Analyser</button><button data-a="pstx">Fermer</button></div></div>';
   var r=pst.rows;
@@ -459,6 +458,17 @@ function pstPanel(){if(!(ED&&pst.open))return"";
 var totop=document.createElement("button");totop.className="totop";totop.textContent="↑";totop.title="Remonter en haut";totop.setAttribute("aria-label","Remonter en haut");document.body.appendChild(totop);
 totop.addEventListener("click",function(){var b=document.querySelector(".cards.panel");if(b)b.scrollTo({top:0,behavior:"smooth"});window.scrollTo({top:0,behavior:"smooth"})});
 document.addEventListener("scroll",function(e){lastScroll=Date.now();var b=document.querySelector(".cards.panel");totop.classList.toggle("on",window.scrollY>500||(!!b&&b.scrollTop>300))},{capture:true,passive:true});
+function pendingQi(){return[].some.call(document.querySelectorAll(".qi"),function(i){return i.value!==i.defaultValue})}
+function qiFocus(id){if(!id)return;var n=document.querySelector('.qi[data-id="'+id+'"]');if(n){n.focus();n.select()}}
+function qiCommit(t,next,fid){var qs=[].slice.call(document.querySelectorAll(".qi")),ix=qs.indexOf(t),it=db.items.filter(function(i){return i.id==t.dataset.id})[0],p=+t.value,nid=fid||(next&&qs[ix+1]?qs[ix+1].dataset.id:"");
+  if(it&&t.value!==""&&p>=0){if(p!==stats(it).p)it.h.push({t:Date.now(),p:p});db.chk=Date.now();save()}
+  render();qiFocus(nid)}
+document.addEventListener("focusout",function(e){var t=e.target;if(!(t.classList&&t.classList.contains("qi"))||t.value===t.defaultValue||!e.relatedTarget||!document.hasFocus())return;
+  var rt=e.relatedTarget,isq=rt.classList&&rt.classList.contains("qi");qiCommit(t,!isq&&!!(rt.closest&&rt.closest("table")),isq?rt.dataset.id:"")});
+document.addEventListener("input",function(e){var t=e.target;if(t.classList&&t.classList.contains("qi"))t.classList.toggle("pend",t.value!==t.defaultValue)});
+function hNav(pv,pp){try{if(view===pv&&page===pp)return;var st={v:view,p:page};if((view&&!pv)||page!==pp)history.pushState(st,"");else history.replaceState(st,"")}catch(e){}}
+try{history.scrollRestoration="manual";history.replaceState({v:null,p:"market"},"")}catch(e){}
+window.addEventListener("popstate",function(e){var st=e.state||{};view=st.v||null;page=st.p||"market";adding=false;render()});
 var syn={tok:"",repo:"",st:"",msg:"",t:null,busy:false,dirty:false},synOpen=false,EMBPH="";
 try{syn.tok=localStorage.getItem("hdv_tok")||"";syn.repo=localStorage.getItem("hdv_repo")||""}catch(e){}
 function synRepo(){if(syn.repo)return syn.repo;var m=location.hostname.match(/^([^.]+)\.github\.io$/),p=location.pathname.split("/")[1];return m&&p?m[1]+"/"+decodeURIComponent(p):""}
@@ -482,7 +492,7 @@ function synPull(done){if(!synOk()){done&&done();return}
     var d=t?JSON.parse(t):null;
     if(d&&Array.isArray(d.items)&&Array.isArray(d.cats)&&(d.rev||0)>(db.rev||0)&&!syn.dirty&&!syn.busy){
       if(EMBPH)d.ph=EMBPH;else delete d.ph;db=d;if(ED){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}}
-      var f=document.activeElement;if(!(f&&/^(INPUT|SELECT|TEXTAREA)$/.test(f.tagName)))render()}
+      var f=document.activeElement;if(!(f&&/^(INPUT|SELECT|TEXTAREA)$/.test(f.tagName))&&!pendingQi())render()}
     else if(ED&&syn.tok&&!syn.dirty&&!syn.busy&&(!d||(d.rev||0)<(db.rev||0)))synPush();
     done&&done()}).catch(function(){done&&done()})}
 function synTick(){if(document.hidden)return;if(ED&&syn.tok&&syn.dirty&&!syn.busy)synPush();else synPull()}
@@ -504,8 +514,8 @@ document.body.classList.toggle("ro",!ED);
 load();render();synInit();if(SA&&!ED&&location.hash=="#admin"){admOpen=true;render()}if(!SA&&!ED&&window.claude&&claude.use){claude.use("user").then(function(u){if(u&&(u.isOwner()||u.canEdit()))setEd()}).catch(function(){})}
 var icoT=null,icf=document.createElement("input");icf.type="file";icf.accept="image/*";icf.style.display="none";document.body.appendChild(icf);
 icf.addEventListener("change",function(){var f=icf.files&&icf.files[0];if(f&&icoT)icoLoad(f,icoT)});
-document.addEventListener("keydown",function(e){if(e.key=="Enter"&&e.target&&e.target.matches&&e.target.matches('tr[data-a="open"]'))e.target.click();if(e.key=="Enter"&&e.target&&e.target.classList&&e.target.classList.contains("rp")){var rps=document.querySelectorAll(".rp"),ix=[].indexOf.call(rps,e.target);if(ix<rps.length-1)rps[ix+1].focus();else if(e.target.value!==""){var ab=document.querySelector('[data-a="psadd"]');if(ab)ab.click()}}if(e.key=="Enter"&&e.target&&e.target.id=="cn"){var sb=document.querySelector('[data-a="savecat"]');if(sb)sb.click()}if(e.key=="Enter"&&e.target&&(e.target.id=="apw"||e.target.id=="apw2"))admGo()});
-setInterval(function(){var f=document.activeElement;if(!view&&Date.now()-lastScroll>4000&&!(f&&(f.tagName=="INPUT"||f.tagName=="SELECT"||f.tagName=="TEXTAREA")))render()},6e4);
+document.addEventListener("keydown",function(e){if(e.key=="Enter"&&e.target&&e.target.matches&&e.target.matches('tr[data-a="open"]'))e.target.click();if(e.key=="Enter"&&e.target&&e.target.classList&&e.target.classList.contains("qi")){e.preventDefault();var qt=e.target;if(qt.value!==qt.defaultValue)qiCommit(qt,true);else{var qs=document.querySelectorAll(".qi"),qk=[].indexOf.call(qs,qt);if(qs[qk+1]){qs[qk+1].focus();qs[qk+1].select()}}}if(e.key=="Enter"&&e.target&&e.target.classList&&e.target.classList.contains("rp")){var rps=document.querySelectorAll(".rp"),ix=[].indexOf.call(rps,e.target);if(ix<rps.length-1)rps[ix+1].focus();else if(e.target.value!==""){var ab=document.querySelector('[data-a="psadd"]');if(ab)ab.click()}}if(e.key=="Enter"&&e.target&&e.target.id=="cn"){var sb=document.querySelector('[data-a="savecat"]');if(sb)sb.click()}if(e.key=="Enter"&&e.target&&(e.target.id=="apw"||e.target.id=="apw2"))admGo()});
+setInterval(function(){var f=document.activeElement;if(!view&&Date.now()-lastScroll>4000&&!pendingQi()&&!(f&&(f.tagName=="INPUT"||f.tagName=="SELECT"||f.tagName=="TEXTAREA")))render()},6e4);
 </script>
 </body>
 </html>
