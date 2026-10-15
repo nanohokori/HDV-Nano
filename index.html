@@ -274,7 +274,7 @@ function icoLoad(file,id){var r=new FileReader();r.onload=function(){var im=new 
     var it=db.items.filter(function(i){return i.id==id})[0];if(it){it.img=u;save();render()}};
   im.src=r.result};r.onerror=function(){showToast("Image illisible.")};r.readAsDataURL(file)}
 function stale(){return db.stale||60}
-var TAX=12,prevSig=null,page="market",cv=null,ED=false,pubRev=0,EDIT={syn:1,synx:1,syngo:1,synoff:1,synnow:1,add:1,create:1,newcat:1,mancat:1,delcat:1,savecat:1,addpt:1,delpt:1,saveinfo:1,delitem:1,qu:1,io:1,reset:1,fav:1,clean:1,ioload:1,chk:1,ico:1,icodel:1};
+var TAX=12,prevSig=null,page="market",cv=null,ED=false,pubRev=0,EDIT={pst:1,pstx:1,pstgo:1,pstback:1,pstok:1,syn:1,synx:1,syngo:1,synoff:1,synnow:1,add:1,create:1,newcat:1,mancat:1,delcat:1,savecat:1,addpt:1,delpt:1,saveinfo:1,delitem:1,qu:1,io:1,reset:1,fav:1,clean:1,ioload:1,chk:1,ico:1,icodel:1};
 function sigp(){return db.sig||15}
 function sg(it){var s=stats(it),p=s.p,lo=it.lo,hi=it.hi;if(lo||hi)return lo&&p<=lo?-1:hi&&p>=hi?1:0;if(s.n<3||!s.med)return 0;var x=sigp()/100;return p<=s.med*(1-x)?-1:p>=s.med*(1+x)?1:0}
 function isAl(it){return sg(it)!=0}
@@ -307,7 +307,7 @@ function list(){
   var form=adding?'<div class="panel form" style="margin-bottom:12px"><label>Nom<input id="nn" placeholder="Nom de l\'objet"></label><label>Catégorie<select id="nc">'+catOpts(filter)+'</select></label><label>Rareté<select id="nr">'+rarOpts(0)+'</select></label><label>Prix<input id="np" type="number" min="0"></label><div style="align-self:end;display:flex;gap:8px"><button class="pri" data-a="create">Ajouter</button><button data-a="cancel">Annuler</button></div></div>':"";
   return'<header><div><h1 class="brand">HDV Nano</h1><p>'+(ED?"":"Prix partagés par la guilde (lecture seule).")+'</p>'+upd()+'</div><div class="bar">'+(SA&&ED?'<button data-a="syn" class="'+(syn.st=="err"?"del":syn.tok?"":"pri")+'">'+synLabel()+"</button>":"")+(ED&&!(SA&&syn.tok)?'<button class="pri" data-a="pub">'+(db.rev>pubRev?(window.claude?"Publier pour la guilde":"Télécharger la mise à jour"):"Publié ✓")+"</button>":"")+(SA&&!ED?'<button data-a="adm">🔒 Admin</button>':"")+(SA&&ED?'<button data-a="out">Quitter le mode admin</button>':"")+'<button data-a="snd" class="'+(db.snd?"on":"")+'">Son : '+(db.snd?"activé":"désactivé")+'</button><button data-a="io">Sauvegarde</button><button data-a="reset" class="del">'+(conf=="reset"?"Confirmer":"Réinitialiser")+'</button></div></header>'+admPanel()+synPanel()+
   '<div class="bar">'+nav()+'</div>'+deals()+'<div class="bar">'+tabs()+"</div>"+
-  iop()+'<div class="bar"><input id="q" type="search" placeholder="Rechercher…" value="'+esc(q)+'" style="min-width:220px"><button class="pri" data-a="add">+ Nouvel objet</button><button data-a="qu" class="'+(qu?"on":"")+'">Mise à jour rapide</button>'+(qu?'<button data-a="chk" title="Marque tous les prix comme vérifiés à l\'instant">Tout est à jour</button>':"")+'<label class="cat">Relevé périmé après <input id="sa" type="number" min="1" value="'+stale()+'" style="width:70px"> min</label><label class="cat">Signal auto : ±<input id="sp" type="number" min="1" value="'+sigp()+'" style="width:60px">% de la médiane 7j</label></div>'+form+
+  iop()+pstPanel()+'<div class="bar"><input id="q" type="search" placeholder="Rechercher…" value="'+esc(q)+'" style="min-width:220px"><button class="pri" data-a="add">+ Nouvel objet</button><button data-a="qu" class="'+(qu?"on":"")+'">Mise à jour rapide</button>'+(ED?'<button data-a="pst" class="'+(pst.open?"on":"")+'">⚡ Collage rapide</button>':"")+(qu?'<button data-a="chk" title="Marque tous les prix comme vérifiés à l\'instant">Tout est à jour</button>':"")+'<label class="cat">Relevé périmé après <input id="sa" type="number" min="1" value="'+stale()+'" style="width:70px"> min</label><label class="cat">Signal auto : ±<input id="sp" type="number" min="1" value="'+sigp()+'" style="width:60px">% de la médiane 7j</label></div>'+form+
   cb()+'<div class="hint"><b>Astuce :</b> clique sur un objet pour ouvrir sa fiche (graphique, historique, meilleures heures).</div><div class="panel scroll cards'+(CP?" cp":"")+'"><table style="min-width:'+(360+80*visN())+'px"><thead>'+hd()+'</thead><tbody>'+
   (rows||'<tr><td colspan="8"><div class="empty">Aucun objet. Ajoutez-en un avec « Nouvel objet ».</div></td></tr>')+"</tbody></table></div>";
 }
@@ -340,6 +340,11 @@ document.addEventListener("click",function(e){
   else if(a=="filter")filter=v;
   else if(a=="range")range=v;
   else if(a=="qu")qu=!qu;
+  else if(a=="pst"){pst.open=!pst.open;pst.rows=null}
+  else if(a=="pstx"){pst.open=false;pst.rows=null;pst.txt=""}
+  else if(a=="pstgo"){pst.txt=val("ptx");pst.rows=pParse(pst.txt)}
+  else if(a=="pstback"){pst.rows=null}
+  else if(a=="pstok"){pApply()}
   else if(a=="chk"){db.chk=Date.now();save()}
   else if(a=="ico"){icoT=v;icf.value="";icf.click();return}
   else if(a=="icodel"){it=cur();if(it){delete it.img;save()}}
@@ -396,6 +401,31 @@ function admGo(){var p=val("apw");admMsg="";
   render();var f=document.getElementById("apw");if(f&&f.focus)f.focus()}
 function admOut(){try{localStorage.removeItem("hdv_admin")}catch(e){}ED=false;document.body.classList.add("ro");load();render()}
 
+var pst={open:false,rows:null,txt:""};
+function nrm(t){return String(t).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[’‘´`]/g,"'").replace(/[^a-z0-9' ]+/g," ").replace(/\s+/g," ").trim()}
+function pNum(t){var re=/\d+[.,]\d+(?=\s*[km](?![a-z]))|\d{1,3}(?:[   .,]\d{3})+(?!\d)|\d+/g,m=re.exec(t);if(!m)return null;
+  var x=m[0],suf=t.charAt(m.index+x.length),sp=t.slice(m.index+x.length).match(/^\s*([km])(?![a-z])/),mul=sp?(sp[1]=="k"?1e3:1e6):1,v;
+  if(/^\d+[.,]\d+$/.test(x)&&mul>1)v=parseFloat(x.replace(",","."));else v=+x.replace(/[   .,]/g,"");
+  v=Math.round(v*mul);return v>=0&&v<1e11?v:null}
+function pParse(txt){var names=db.items.map(function(i){return{i:i,n:nrm(i.name)}}).filter(function(x){return x.n}),ok={},order=[],unk=[];
+  String(txt).split(/\r?\n/).forEach(function(line){if(!line.trim())return;
+    var nl=line.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[’‘´`]/g,"'").replace(/\t/g," ; ").replace(/[^a-z0-9'.,;   ]/g," "),nm=nl.replace(/[.,;  ]/g," "),best=null,bi=-1;
+    names.forEach(function(x){var k=nm.indexOf(x.n);while(k>-1){var b=k==0||!/[a-z0-9]/.test(nm.charAt(k-1)),a=!/[a-z0-9]/.test(nm.charAt(k+x.n.length));if(b&&a){if(!best||x.n.length>best.n.length){best=x;bi=k}break}k=nm.indexOf(x.n,k+1)}});
+    if(!best){if(/[a-z]/.test(nl))unk.push(line.trim());return}
+    var after=nl.slice(bi+best.n.length),before=nl.slice(0,bi),p=pNum(after);if(p==null)p=pNum(before);
+    if(p==null){unk.push(line.trim()+" (pas de prix)");return}
+    if(!ok[best.i.id])order.push(best.i.id);ok[best.i.id]={it:best.i,p:p}});
+  return{ok:order.map(function(id){return ok[id]}),unk:unk}}
+function pApply(){var n=0,now=Date.now();[].slice.call(document.querySelectorAll(".pp")).forEach(function(inp){var it=db.items.filter(function(i){return i.id==inp.dataset.id})[0],p=+inp.value;if(!it||inp.value===""||!(p>=0))return;
+    var last=it.h.length?Math.max.apply(0,it.h.map(function(x){return x.t})):0;if(p!==stats(it).p||now-last>36e5){it.h.push({t:now,p:p});n++}});
+  pst.open=false;pst.rows=null;pst.txt="";if(n)save();showToast(n?n+" prix mis à jour.":"Rien à changer : les prix collés sont déjà à jour.")}
+function pstPanel(){if(!(ED&&pst.open))return"";
+  var h='<div class="panel form" style="margin-bottom:12px;flex-direction:column"><div class="cat"><b>Collage rapide</b> : colle une liste avec <b>une ligne par objet</b> (le nom, puis le prix), ou un tableau copié. Les objets sont reconnus par leur nom. Tu vérifies l\'aperçu avant d\'appliquer.</div>';
+  if(!pst.rows)return h+'<textarea id="ptx" rows="8" placeholder="Pierre de raffinage 2 000&#10;Bois d\'Yggdrasil pur 59 995" style="width:100%;font:13px monospace;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:8px">'+esc(pst.txt)+'</textarea><div class="bar" style="margin:0"><button class="pri" data-a="pstgo">Analyser</button><button data-a="pstx">Fermer</button></div></div>';
+  var r=pst.rows;
+  h+=r.ok.length?'<div class="scroll"><table><thead><tr><th style="text-align:left">Objet reconnu</th><th>Prix actuel</th><th>Nouveau prix</th><th>Écart</th></tr></thead><tbody>'+r.ok.map(function(x){var o=stats(x.it).p,d=o?(x.p/o-1)*100:0;return'<tr><td style="text-align:left">'+esc(x.it.name)+'</td><td>'+fmt(o)+'</td><td><input class="pp" type="number" min="0" data-id="'+x.it.id+'" value="'+x.p+'" style="width:120px" aria-label="Nouveau prix"></td><td class="'+(d>.05?"dn":d<-.05?"up":"")+'">'+(x.p==o?"inchangé":(d>0?"+":"")+d.toFixed(1).replace(".",",")+" %")+"</td></tr>"}).join("")+"</tbody></table></div>":'<div class="cat">Aucun objet reconnu. Vérifie que les noms collés sont les mêmes que sur le site.</div>';
+  if(r.unk.length)h+='<div class="cat"><b>Non reconnus ('+r.unk.length+')</b> : '+r.unk.slice(0,8).map(esc).join(" · ")+(r.unk.length>8?" …":"")+"</div>";
+  return h+'<div class="bar" style="margin:0">'+(r.ok.length?'<button class="pri" data-a="pstok">Appliquer ('+r.ok.length+")</button>":"")+'<button data-a="pstback">Modifier le texte</button><button data-a="pstx">Fermer</button></div></div>'}
 var syn={tok:"",repo:"",st:"",msg:"",t:null,busy:false,dirty:false},synOpen=false,EMBPH="";
 try{syn.tok=localStorage.getItem("hdv_tok")||"";syn.repo=localStorage.getItem("hdv_repo")||""}catch(e){}
 function synRepo(){if(syn.repo)return syn.repo;var m=location.hostname.match(/^([^.]+)\.github\.io$/),p=location.pathname.split("/")[1];return m&&p?m[1]+"/"+decodeURIComponent(p):""}
