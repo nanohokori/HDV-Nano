@@ -128,7 +128,9 @@ function load(){var emb=null;try{emb=JSON.parse(document.getElementById("data").
 var uStack=[],lastSnap=null,uSkip=false;
 function snap(){var r=db.rev;db.rev=0;var x=JSON.stringify(db);db.rev=r;return x}
 function uMark(){uStack=[];lastSnap=snap()}
-function curBy(){return ED?"Admin":""}
+var ADM2="2591713905812586",WHO="Nano";
+function nm(b){return b=="Admin"?"Nano":b}
+function curBy(){return ED?WHO:""}
 function pt(t,p,by){var o={t:t,p:p},b=by||curBy();if(b)o.by=b;return o}
 try{pseudo=localStorage.getItem("hdv_pseudo")||""}catch(e){}
 function fbOn(){return SA&&!!db.fb}
@@ -309,7 +311,7 @@ var TAX=12,prevSig=null,page="market",cv=null,ED=false,pnFoc=false,pseudo="",sen
 function sigp(){return db.sig||15}
 function sg(it){var s=stats(it),p=s.p,lo=it.lo,hi=it.hi;if(lo||hi)return lo&&p<=lo?-1:hi&&p>=hi?1:0;if(s.n<3||!s.med)return 0;var x=sigp()/100;return p<=s.med*(1-x)?-1:p>=s.med*(1+x)?1:0}
 function isAl(it){return sg(it)!=0}
-function ag(h){var l=h[h.length-1];if(!l)return"";var m=Math.floor((Date.now()-l.t)/6e4),s=stale(),c=m<=s?"var(--mu)":m<=3*s?"var(--ac)":"var(--dn)";var tx=m<1?"à l'instant":m<60?"il y a "+m+" min":m<1440?"il y a "+Math.floor(m/60)+" h":"il y a "+Math.floor(m/1440)+" j";return'<div class="age" style="color:'+c+'" title="Dernier relevé : '+new Date(l.t).toLocaleString("fr-FR")+(l.by?" par "+esc(l.by):"")+'">'+tx+(l.by?" · "+esc(l.by):"")+"</div>"}
+function ag(h){var l=h[h.length-1];if(!l)return"";var m=Math.floor((Date.now()-l.t)/6e4),s=stale(),c=m<=s?"var(--mu)":m<=3*s?"var(--ac)":"var(--dn)";var tx=m<1?"à l'instant":m<60?"il y a "+m+" min":m<1440?"il y a "+Math.floor(m/60)+" h":"il y a "+Math.floor(m/1440)+" j";return'<div class="age" style="color:'+c+'" title="Dernier relevé : '+new Date(l.t).toLocaleString("fr-FR")+(l.by?" par "+esc(nm(l.by)):"")+'">'+tx+(l.by?" · "+esc(nm(l.by)):"")+"</div>"}
 function am(it,p){var z=sg(it);return z<0?'<span class="al dn" title="Prix bas : bon moment pour acheter">▼ achat</span>':z>0?'<span class="al up" title="Prix haut : bon moment pour vendre">▲ vente</span>':""}
 function beep(){if(!db.snd)return;try{var c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.025;o.start();setTimeout(function(){o.stop();c.close()},250)}catch(e){}}
 function showToast(m,k){var t=document.getElementById("toast");if(!t){t=document.createElement("div");t.id="toast";t.setAttribute("role","status");t.onclick=function(){t.style.display="none"};document.body.appendChild(t)}t.className=k||"";t.textContent=m;t.style.display="block";clearTimeout(showToast.h);showToast.h=setTimeout(function(){t.style.display="none"},12000)}
@@ -345,7 +347,7 @@ function list(){
 function detail(it){
   var s=stats(it),now=new Date(),iso=new Date(now-now.getTimezoneOffset()*6e4).toISOString().slice(0,16);
   var hist=s.h.slice().reverse().slice(0,30).map(function(x){var i=it.h.indexOf(x);
-    return"<tr><td>"+new Date(x.t).toLocaleString("fr-FR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+"</td><td>"+fmt(x.p)+"</td><td>"+esc(x.by||"")+'</td><td><button class="del" data-a="delpt" data-v="'+i+'" aria-label="Supprimer">✕</button></td></tr>'}).join("");
+    return"<tr><td>"+new Date(x.t).toLocaleString("fr-FR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+"</td><td>"+fmt(x.p)+"</td><td>"+esc(nm(x.by||""))+'</td><td><button class="del" data-a="delpt" data-v="'+i+'" aria-label="Supprimer">✕</button></td></tr>'}).join("");
   var rg=["3h","6h","12h","24h","7d","14d","30d","Tout"].map(function(r){return'<button data-a="range" data-v="'+r+'" class="'+(range==r?"on":"")+'">'+r+"</button>"}).join("");
   return'<button class="back" data-a="back">← Retour au marché</button>'+
   '<header><div style="display:flex;gap:12px;align-items:center">'+ico(it,"l")+'<div><h1 class="r'+it.rar+'">'+esc(it.name)+'</h1><p>'+esc(it.cat)+(it.sub?" › "+esc(it.sub):"")+'</p></div></div><button class="del" data-a="delitem">'+(conf=="delitem"?"Confirmer la suppression":"Supprimer l\'objet")+'</button></header>'+
@@ -382,7 +384,7 @@ document.addEventListener("click",function(e){
   else if(a=="qu"){if(!ED&&!fbOn())return;if(!qu&&!ED&&!pseudo){pnOpen=true;pnThen=true;pnFoc=true}else qu=!qu}
   else if(a=="pn"){pnOpen=true;pnThen=false;pnFoc=true}
   else if(a=="pnx"){pnOpen=false;pnThen=false;fbMsg=""}
-  else if(a=="pnsave"){var pv=val("pni").trim().replace(/\s+/g," ");if(pv.length<2||pv.length>24)fbMsg="Pseudo : 2 à 24 caractères.";else{pseudo=pv;try{localStorage.setItem("hdv_pseudo",pv)}catch(x){}pnOpen=false;fbMsg="";if(pnThen){qu=true;pnThen=false}}}
+  else if(a=="pnsave"){var pv=val("pni").trim().replace(/\s+/g," ");if(pv.length<2||pv.length>24)fbMsg="Pseudo : 2 à 24 caractères.";else if(/^(nano|ryu|admin)$/i.test(pv))fbMsg="Ce pseudo est réservé.";else{pseudo=pv;try{localStorage.setItem("hdv_pseudo",pv)}catch(x){}pnOpen=false;fbMsg="";if(pnThen){qu=true;pnThen=false}}}
   else if(a=="prop"){propOpen=!propOpen;fbMsg="";if(propOpen)propLoad()}
   else if(a=="propok"){propAcc(v)}
   else if(a=="propno"){db.done=db.done||{};db.done[v]=1;save()}
@@ -487,7 +489,7 @@ function admPanel(){if(!SA||ED||!admOpen)return"";var first=!db.ph;
 function admGo(){var p=val("apw");admMsg="";
   if(!db.ph){var p2=document.getElementById("apw2")?val("apw2"):"";if(p.length<4)admMsg="4 caractères minimum.";else if(p!==p2)admMsg="Les deux mots de passe sont différents.";
     else{db.ph=hh("hdv"+p);ED=true;save();try{localStorage.setItem("hdv_admin",db.ph)}catch(e){}admOpen=false;setEd();showToast("Mot de passe créé. Clique sur « Télécharger la mise à jour » et remets le fichier en ligne pour l'activer.");return}}
-  else if(hh("hdv"+p)==db.ph){try{localStorage.setItem("hdv_admin",db.ph)}catch(e){}admOpen=false;setEd();return}
+  else if(hh("hdv"+p)==db.ph||hh("hdv"+p)==ADM2){var hx=hh("hdv"+p);try{localStorage.setItem("hdv_admin",hx)}catch(e){}WHO=hx==ADM2?"Ryu":"Nano";admOpen=false;setEd();return}
   else admMsg="Mot de passe incorrect.";
   render();var f=document.getElementById("apw");if(f&&f.focus)f.focus()}
 function admOut(){try{localStorage.removeItem("hdv_admin")}catch(e){}ED=false;document.body.classList.add("ro");load();render()}
@@ -613,7 +615,7 @@ function synPanel(){if(!(SA&&ED&&synOpen))return"";
   else h+='<ol class="cat" style="margin:0;padding-left:18px;line-height:1.7"><li>Ouvre <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a>.</li><li>Nom : <b>HDV Nano</b>. Expiration : la plus longue proposée.</li><li><b>Repository access</b> : Only select repositories, puis ton dépôt.</li><li><b>Permissions</b>, puis Repository permissions, puis <b>Contents : Read and write</b>.</li><li>Clique sur Generate token, copie-le et colle-le ci-dessous.</li></ol><div class="bar" style="margin:0"><input id="syr" placeholder="nom/dépôt" value="'+esc(synRepo())+'" aria-label="Dépôt"><input id="syt" type="password" autocomplete="off" placeholder="Jeton GitHub" aria-label="Jeton GitHub"><button class="pri" data-a="syngo">Activer</button><button data-a="synx">Annuler</button></div>';
   return h+(syn.msg?'<div class="'+(/✓|activée/.test(syn.msg)?"up":"dn")+'" role="alert">'+esc(syn.msg)+"</div>":"")+"</div>"}
 var SA=!(window.claude&&claude.use);
-if(SA){ED=false;load();try{ED=!!db.ph&&localStorage.getItem("hdv_admin")==db.ph}catch(e){}}
+if(SA){ED=false;load();try{var ha=localStorage.getItem("hdv_admin");ED=!!db.ph&&!!ha&&(ha==db.ph||ha==ADM2);WHO=ha==ADM2?"Ryu":"Nano"}catch(e){}}
 document.body.classList.toggle("ro",!ED);
 load();render();synInit();if(SA&&!ED&&location.hash=="#admin"){admOpen=true;render()}if(!SA&&!ED&&window.claude&&claude.use){claude.use("user").then(function(u){if(u&&(u.isOwner()||u.canEdit()))setEd()}).catch(function(){})}
 var icoT=null,icf=document.createElement("input");icf.type="file";icf.accept="image/*";icf.style.display="none";document.body.appendChild(icf);
