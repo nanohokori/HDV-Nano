@@ -64,8 +64,9 @@ tr[data-a="open"]:focus-visible{outline:2px solid var(--ac);outline-offset:-2px}
 .hint{font-size:13px;color:var(--mu);margin:0 0 8px}.hint b{color:var(--ac)}
 @media (prefers-reduced-motion:reduce){.go{transition:none}}
 .cards.panel{max-height:78vh;overflow:auto}
-.cathd{padding:14px 16px 12px;border-bottom:1px solid var(--line);position:sticky;left:0;max-width:100%;box-sizing:border-box}.cathd .tabs{border-color:var(--line)}
-.cards th{position:sticky;top:0;z-index:2;background:var(--panel);box-shadow:0 1px 0 var(--line)}
+.cathd{padding:10px 16px 10px;border-bottom:1px solid var(--line);position:sticky;top:0;left:0;z-index:4;background:var(--panel);max-width:100%;box-sizing:border-box}.cathd .tabs{border-color:var(--line)}
+.cathd .catbox{flex-direction:row!important;flex-wrap:wrap;align-items:center!important;gap:6px 12px!important}.cathd .catbox>.catlab:first-child{width:100%}.cathd .catbox>.tabs.cat1{order:1}.cathd .catbox>.catlab.ql{display:none}.cathd .catbox>.tabs:last-child{order:2}.cathd .catbox>.subbox,.cathd .catbox>.bar{order:3;width:100%}
+.cards th{position:sticky;top:var(--chh,0px);z-index:2;background:var(--panel);box-shadow:0 1px 0 var(--line)}
 @media(max-width:640px){.cards.panel{max-height:none}}
 .cp td{padding:6px 12px}.cp .name{font-size:14px}.cp td .cat,.cp td .sub{display:none}.cp .age{display:inline;margin-left:6px}.cp .price{font-size:15px}.cp .star{font-size:16px}
 @keyframes fx{from{background-color:var(--fxc)}to{background-color:transparent}}
@@ -287,12 +288,15 @@ function markSeen(items){items.forEach(function(o){shown[o.it.id]=o.s.p});try{lo
 function lastUpd(){var m=db.chk||0;db.items.forEach(function(i){i.h.forEach(function(x){if(x.t>m)m=x.t})});return m}
 function upd(){var t=lastUpd();if(!t)return"";var m=Math.max(0,Math.floor((Date.now()-t)/6e4)),s=stale(),c=m<=s?"var(--up)":m<=3*s?"var(--ac)":"var(--dn)";var tx=m<1?"à l'instant":m<60?"il y a "+m+" min":m<1440?"il y a "+Math.floor(m/60)+" h":"il y a "+Math.floor(m/1440)+" j";return'<div class="upd" title="Dernière mise à jour : '+new Date(t).toLocaleString("fr-FR")+'"><span class="dot" style="background:'+c+'"></span>Prix mis à jour '+tx+"</div>"}
 var colp={};try{colp=JSON.parse(localStorage.getItem("hdv_col3"))||{}}catch(e){}
+["mov","deals","movAll","dealsAll"].forEach(function(k){delete colp[k]});
 function colHd(k,t,n){var o=!isShut(k);return'<div class="ph"><h2><button class="fold" data-a="fold" data-v="'+k+'" aria-expanded="'+o+'" title="'+(o?"Replier":"Déplier")+'"><span class="car">'+(o?"▾":"▸")+"</span> "+t+(o?"":' <small class="cat">('+n+")</small>")+"</button></h2></div>"}
+function setChh(){var p=document.querySelector(".cards.panel"),c=p&&p.querySelector(".cathd");if(p&&c)p.style.setProperty("--chh",c.offsetHeight+"px")}
+window.addEventListener("resize",setChh);
 function srtGet(id){var v=colp["s_"+id];if(!v)return{k:"pct",d:-1};var a=v.split("|");return{k:a[0],d:+a[1]||-1}}
 function srtSort(a,id,fp,fa){var s0=srtGet(id);a.sort(function(x,y){var X=Math.abs(s0.k=="amt"?fa(x):fp(x)),Y=Math.abs(s0.k=="amt"?fa(y):fp(y));return(X-Y)*s0.d})}
 function srtBar(id){var s0=srtGet(id),b=function(k,l){var on=s0.k==k;return'<button data-a="srt" data-v="'+id+"|"+k+'" class="'+(on?"on":"")+'" title="'+(on?(s0.d<0?"Du plus grand au plus petit : clique pour inverser":"Du plus petit au plus grand : clique pour inverser"):"Trier par "+l)+'">'+l+(on?(s0.d<0?" ▼":" ▲"):"")+"</button>"};return'<span class="srt"><span class="cat">Trier :</span>'+b("pct","%")+b("amt","Montant")+"</span>"}
 function isAll(k){return!!colp[k+"All"]}
-function isShut(k){var v=colp[k];return v===undefined?k=="deals":!!v}
+function isShut(k){var v=colp[k];return v===undefined?true:!!v}
 function more(k,n){if(n<=4)return"";var o=isAll(k);return'<div class="more"><button data-a="more" data-v="'+k+'">'+(o?"Réduire ▴":"Voir tout ("+n+") ▾")+"</button></div>"}
 function deals(){var b=[],v=[];db.items.forEach(function(i){var z=sg(i);if(!z)return;var s=stats(i);if(!s.med)return;var d=(s.p/s.med-1)*100;(z<0?b:v).push({i:i,s:s,d:d,g:s.p-s.med})});
   srtSort(b,"deals-b",function(o){return o.d},function(o){return o.g});srtSort(v,"deals-v",function(o){return o.d},function(o){return o.g});
@@ -335,7 +339,7 @@ function tabs(){
   var mk=function(all,man){return all.map(function(c){var n=c=="Tout"?db.items.length:db.items.filter(function(i){return c=="★"?i.fav:c=="!"?isAl(i):i.cat==c}).length;
     return'<button data-a="filter" data-v="'+esc(c)+'" class="'+(filter==c?"on":"")+'">'+(c=="★"?"★ Favoris":c=="!"?"🔔 Alertes":esc(c))+"<small"+(c=="!"&&n?' style="color:var(--dn);font-weight:700"':"")+">"+n+"</small>"+(c!="Tout"&&c!="★"&&c!="!"&&subs(c).length?'<i class="hs" title="Contient des sous-catégories">▾</i>':"")+"</button>"+(man&&c!="Tout"?'<button data-a="rencat" data-v="'+esc(c)+'" title="Renommer cette catégorie" aria-label="Renommer">✎</button><button class="del" data-a="delcat" data-v="'+esc(c)+'" title="Supprimer cette catégorie">'+(conf=="delcat:"+c?"Confirmer"+(n?" ("+n+" objet"+(n>1?"s":"")+" → Autre)":""):"✕")+"</button>":"")}).join("")};
   var anySub=db.cats.some(function(c){return subs(c).length});
-  return'<div class="catbox" style="display:flex;flex-direction:column;gap:8px;align-items:flex-start"><div class="catlab">📂 Catégories'+(anySub?' <span class="cat">· les catégories marquées ▾ ont des sous-catégories</span>':"")+'</div><div class="tabs cat1">'+mk(["Tout"].concat(db.cats),ED&&manCat)+(ED?'<button data-a="newcat" title="Ajouter une catégorie">+ Catégorie</button><button data-a="mancat" class="'+(manCat?"on":"")+'" title="Supprimer des catégories">'+(manCat?"Terminer":"✎ Gérer")+"</button>":"")+'</div>'+(ED&&catEdit!==null&&db.cats.indexOf(catEdit)>-1?'<div class="bar"><input id="cr" value="'+esc(catEdit)+'" aria-label="Nouveau nom"><button class="pri" data-a="savecr">Renommer</button><button data-a="cancelcr">Annuler</button></div>':"")+(ED&&addingCat?'<div class="bar"><input id="cn" placeholder="Nom de la catégorie"><button class="pri" data-a="savecat">Ajouter</button></div>':"")+subRow()+'<div class="catlab">Filtres rapides</div><div class="tabs">'+mk(["★","!"])+"</div></div>";
+  return'<div class="catbox" style="display:flex;flex-direction:column;gap:8px;align-items:flex-start"><div class="catlab">📂 Catégories'+(anySub?' <span class="cat">· les catégories marquées ▾ ont des sous-catégories</span>':"")+'</div><div class="tabs cat1">'+mk(["Tout"].concat(db.cats),ED&&manCat)+(ED?'<button data-a="newcat" title="Ajouter une catégorie">+ Catégorie</button><button data-a="mancat" class="'+(manCat?"on":"")+'" title="Supprimer des catégories">'+(manCat?"Terminer":"✎ Gérer")+"</button>":"")+'</div>'+(ED&&catEdit!==null&&db.cats.indexOf(catEdit)>-1?'<div class="bar"><input id="cr" value="'+esc(catEdit)+'" aria-label="Nouveau nom"><button class="pri" data-a="savecr">Renommer</button><button data-a="cancelcr">Annuler</button></div>':"")+(ED&&addingCat?'<div class="bar"><input id="cn" placeholder="Nom de la catégorie"><button class="pri" data-a="savecat">Ajouter</button></div>':"")+subRow()+'<div class="catlab ql">Filtres rapides</div><div class="tabs">'+mk(["★","!"])+"</div></div>";
 }
 function catOpts(sel){return db.cats.map(function(c){return'<option'+(c==sel?" selected":"")+">"+esc(c)+"</option>"}).join("")}
 function rarOpts(sel){return RAR.map(function(c,i){return'<option value="'+i+'"'+(i==sel?" selected":"")+">"+c+"</option>"}).join("")}
@@ -370,7 +374,7 @@ function render(){
   var fo=document.activeElement&&document.activeElement.id==="q",bx=document.querySelector(".cards.panel"),wy=window.scrollY,vk=it?it.id:"";
   if(bx&&lsc>=0)lsc=bx.scrollTop;if(lsc<0)lsc=0;if(vk&&vk!==lastV)wyl=wy;
   app.innerHTML=it?detail(it):page=="calc"?calcPage():list();initChart();notify();if(!it&&page=="calc")calcUpdate();
-  var nb=document.querySelector(".cards.panel");if(nb&&lsc)nb.scrollTo({top:lsc,behavior:"instant"});
+  var nb=document.querySelector(".cards.panel");setChh();if(nb&&lsc)nb.scrollTo({top:lsc,behavior:"instant"});
   if(vk!==lastV){window.scrollTo({top:vk?0:wyl,behavior:"instant"});lastV=vk}else if(Math.abs(window.scrollY-wy)>1)window.scrollTo({top:wy,behavior:"instant"});
   if(pnFoc){pnFoc=false;var pi=document.getElementById("pni");if(pi){pi.focus();pi.select&&pi.select();pi.scrollIntoView({block:"center",behavior:"instant"})}}
   if(fo){var e=document.getElementById("q");e.focus();e.setSelectionRange(q.length,q.length)}
@@ -383,8 +387,8 @@ document.addEventListener("input",function(e){if(e.target.id==="q"){q=e.target.v
 document.addEventListener("click",function(e){
   if(e.target.closest(".qi,.ss"))return;var el=e.target.closest("[data-a]");if(!el)return;var a=el.dataset.a,v=el.dataset.v,it,pc=conf;conf=null;if(!ED&&EDIT[a])return;var pv=view,pp=page;
   if(a=="srt"){var sp=v.split("|"),sc=srtGet(sp[0]);colp["s_"+sp[0]]=sp[1]+"|"+(sc.k==sp[1]?-sc.d:-1);try{localStorage.setItem("hdv_col3",JSON.stringify(colp))}catch(x){}}
-  else if(a=="more"){colp[v+"All"]=!isAll(v);try{localStorage.setItem("hdv_col3",JSON.stringify(colp))}catch(x){}}
-  else if(a=="fold"){colp[v]=!isShut(v);try{localStorage.setItem("hdv_col3",JSON.stringify(colp))}catch(x){}}
+  else if(a=="more"){colp[v+"All"]=!isAll(v)}
+  else if(a=="fold"){colp[v]=!isShut(v)}
   else if(a=="undo"){undo()}
   else if(a=="open"){view=v;range="24h"}
   else if(a=="back"){if(history.state&&history.state.v){history.back();return}view=null}
