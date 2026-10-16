@@ -90,6 +90,8 @@ body.ro [data-a="add"],body.ro [data-a="io"],body.ro [data-a="reset"],body.ro [d
 .star{border:0;background:none;padding:0 2px;font-size:20px;color:var(--ac);line-height:1}
 .th{border:0;background:none;padding:0;color:var(--mu);font-size:13px}.th:hover{color:var(--tx)}
 .qi{width:110px;text-align:right;font-weight:700}
+#numhint{position:fixed;display:none;z-index:30;background:var(--ac);color:#111;font-weight:800;padding:3px 9px;border-radius:6px;font-size:15px;pointer-events:none;white-space:nowrap;box-shadow:0 2px 8px #0008}
+.qgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}@media(max-width:760px){.qgrid{grid-template-columns:1fr}}.qin{padding:12px 16px 16px;display:flex;flex-direction:column;gap:6px}.qb{font-weight:700;font-size:16px}.qbig{font-size:28px;font-weight:800;color:var(--up)}.qbig span{font-size:14px;color:var(--mu);font-weight:500}.qbest{font-weight:800}.qbest small{font-size:11px;font-weight:700}.qnote{margin-top:12px;padding:12px 16px;display:flex;flex-direction:column;gap:8px}
 .al{font-size:12px;font-weight:600;margin-left:6px;padding:1px 6px;border-radius:6px;background:var(--chip)}
 @media(max-width:640px){.cards table,.cards tbody,.cards tr,.cards td{display:block}.cards thead{display:none}.cards table{min-width:0!important}.cards tr{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:10px 14px;border-bottom:1px solid var(--line)}.cards td{border:0;padding:2px 0;text-align:right}.cards td:first-child{grid-row:1/7;text-align:left;white-space:normal}.cards td.sp{display:none}.cards td[data-l]::before{content:attr(data-l) " ";color:var(--mu);font-size:12px;font-weight:400}.qi{width:100px}}
 html{scroll-behavior:smooth}
@@ -142,7 +144,7 @@ try{pseudo=localStorage.getItem("hdv_pseudo")||""}catch(e){}
 function fbOn(){return SA&&!!db.fb}
 function save(){if(ED){var sn=snap();if(!uSkip&&lastSnap!==null&&sn!==lastSnap){uStack.push(lastSnap);if(uStack.length>20)uStack.shift()}lastSnap=sn}db.rev=Date.now();if(ED){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}if(syn.tok){syn.dirty=true;clearTimeout(syn.t);syn.t=setTimeout(synPush,2500);synPaint()}}}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-function fmt(n){return Number(n).toLocaleString("fr-FR")}
+function fmt(n){n=Number(n);if(!isFinite(n))return String(n);var g=n<0?"-":"",a=Math.abs(n).toString();if(a.indexOf("e")>-1)return n.toLocaleString("fr-FR");var p=a.split(".");return g+p[0].replace(/\B(?=(\d{3})+(?!\d))/g,"\u00A0")+(p[1]?","+p[1]:"")}
 function med(a){a=a.slice().sort(function(x,y){return x-y});var m=a.length>>1;return a.length%2?a[m]:(a[m-1]+a[m])/2}
 function stats(it){
   var h=it.h.slice().sort(function(a,b){return a.t-b.t}),last=h[h.length-1],now=Date.now();
@@ -253,32 +255,32 @@ function col(k){return!db.cols||db.cols.indexOf(k)>-1}
 function visN(){return["3","6","12","24","7","tr"].filter(col).length}
 function cb(){return'<div class="bar"><span class="cat">Colonnes</span>'+[["3","3h"],["6","6h"],["12","12h"],["24","24h"],["7","7j"],["tr","Tendance"]].map(function(c){return'<button data-a="col" data-v="'+c[0]+'" class="'+(col(c[0])?"on":"")+'">'+c[1]+"</button>"}).join("")+"</div>"}
 function cells(s){var o="";["3","6","12","24","7"].forEach(function(k){if(col(k))o+='<td data-l="'+(k=="7"?"7j":k+"h")+'">'+pct(s["d"+k])+pa(s["a"+k])+"</td>"});if(col("tr"))o+='<td class="sp">'+spark(s.h)+"</td>";return o}
-function nav(){return'<div class="tabs">'+[["market","Marché"],["calc","Calculateur de marge"]].map(function(p){return'<button data-a="page" data-v="'+p[0]+'" class="'+(page==p[0]?"on":"")+'">'+p[1]+"</button>"}).join("")+"</div>"}
-function scen(b,t){if(!b)return"";var R=function(v){return fmt(Math.round(v))},rows=[0,5,10,15,20,30,50].map(function(k){var s=k?b*(1+k/100):b/(1-t),pu=Math.round((s*(1-t)-b)*1e6)/1e6+0,mg=pu/b*100;return'<tr><td>'+(k?"Prix +"+k+" % par rapport à ton achat":"Seuil : ni gain ni perte")+"</td><td>"+R(s)+'</td><td class="'+(pu>.5?"up":pu<-.5?"dn":"")+'">'+(pu>.5?"+":"")+R(pu)+'</td><td class="'+(mg>.05?"up":mg<-.05?"dn":"")+'">'+(mg>.05?"+":"")+mg.toFixed(1).replace(".",",")+" %</td></tr>"}).join("");
-  return'<div class="scroll" style="border-top:1px solid var(--line)"><div class="cat" style="padding:12px 16px 4px">Si tu revends à… (après taxe)</div><table style="min-width:420px"><thead><tr><th>Scénario</th><th>Prix de vente</th><th>Bénéfice / unité</th><th>Marge</th></tr></thead><tbody>'+rows+"</tbody></table></div>"}
-function calcRes(){var b=+cv.b||0,s=+cv.s||0,qn=Math.max(1,+cv.q||1),t=Math.min(.99,(+cv.t||0)/100),m=(+cv.m||0)/100;
-  if(!b&&!s)return'<div class="empty">Saisis un prix d’achat et un prix de vente, ou choisis un objet.</div>';
-  var net=s*(1-t),pu=net-b,cl=pu>0?"up":pu<0?"dn":"",R=function(v){return fmt(Math.round(v))},sg=function(v){return(v>0?"+":v<0?"-":"")+R(Math.abs(v))};
-  var tile=function(l,v,c,sub){return'<div><span>'+l+'</span><b class="'+(c||"")+'">'+v+"</b>"+(sub?'<div class="sub">'+sub+"</div>":"")+"</div>"};
-  var mg=b?pu/b*100:0;
-  return'<div class="stats" style="margin:0;border-top:1px solid var(--line)">'+
-    tile("Revenu net par unité",R(net),"",t?"après "+(t*100).toFixed(1).replace(".",",")+" % de taxe":"sans taxe")+
-    tile("Bénéfice par unité",sg(pu),cl)+
-    tile("Bénéfice total (× "+qn+")",sg(pu*qn),cl)+
-    tile("Marge",b?(mg>0?"+":"")+mg.toFixed(1).replace(".",",")+" %":"–",cl)+
-    tile("Prix de vente minimum",R(b/(1-t)),"","pour ne pas perdre d’argent")+
-    "</div>"+scen(b,t)}
-function opps(){var t=Math.min(.99,(+cv.t||0)/100),rows=[];
-  db.items.forEach(function(i){var s=stats(i);if(s.n<3||!s.med||!s.p)return;var pu=s.med*(1-t)-s.p;if(pu>0)rows.push({i:i,s:s,pu:pu,mg:pu/s.p*100})});
-  rows.sort(function(a,b){return b.mg-a.mg});
-  if(!rows.length)return'<div class="empty">Aucune opportunité pour l’instant : aucun objet n’est assez sous sa médiane 7j pour être rentable après la taxe (il faut au moins 3 relevés sur 7 jours).</div>';
-  return'<div class="scroll"><table style="min-width:520px"><thead><tr><th>Objet</th><th>Prix actuel</th><th>Médiane 7j</th><th>Bénéfice / unité</th><th>Marge</th></tr></thead><tbody>'+rows.slice(0,10).map(function(r){return'<tr data-a="open" data-v="'+r.i.id+'"><td><div class="name r'+r.i.rar+'">'+esc(r.i.name)+"</div></td><td>"+fmt(r.s.p)+"</td><td>"+fmt(Math.round(r.s.med))+'</td><td class="up">+'+fmt(Math.round(r.pu))+'</td><td class="up">+'+r.mg.toFixed(1).replace(".",",")+" %</td></tr>"}).join("")+'</tbody></table></div><div class="cat" style="padding:10px 16px 14px">Hypothèse : achat au prix actuel, revente à la médiane 7j, taxe de vente comprise. Les prix réels peuvent varier.</div>'}
-function calcUpdate(){var g=function(i){var e=document.getElementById(i);return e?e.value:""};cv.b=g("cb");cv.s=g("cs");cv.q=g("cq");cv.t=TAX;cv.m=g("cm");var r=document.getElementById("cr"),o=document.getElementById("co");if(r)r.innerHTML=calcRes();if(o)o.innerHTML=opps()}
-function calcPage(){cv=cv||{i:"",b:"",s:"",q:1,t:TAX,m:20};cv.t=TAX;
-  var opt='<option value="">Choisir un objet…</option>'+db.items.map(function(i){return'<option value="'+i.id+'"'+(cv.i==i.id?" selected":"")+">"+esc(i.name)+"</option>"}).join("");
-  return'<header><div><h1 class="brand">HDV Nano</h1><p>Calcule ton bénéfice net après taxe et le prix de revente minimum.</p>'+upd()+'</div></header><div class="bar">'+nav()+'</div>'+
-  '<div id="calc" class="panel" style="margin-bottom:16px"><div class="ph"><h2>Calculateur de marge</h2></div><div class="form"><label>Objet (remplit les prix)<select id="ci">'+opt+'</select></label><label>Prix d’achat (unité)<input id="cb" type="number" min="0" value="'+esc(cv.b)+'"></label><label>Prix de vente visé (unité)<input id="cs" type="number" min="0" value="'+esc(cv.s)+'"></label><label>Quantité<input id="cq" type="number" min="1" value="'+esc(cv.q)+'"></label><label>Taxe de vente (fixe)<input id="ct" value="'+TAX+' %" disabled readonly aria-readonly="true" style="opacity:.75;cursor:not-allowed"></label></div><div id="cr"></div></div>'+
-  '<div class="panel"><div class="ph"><h2>Opportunités du moment</h2></div><div id="co"></div></div>'}
+function nav(){return'<div class="tabs">'+[["market","Marché"],["quna","Quna"]].map(function(p){return'<button data-a="page" data-v="'+p[0]+'" class="'+(page==p[0]?"on":"")+'">'+p[1]+"</button>"}).join("")+"</div>"}
+var QC=[{v:4e5},{v:2e6},{v:1e7}];
+function qName(k){return"Coffre de "+fmt(+k)+" Kinah"}
+function findIt(id,mk){if(String(id).indexOf("qn:")!=0)return db.items.filter(function(i){return i.id==id})[0];var k=id.slice(3);if(!QC.some(function(c){return String(c.v)==k}))return null;var h=db.qn&&db.qn[k];if(!h){if(mk){db.qn=db.qn||{};h=db.qn[k]=[]}else h=[]}return{id:id,name:qName(k),h:h,rar:0}}
+function qMo(){return db.qm!=null?+db.qm:10}
+function qFe(){return db.qf!=null?+db.qf:0}
+function fk(v){return fmt(v>=100?Math.round(v):Math.round(v*10)/10)}
+function qunaRows(){var mo=qMo(),fe=qFe();return QC.map(function(c){var it=findIt("qn:"+c.v),st=stats(it),q=st.p,cost=c.v*(1+mo/100),qn=q*(1-fe/100);return{c:c,it:it,s:st,q:q,cost:cost,buy:q>0&&qn>0?cost/qn:0,sell:q>0?c.v/q:0}})}
+function qBest(R,k,mx){var b=null;R.forEach(function(r){if(r[k]>0&&(!b||(mx?r[k]>b[k]:r[k]<b[k])))b=r});return b}
+function qunaPage(){var R=qunaRows(),bb=qBest(R,"buy",false),bs=qBest(R,"sell",true),mo=qMo(),fe=qFe();
+  var worst=function(k,mx){var w=null;R.forEach(function(r){if(r[k]>0&&(!w||(mx?r[k]<w[k]:r[k]>w[k])))w=r});return w};
+  var wb=worst("buy",false),ws=worst("sell",true);
+  var c1=bb?'<div class="qb">'+qName(bb.c.v)+'</div><div class="qbig">'+fk(bb.buy)+' Kinah <span>par Quna</span></div><div class="cat">Tu fabriques le coffre (coût '+fmt(Math.round(bb.cost))+' Kinah) et tu le vends '+fmt(bb.q)+' Quna.'+(wb&&wb!==bb?' Le moins rentable : '+qName(wb.c.v)+' ('+fk(wb.buy)+' Kinah par Quna, soit '+Math.round((wb.buy/bb.buy-1)*100)+' % de plus).':"")+"</div>":'<div class="cat">Entre le prix en Quna d’au moins un coffre (bouton « Changer Prix »).</div>';
+  var c2=bs?'<div class="qb">'+qName(bs.c.v)+'</div><div class="qbig">'+fk(bs.sell)+' Kinah <span>par Quna</span></div><div class="cat">Tu paies '+fmt(bs.q)+' Quna un coffre qui contient '+fmt(bs.c.v)+' Kinah.'+(ws&&ws!==bs?' Le moins rentable : '+qName(ws.c.v)+' ('+fk(ws.sell)+' Kinah par Quna, soit '+Math.round((1-ws.sell/bs.sell)*100)+' % de moins).':"")+"</div>":'<div class="cat">Entre le prix en Quna d’au moins un coffre (bouton « Changer Prix »).</div>';
+  var rows=R.map(function(r){var inp=qu&&(ED||fbOn())?'<input class="qi" type="number" min="0" data-id="'+r.it.id+'" value="'+r.q+'" aria-label="Prix en Quna">':(r.q?fmt(r.q)+' <span class="cat">Quna</span>':"–");
+    return'<tr><td><div class="name">'+qName(r.c.v)+'</div><div class="cat">Fabrication : '+fmt(Math.round(r.cost))+' Kinah</div></td>'+
+    '<td class="price">'+inp+ag(r.s.h)+(qu&&!ED&&sent[r.it.id]!=null&&sent[r.it.id]!==r.q?'<div class="age" style="color:var(--ac)">proposé : '+fmt(sent[r.it.id])+" ✓</div>":"")+"</td>"+
+    "<td>"+(r.s.h.length>1?pct(r.s.d24):"–")+"</td>"+
+    '<td class="'+(r===bb?"up qbest":"")+'">'+(r.buy?fk(r.buy)+(r===bb?' <small>✓ meilleur</small>':""):"–")+"</td>"+
+    '<td class="'+(r===bs?"up qbest":"")+'">'+(r.sell?fk(r.sell)+(r===bs?' <small>✓ meilleur</small>':""):"–")+"</td></tr>"}).join("");
+  var set=ED?'<div class="bar"><label class="cat">Surcoût de fabrication <input id="qm" type="number" min="0" value="'+mo+'" style="width:64px"> %</label><label class="cat">Frais de l’Exchange à la vente <input id="qf" type="number" min="0" value="'+fe+'" style="width:64px"> %</label></div>':'<div class="cat">Surcoût de fabrication : '+mo+' % · Frais de l’Exchange : '+fe+' %</div>';
+  return'<header><div><h1 class="brand">HDV Nano</h1><p>Compare les coffres de Kinah pour acheter ou vendre des Quna.</p>'+upd()+'</div></header><div class="bar">'+nav()+"</div>"+
+  '<div class="qgrid"><div class="panel qcard"><div class="ph"><h2>Acheter des Quna <span class="cat">(tu paies en Kinah)</span></h2></div><div class="qin">'+c1+'</div></div><div class="panel qcard"><div class="ph"><h2>Vendre des Quna <span class="cat">(tu reçois des Kinah)</span></h2></div><div class="qin">'+c2+"</div></div></div>"+
+  ((ED||fbOn())?'<div class="bar" style="margin-top:10px"><button data-a="qu" class="'+(qu?"on":"")+'">Changer Prix</button>'+(qu&&!ED&&pseudo?'<span class="cat">Pseudo : <b>'+esc(pseudo)+'</b></span><button data-a="pn">Changer</button><span class="cat">Ton prix est envoyé en proposition (accepté tout seul à ±'+AUTOP+' % du prix actuel, sinon validé par l’admin).</span>':"")+(qu&&ED?'<span class="cat">Tape le prix en Quna puis Entrée.</span>':"")+"</div>":"")+pnPanel()+
+  '<div class="panel scroll"><table style="min-width:640px"><thead><tr><th>Coffre</th><th>Prix en Quna</th><th>24h</th><th>Acheter des Quna<div class="cat">Kinah payés par Quna (plus bas = mieux)</div></th><th>Vendre des Quna<div class="cat">Kinah reçus par Quna (plus haut = mieux)</div></th></tr></thead><tbody>'+rows+"</tbody></table></div>"+
+  '<div class="panel qnote"><div class="cat"><b>Comment lire :</b> un coffre de Kinah se fabrique pour environ '+mo+' % de Kinah en plus de sa valeur, puis se vend contre des Quna sur l’Exchange. Pour <b>acheter</b> des Quna, cherche le coût en Kinah le plus bas par Quna. Pour <b>vendre</b> des Quna, cherche le plus de Kinah reçus par Quna. Le prix en Quna de chaque coffre vient des annonces de l’Exchange.</div>'+set+"</div>"}
 function buildDoc(){var css=document.getElementById("css").textContent,code=document.getElementById("code").textContent,data=JSON.stringify(db).replace(/</g,"\\u003c");
   return'<!DOCTYPE html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n<meta name="color-scheme" content="dark">\n<title>HDV Nano</title>\n<style id="css">'+css+'</style>\n</head>\n<body class="ro">\n<div class="wrap" id="app"></div>\n<script id="data" type="application/json">'+data+'<\/script>\n<script id="code">'+code+'<\/script>\n</body>\n</html>'}
 function dl(){save();var b=new Blob([buildDoc()],{type:"text/html"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="index.html";document.body.appendChild(a);a.click();setTimeout(function(){a.remove()},500);showToast("Fichier index.html téléchargé : mets-le en ligne pour que la guilde voie les changements.")}
@@ -319,7 +321,7 @@ function icoLoad(file,id){var r=new FileReader();r.onload=function(){var im=new 
     var it=db.items.filter(function(i){return i.id==id})[0];if(it){it.img=u;save();render()}};
   im.src=r.result};r.onerror=function(){showToast("Image illisible.")};r.readAsDataURL(file)}
 function stale(){return db.stale||60}
-var TAX=12,prevSig=null,page="market",cv=null,ED=false,pnFoc=false,pseudo="",sent={},props=[],propOpen=false,pnOpen=false,pnThen=false,fbMsg="",pubRev=0,EDIT={prop:1,propok:1,propno:1,propall:1,propnone:1,fbgo:1,fboff:1,fbcopy:1,undo:1,rencat:1,savecr:1,cancelcr:1,newsub:1,savesub:1,mansub:1,rensub:1,savesr:1,cancelsr:1,delsub:1,psmode:1,psadd:1,psdel:1,psok:1,pst:1,pstx:1,pstgo:1,pstback:1,pstok:1,syn:1,synx:1,syngo:1,synoff:1,synnow:1,add:1,create:1,newcat:1,mancat:1,delcat:1,savecat:1,addpt:1,delpt:1,saveinfo:1,delitem:1,io:1,reset:1,fav:1,clean:1,ioload:1,chk:1,ico:1,icodel:1};
+var TAX=12,prevSig=null,page="market",ED=false,pnFoc=false,pseudo="",sent={},props=[],propOpen=false,pnOpen=false,pnThen=false,fbMsg="",pubRev=0,EDIT={prop:1,propok:1,propno:1,propall:1,propnone:1,fbgo:1,fboff:1,fbcopy:1,undo:1,rencat:1,savecr:1,cancelcr:1,newsub:1,savesub:1,mansub:1,rensub:1,savesr:1,cancelsr:1,delsub:1,psmode:1,psadd:1,psdel:1,psok:1,pst:1,pstx:1,pstgo:1,pstback:1,pstok:1,syn:1,synx:1,syngo:1,synoff:1,synnow:1,add:1,create:1,newcat:1,mancat:1,delcat:1,savecat:1,addpt:1,delpt:1,saveinfo:1,delitem:1,io:1,reset:1,fav:1,clean:1,ioload:1,chk:1,ico:1,icodel:1};
 function sigp(){return db.sig||15}
 function sg(it){var s=stats(it),p=s.p,lo=it.lo,hi=it.hi;if(lo||hi)return lo&&p<=lo?-1:hi&&p>=hi?1:0;if(s.n<3||!s.med)return 0;var x=sigp()/100;return p<=s.med*(1-x)?-1:p>=s.med*(1+x)?1:0}
 function isAl(it){return sg(it)!=0}
@@ -374,7 +376,7 @@ function render(){
   var app=document.getElementById("app"),it=view&&db.items.filter(function(i){return i.id==view})[0];
   var fo=document.activeElement&&document.activeElement.id==="q",bx=document.querySelector(".cards.panel"),wy=window.scrollY,vk=it?it.id:"";
   if(bx&&lsc>=0)lsc=bx.scrollTop;if(lsc<0)lsc=0;if(vk&&vk!==lastV)wyl=wy;
-  app.innerHTML=it?detail(it):page=="calc"?calcPage():list();initChart();notify();if(!it&&page=="calc")calcUpdate();
+  app.innerHTML=it?detail(it):page=="quna"?qunaPage():list();initChart();notify();
   var nb=document.querySelector(".cards.panel");setChh();if(nb&&lsc)nb.scrollTo({top:lsc,behavior:"instant"});
   if(vk!==lastV){window.scrollTo({top:vk?0:wyl,behavior:"instant"});lastV=vk}else if(Math.abs(window.scrollY-wy)>1)window.scrollTo({top:wy,behavior:"instant"});
   if(pnFoc){pnFoc=false;var pi=document.getElementById("pni");if(pi){pi.focus();pi.select&&pi.select();pi.scrollIntoView({block:"center",behavior:"instant"})}}
@@ -384,7 +386,7 @@ function undo(){if(!ED||!uStack.length)return;var s0=uStack.pop();try{db=JSON.pa
   if(view&&!db.items.some(function(i){return i.id==view}))view=null;if(db.cats.indexOf(filter)<0&&filter!="Tout"&&filter!="★"&&filter!="!")filter="Tout";subFilter="";subMan=false;subEdit=null;showToast("Dernière modification annulée.")}
 function val(id){return document.getElementById(id).value}
 function cur(){return db.items.filter(function(i){return i.id==view})[0]}
-document.addEventListener("input",function(e){if(e.target.id==="q"){q=e.target.value;lsc=-1;render()}else if(e.target.closest("#calc"))calcUpdate()});
+document.addEventListener("input",function(e){if(e.target.id==="q"){q=e.target.value;lsc=-1;render()}});
 document.addEventListener("click",function(e){
   if(e.target.closest(".qi,.ss"))return;var el=e.target.closest("[data-a]");if(!el)return;var a=el.dataset.a,v=el.dataset.v,it,pc=conf;conf=null;if(!ED&&EDIT[a])return;var pv=view,pp=page;
   if(a=="srt"){var sp=v.split("|"),sc=srtGet(sp[0]);colp["s_"+sp[0]]=sp[1]+"|"+(sc.k==sp[1]?-sc.d:-1);try{localStorage.setItem("hdv_col3",JSON.stringify(colp))}catch(x){}}
@@ -468,7 +470,7 @@ document.addEventListener("click",function(e){
 });
 document.addEventListener("change",function(e){var t=e.target;if(t.id=="ic"||t.id=="nc"){var se=document.getElementById(t.id=="ic"?"is":"ns");if(se)se.innerHTML=subOpts(t.value,"");return}
   if(t.classList.contains("ss")){if(!ED)return;var si=db.items.filter(function(i){return i.id==t.dataset.id})[0];if(si){if(t.value)si.sub=t.value;else delete si.sub;save();render()}return}
-  if(t.classList.contains("rs")){pSync();pst.fi=+t.dataset.i;render();pFocus();return}if(t.id=="ci"){var itm=db.items.filter(function(i){return i.id==t.value})[0];cv.i=t.value;if(itm){var ss=stats(itm);document.getElementById("cb").value=ss.p;document.getElementById("cs").value=Math.round(ss.med)||""}calcUpdate();return}if(t.id=="sp"){db.sig=Math.max(1,+t.value||15);save();render();return}if(t.id=="sa"){db.stale=Math.max(1,+t.value||60);save();render();return}return});
+  if(t.classList.contains("rs")){pSync();pst.fi=+t.dataset.i;render();pFocus();return}if(t.id=="qm"){db.qm=Math.max(0,+t.value||0);save();render();return}if(t.id=="qf"){db.qf=Math.min(99,Math.max(0,+t.value||0));save();render();return}if(t.id=="sp"){db.sig=Math.max(1,+t.value||15);save();render();return}if(t.id=="sa"){db.stale=Math.max(1,+t.value||60);save();render();return}return});
 var AUTOP=30;
 var FBRULES="{\n  \"rules\": {\n    \".read\": false,\n    \"proposals\": {\n      \".read\": true,\n      \"$id\": {\n        \".write\": \"!data.exists() && newData.exists()\",\n        \".validate\": \"newData.hasChildren(['n','i','p','t'])\",\n        \"n\": {\n          \".validate\": \"newData.isString() && newData.val().length >= 2 && newData.val().length <= 24\"\n        },\n        \"i\": {\n          \".validate\": \"newData.isString() && newData.val().length <= 40\"\n        },\n        \"p\": {\n          \".validate\": \"newData.isNumber() && newData.val() >= 0 && newData.val() < 100000000000\"\n        },\n        \"t\": {\n          \".validate\": \"newData.isNumber()\"\n        },\n        \"$other\": {\n          \".validate\": false\n        }\n      }\n    }\n  }\n}";
 function propPend(){var d=db.done||{};return props.filter(function(P){return!d[P.id]})}
@@ -476,12 +478,12 @@ function propLoad(cb){if(!ED||!fbOn()){cb&&cb();return}
   fetch(db.fb+"/proposals.json?t="+Date.now(),{cache:"no-store"}).then(function(r){if(!r.ok)throw r.status;return r.json()}).then(function(o){
     var a=[],k,pend0=propPend().length;o=o||{};for(k in o){var x=o[k];if(x&&typeof x.n=="string"&&typeof x.i=="string"&&typeof x.p=="number"&&x.p>=0)a.push({id:k,n:x.n.slice(0,24),i:x.i,p:Math.round(x.p),t:+x.t||0})}
     a.sort(function(x,y){return y.t-x.t});props=a;
-    var auto=0;a.slice().sort(function(x,y){return x.t-y.t}).forEach(function(P){if((db.done||{})[P.id])return;var it=db.items.filter(function(i){return i.id==P.i})[0];if(!it)return;var cp=stats(it).p;if(cp>0&&Math.abs(P.p/cp-1)<=AUTOP/100){propAcc(P.id,1);auto++}});
+    var auto=0;a.slice().sort(function(x,y){return x.t-y.t}).forEach(function(P){if((db.done||{})[P.id])return;var it=findIt(P.i);if(!it)return;var cp=stats(it).p;if(cp>0&&Math.abs(P.p/cp-1)<=AUTOP/100){propAcc(P.id,1);auto++}});
     if(auto){save();fbMsg=auto+(auto>1?" propositions acceptées automatiquement":" proposition acceptée automatiquement")+" (écart ≤ "+AUTOP+" %)."}
     if(db.done){var ch=false;for(k in db.done)if(!(k in o)){delete db.done[k];ch=true}if(ch)save()}
     var f=document.activeElement;if(!(f&&/^(INPUT|SELECT|TEXTAREA)$/.test(f.tagName))&&!pendingQi()&&(auto||propOpen||propPend().length!==pend0))render();cb&&cb()}).catch(function(){cb&&cb()})}
 function propAcc(id,batch){var P=props.filter(function(x){return x.id==id})[0];if(!P)return;db.done=db.done||{};db.done[id]=1;
-  var it=db.items.filter(function(i){return i.id==P.i})[0];
+  var it=findIt(P.i,1);
   if(it){var now=Date.now(),last=it.h.length?Math.max.apply(0,it.h.map(function(x){return x.t})):0;if(P.p!==stats(it).p||now-last>36e5)it.h.push(pt(Math.min(P.t||now,now),P.p,P.n))}
   if(!batch)save()}
 function propSend(it,p){if(!pseudo){pnOpen=true;render();return}
@@ -494,7 +496,7 @@ function propPanel(){if(!(SA&&ED&&propOpen))return"";var h='<div class="panel fo
   if(!db.fb){return h+'<div class="cat"><b>Propositions de prix</b> : les membres proposent un prix depuis « Mise à jour rapide », avec un pseudo obligatoire. Un prix à ±'+AUTOP+' % du prix actuel est accepté automatiquement ; au-delà, rien ne change tant que tu n\'as pas accepté. Il faut une petite base gratuite (Firebase), à créer une seule fois :</div><ol class="cat" style="margin:0;padding-left:18px;line-height:1.7"><li>Ouvre <a href="https://console.firebase.google.com" target="_blank" rel="noopener">console.firebase.google.com</a>, connecte-toi avec un compte Google et crée un projet (nom : HDV Nano, tu peux désactiver Google Analytics).</li><li>Menu de gauche <b>Bases de données et stockage</b> (ou « Build » selon la version), puis <b>Realtime Database</b> (pas Firestore), puis Créer une base (région Europe, mode verrouillé).</li><li>Onglet <b>Règles</b> : remplace tout le texte par celui ci-dessous, puis Publier.</li><li>Onglet <b>Données</b> : copie l\'adresse en haut (https://….firebasedatabase.app) et colle-la ici.</li></ol><textarea readonly rows="9" style="width:100%;font:12px monospace;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:8px">'+esc(FBRULES)+'</textarea><div class="bar" style="margin:0"><button data-a="fbcopy">Copier les règles</button><input id="fbu" placeholder="https://xxxx-default-rtdb.europe-west1.firebasedatabase.app" style="min-width:320px" aria-label="Adresse de la base"><button class="pri" data-a="fbgo">Activer</button><button data-a="prop">Fermer</button></div>'+(fbMsg?'<div class="'+(/✓|copiées|Test/.test(fbMsg)?"up":"dn")+'" role="alert">'+esc(fbMsg)+"</div>":"")+"</div>"}
   var l=propPend();h+='<div class="cat"><b>Propositions en attente ('+l.length+')</b></div><div class="cat">Automatique : un prix proposé à ±'+AUTOP+' % du prix actuel est accepté tout seul dès qu\'une page admin est ouverte. Au-delà, il attend ton accord ici.</div>';
   if(!l.length)h+='<div class="cat">Aucune proposition pour le moment.</div>';
-  else{h+='<div class="props">'+l.slice(0,60).map(function(P){var it=db.items.filter(function(i){return i.id==P.i})[0],cp=it?stats(it).p:0,d=cp?(P.p/cp-1)*100:0;
+  else{h+='<div class="props">'+l.slice(0,60).map(function(P){var it=findIt(P.i),cp=it?stats(it).p:0,d=cp?(P.p/cp-1)*100:0;
     return'<div class="prow"><span class="name'+(it?" r"+it.rar:"")+'">'+esc(it?it.name:"(objet supprimé)")+'</span><span>'+fmt(cp)+" → <b>"+fmt(P.p)+'</b></span><span class="'+(Math.abs(d)>=50?"dn":"cat")+'">'+(d>0?"+":"")+d.toFixed(0)+' %</span><span class="cat">'+esc(P.n)+" · "+new Date(P.t).toLocaleString("fr-FR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+'</span><span class="pb"><button class="pri" data-a="propok" data-v="'+esc(P.id)+'">Accepter</button><button class="del" data-a="propno" data-v="'+esc(P.id)+'">Refuser</button></span></div>'}).join("")+"</div>"+(l.length>60?'<div class="cat">… et '+(l.length-60)+" autres (les plus anciennes).</div>":"")+'<div class="bar" style="margin:0"><button class="pri" data-a="propall">Tout accepter ('+l.length+')</button><button class="del" data-a="propnone">Tout refuser</button></div>'}
   return h+'<div class="bar" style="margin:0"><button data-a="prop">Fermer</button><button class="del" data-a="fboff" title="Désactive les propositions (la base Firebase n\'est pas supprimée)">Désactiver les propositions</button></div>'+(fbMsg?'<div class="cat" role="status">'+esc(fbMsg)+"</div>":"")+"</div>"}
 function pnPanel(){if(!(SA&&!ED&&pnOpen))return"";return'<div class="panel form" style="margin-bottom:12px;flex-direction:column"><div class="cat">Choisis un <b>pseudo</b> : il est obligatoire et sera noté avec chacun de tes prix proposés.</div><div class="bar" style="margin:0"><input id="pni" maxlength="24" placeholder="Ton pseudo" value="'+esc(pseudo)+'" aria-label="Pseudo"><button class="pri" data-a="pnsave">Valider</button><button data-a="pnx">Annuler</button></div>'+(fbMsg?'<div class="dn" role="alert">'+esc(fbMsg)+"</div>":"")+"</div>"}
@@ -567,9 +569,12 @@ document.addEventListener("pointerup",function(){if(!dg)return;var d=dg;dg=null;
   if(d.to!==null){var l=d.t.l,i=l.indexOf(d.t.v);l.splice(i,1);var j=l.indexOf(d.to);l.splice(d.after?j+1:j,0,d.t.v);save();render()}});
 document.addEventListener("click",function(e){if(dgSkip){e.stopPropagation();e.preventDefault()}},true);
 document.addEventListener("keydown",function(e){if(e.key=="Escape"&&dg){dg=null;dgClear()}});
+var nh=document.createElement("div");nh.id="numhint";document.body.appendChild(nh);
+function nhShow(t){if(!(t&&t.tagName=="INPUT"&&t.type=="number")){nh.style.display="none";return}var v=+t.value;if(!t.value||!isFinite(v)||Math.abs(v)<1000){nh.style.display="none";return}nh.textContent=fmt(v);nh.style.display="block";var r=t.getBoundingClientRect();nh.style.left=Math.max(4,Math.min(r.left,innerWidth-nh.offsetWidth-4))+"px";nh.style.top=(r.top>44?r.top-nh.offsetHeight-6:r.bottom+6)+"px"}
+document.addEventListener("input",function(e){nhShow(e.target)});document.addEventListener("focusin",function(e){nhShow(e.target)});document.addEventListener("focusout",function(){nhShow(null)});window.addEventListener("scroll",function(){nhShow(document.activeElement)},true);
 function pendingQi(){return[].some.call(document.querySelectorAll(".qi"),function(i){return i.value!==i.defaultValue})}
 function qiFocus(id){if(!id)return;var n=document.querySelector('.qi[data-id="'+id+'"]');if(n){n.focus();n.select()}}
-function qiCommit(t,next,fid){var qs=[].slice.call(document.querySelectorAll(".qi")),ix=qs.indexOf(t),it=db.items.filter(function(i){return i.id==t.dataset.id})[0],p=+t.value,nid=fid||(next&&qs[ix+1]?qs[ix+1].dataset.id:"");
+function qiCommit(t,next,fid){var qs=[].slice.call(document.querySelectorAll(".qi")),ix=qs.indexOf(t),it=findIt(t.dataset.id,1),p=+t.value,nid=fid||(next&&qs[ix+1]?qs[ix+1].dataset.id:"");
   if(!ED){if(it&&t.value!==""&&p>=0&&p!==stats(it).p)propSend(it,p)}
   else if(it&&t.value!==""&&p>=0){if(p!==stats(it).p)it.h.push(pt(Date.now(),p));db.chk=Date.now();save()}
   render();qiFocus(nid)}
@@ -608,6 +613,7 @@ function mergeDB(L,R){var dt={};(L.dt||[]).concat(R.dt||[]).forEach(function(x){
     if(o)o.h.forEach(function(x){if(x.t>=lim&&!seen[x.t]){i.h.push(x);seen[x.t]=1}});
     i.h=i.h.filter(function(x){return!dt[i.id+":"+x.t]})});
   other.items.forEach(function(i){if(!have[i.id]&&!dt[i.id])out.items.push(JSON.parse(JSON.stringify(i)))});
+  var qk,oq=other.qn||{};out.qn=out.qn||{};for(qk in oq){var QA=out.qn[qk]=out.qn[qk]||[],qs={};QA.forEach(function(x){qs[x.t]=1});oq[qk].forEach(function(x){if(x.t>=lim&&!qs[x.t]){QA.push(x);qs[x.t]=1}})}
   out.dt=Object.keys(dt).slice(-400);out.rev=Math.max(Date.now(),(L.rev||0)+1,(R.rev||0)+1);return out}
 function synPush(cb){if(!ED||!syn.tok||!synOk()){cb&&cb(false,"Synchronisation non configurée.");return}
   if(syn.busy){syn.dirty=true;cb&&cb(false,"Un envoi est déjà en cours, réessaie dans un instant.");return}
