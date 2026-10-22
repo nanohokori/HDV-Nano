@@ -424,7 +424,7 @@ function crEdRows(list,pre,d){var h="";(list||[]).forEach(function(x,j){var p=pr
 function crEdModal(b){
   var rows=crEdRows(b.ing,"",0);
   function res(key,lab){var it=b[key]&&findIt(b[key]);return'<div class="cred"><div class="credl">'+lab+'</div><div class="credi">'+(it?ico(it,"s"):ico({name:"?"},"s",true))+"</div>"+crSel("crsl",'data-k="'+key+'"',b[key]||"","Aucun")+(it?'<button class="crren" data-a="crren" data-v="'+esc(it.id)+'" title="Renommer l’objet" aria-label="Renommer">✎</button><input class="crf crpe" data-f="pe" data-it="'+esc(it.id)+'" inputmode="decimal" value="'+(stats(it).p?fmt(stats(it).p):"")+'" placeholder="prix" aria-label="Prix dans la liste">':"")+"</div>"}
-  var img=crFake(b),tbs=[["b","Blanc (100 %)"],["w","Blanc > Vert"],["e","Vert > Bleu"],["a","Bleu > Gold"],["","Réussite fixe"]].concat(b.tb=="s1"?[["s1","Star / True"]]:[]);
+  var img=crFake(b),tbs=[["b","Blanc (100 %)"],["w","Blanc > Vert"],["e","Vert > Bleu"],["a","Bleu > Gold"],["s1","Gold > Gold"],["","Réussite fixe"]];
   return'<div class="crov" data-a="crbg"><div class="crmd wide" role="dialog" aria-modal="true" aria-label="Modifier le bloc"><div class="crmh"><h2>Modifier le bloc</h2><button data-a="crcalc" data-v="'+b.id+'">Calculer</button><button class="crx" data-a="crclose" aria-label="Fermer">×</button></div>'+
    '<div class="crgrid2"><div class="crimgbox">'+ico(img,"l",true)+'<button data-a="crimg" data-v="'+b.id+'">Image…</button>'+(b.img?'<button class="del" data-a="crimgdel" data-v="'+b.id+'">Retirer</button>':"")+'</div>'+
    '<label>Nom<input class="crf" data-f="name" value="'+esc(b.name||"")+'"></label><label>Groupe<input class="crf" data-f="grp" value="'+esc(b.grp||"")+'" placeholder="ex : Colliers" list="crgl"></label></div>'+
