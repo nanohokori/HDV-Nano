@@ -133,7 +133,7 @@ tbody tr{transition:background-color .15s ease}
 .crtg::before,.crtg::after{content:"";position:absolute;left:50%;top:50%;background:var(--ac);border-radius:1px;transform:translate(-50%,-50%)}
 .crtg::before{width:8px;height:2px}.crtg::after{width:2px;height:8px;transition:transform .15s,opacity .15s}
 .crtg.open::after{transform:translate(-50%,-50%) scaleY(0);opacity:0}.crtg:hover{background:rgba(255,159,28,.15)}.crtp{width:20px;height:20px;flex:none}
-.crmi{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--mu)}.crmi b{color:var(--tx);font-weight:600;text-align:right}.crbp .vd.mini{margin-top:6px;padding:5px 8px;font-size:12px}.crlv{margin:8px 0 2px;display:flex;flex-direction:column;gap:3px;max-width:360px}.crlv .crl{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--mu)}.crlv .crl b{color:var(--tx)}.crlv .crl.cur{color:var(--ac)}.crlv .crl.cur b{color:var(--ac)}.crsum2{margin-top:14px;border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:5px}.crsum2 .vd.na{background:var(--chip);color:var(--mu)}.crset{display:flex;flex-wrap:wrap;gap:6px 20px;justify-content:space-between;align-items:center;font-size:13px;color:var(--mu);margin-top:4px}.crset label{display:flex;gap:6px;align-items:center}.crset b{color:var(--tx)}.crset input{width:56px;height:28px;padding:2px 6px;text-align:right}
+.crmi{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--mu)}.crmi b{color:var(--tx);font-weight:600;text-align:right}.crbp .vd.mini{margin-top:6px;padding:5px 8px;font-size:12px}.crlp{display:flex;gap:6px}.crlp select{flex:1;min-width:0}.crlp input{width:64px;text-align:center}.crlv{margin:8px 0 2px;display:flex;flex-direction:column;gap:3px;max-width:360px}.crlv .crl{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--mu)}.crlv .crl b{color:var(--tx)}.crlv .crl.cur{color:var(--ac)}.crlv .crl.cur b{color:var(--ac)}.crsum2{margin-top:14px;border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:5px}.crsum2 .vd.na{background:var(--chip);color:var(--mu)}.crset{display:flex;flex-wrap:wrap;gap:6px 20px;justify-content:space-between;align-items:center;font-size:13px;color:var(--mu);margin-top:4px}.crset label{display:flex;gap:6px;align-items:center}.crset b{color:var(--tx)}.crset input{width:56px;height:28px;padding:2px 6px;text-align:right}
 .crgrid3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}.crgrid3 label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mu)}.crgrid3 input,.crgrid3 select{height:34px}
 .crsb{padding:0 8px;height:34px;color:var(--mu)}.crsb.act{color:var(--ac);border-color:var(--ac)}
 .crmt select{height:32px}
@@ -330,15 +330,17 @@ function qunaPage(){var R=qunaRows(),bb=qBest(R,"buy",false),bs=qBest(R,"sell",t
 /* ===== Onglet Craft : blocs créés à la main ===== */
 function parseK(s){s=String(s||"").trim().toLowerCase().replace(/[\s  ]/g,"");if(!s)return 0;var m=s.match(/^(\d+(?:[.,]\d+)?)([kmb])?$/);if(!m){s=s.replace(/[.,](?=\d{3}(\D|$))/g,"");m=s.match(/^(\d+(?:[.,]\d+)?)([kmb])?$/)}if(!m)return 0;return Math.round(parseFloat(m[1].replace(",","."))*({k:1e3,m:1e6,b:1e9}[m[2]]||1))}
 var crM=null,crG="",crOpts="",crXp={},crL={me:{},fee:12,att:{},lvl:100};var CRTAB={w:[74.011698,74.718902,75.631177,77.467106,77.669025,78.187021,79.129959,80.157193,80.991798,81.227508,81.43995,82.755613,83.462816,84.356316,84.662035,84.662035,84.662035,85.511803,86.547794,86.547794,87.390018,87.761514,87.761514,87.761514,87.761514,88.157714,88.157714,89.432365,89.432365,90.252757,90.252757,90.676961,90.676961,90.676961,90.676961,90.676961,90.676961,90.676961,91.865563,91.865563,91.865563,92.71533,92.71533,92.71533,93.121326],e:[77.981229,78.681229,79.381229,80.081229,80.781229,81.481229,82.181229,82.881229,83.645249,84.508476,85.061212,85.207336,85.600142,86.372065,87.164426,87.773575,88.05,88.33,88.6,88.87595,89.631358,90.258876,90.467432,90.467432,90.467432,90.467432,91.0588,91.84441,91.84441,92.428919,92.428919,92.671025,92.671025,92.671025,92.671025,92.921018,92.921018,93.808071,93.808071,94.371089,94.371089,94.371089,94.633946],a:[79.571081,80.124386,80.926125,82.284634,82.883323,83.573495,84.114718,85.476782,85.793152,86.556753,87.198972,87.923635,88.210967,88.356177,88.887385,90.030461,90.05525,90.526988,90.526988,90.804885,91.392014,91.969241,92.390526,92.50524,92.50524,92.60178,93.157574,93.157574,93.703275,94.12331,94.12331,94.258973,94.258973,94.258973,94.645133,94.645133,95.200927,95.200927,95.587774,95.587774,95.724539,95.739046,95.739046,95.739046,95.739046,95.888298,95.888298,96.467538,96.467538,96.467538,96.837241],s1:[67.506212,68.198244,69.824562,71.774814,72.773479,74.093554,75.222343,76.203609,77.541261,78.466072,79.033485,80.772127,81.148839,81.583644,82.889213,83.38122,83.713424,84.62849,85.309191,85.836292,86.168055,86.922289,87.551611,88.112297,88.383568,88.600967,89.048631,89.610372,89.9,90.19,90.474499,90.594902,90.971587,91.491841,91.491841,92.029715,92.360459,92.443413,92.443413,92.673487,92.673487,93.175734,93.662103,93.662103,94.008885,94.008885,94.102514,94.179641,94.179641,94.639789]};
-var CRLV=[1,30,51,85,100],CRLN=["Novice 1","Novice 30","Professionnel 1","Professionnel 35","Professionnel 50"];
-try{var crl0=JSON.parse(localStorage.getItem("hdv_craft2")||"null");if(crl0){if(crl0.me&&typeof crl0.me=="object")crL.me=crl0.me;if(crl0.att&&typeof crl0.att=="object")crL.att=crl0.att;if(CRLV.indexOf(+crl0.lvl)>-1)crL.lvl=+crl0.lvl;if(crl0.fee!=null&&isFinite(+crl0.fee))crL.fee=Math.min(99,Math.max(0,+crl0.fee))}}catch(e){}
+var CRLV=[1,25,50,51,75,100];
+try{var crl0=JSON.parse(localStorage.getItem("hdv_craft2")||"null");if(crl0){if(crl0.me&&typeof crl0.me=="object")crL.me=crl0.me;if(crl0.att&&typeof crl0.att=="object")crL.att=crl0.att;if(+crl0.lvl>=1&&+crl0.lvl<=100)crL.lvl=Math.round(+crl0.lvl);if(crl0.fee!=null&&isFinite(+crl0.fee))crL.fee=Math.min(99,Math.max(0,+crl0.fee))}}catch(e){}
 function crSave(){try{localStorage.setItem("hdv_craft2",JSON.stringify(crL))}catch(e){}}
 function crBl(){return db.cr2&&db.cr2.blocks||[]}
 function crBlock(id){return crBl().filter(function(b){return b.id==id})[0]||null}
 function crP(id){var m=+crL.me[id];if(m>0)return m;var it=findIt(id);return it?stats(it).p:0}
 function crS_(b){return Math.min(100,Math.max(0,b.s==null?100:+b.s))/100}
 function crC_(b){return Math.min(100,Math.max(0,b.c==null?25:+b.c))/100}
-function crLvLab(l){return l<=50?"Novice "+l:"Professionnel "+(l-50)}
+function crLvLab(l){return l<=50?"Débutant niv. "+l:"Spécialiste niv. "+(l-50)}
+function crLvPick(f,abs,ph){var has=abs!=null&&abs!==""&&isFinite(+abs),g=has&&abs>50?1:0,n=has?(g?abs-50:abs):"";
+  return'<span class="crlp"><select class="crf" data-f="'+f+'g"><option value="0"'+(g?"":" selected")+'>Débutant</option><option value="1"'+(g?" selected":"")+'>Spécialiste</option></select><input class="crf" data-f="'+f+'n" inputmode="numeric" value="'+n+'" placeholder="'+(ph||"niv.")+'" aria-label="Niveau (1 à 50)"></span>'}
 var CRRL=[1,3,5,10,15,20,25,30,35,40,51,55,60,85,100];
 function crSucc(b,lv){var t=b.tb&&CRTAB[b.tb];if(t){var d=(lv||crL.lvl)-(+b.rl||0);if(d<0)return 0;return t[Math.min(d,t.length-1)]/100}return crS_(b)}
 function crProb(b){var p=crSucc(b),c=b.combo?crC_(b):0,q=p*c*p;return{p:p,c:c,q:q,pl:p-q}}
@@ -385,7 +387,7 @@ function crTbl(b,N){var cc=crCalc(b,N),h=crRowsHtml(b,cc.rows,0);
   return{h:h,cc:cc}}
 function crSumD(b){var c1=crCalc(b,1),tb=CRTAB[b.tb],P=crProb(b),tgt=b.combo||b.out,pr=tgt?crP(tgt):0,R=[],n1=function(v){return(Math.round(v*10)/10).toString().replace(".",",")};
   R.push(["Un craft",c1.cost?fmt(Math.round(c1.cost)):"—"]);
-  if(tb)R.push(["Recette",b.rl!=null?crLvLab(+b.rl):"—"],["Ton niveau",CRLN[CRLV.indexOf(crL.lvl)]||crL.lvl]);
+  if(tb)R.push(["Recette",b.rl!=null?crLvLab(+b.rl):"—"],["Ton niveau",crLvLab(crL.lvl)],["Écart",(crL.lvl-(+b.rl||0))+" niv."]);
   R.push(["Réussite (basique)",P.p?crPct(P.p)+" %":"—"]);
   if(b.combo)R.push(["Réussite (combo)",P.q?crPct(P.q)+" %":"—"]);
   var tries=b.combo?(P.q?1/P.q:0):(P.p?1/P.p:0);
@@ -398,8 +400,9 @@ function crSumD(b){var c1=crCalc(b,1),tb=CRTAB[b.tb],P=crProb(b),tgt=b.combo||b.
   return{R:R,vc:vc,vt:vt,P:P,avg:avg,pr:pr,c1:c1}}
 function crSum(b){var D=crSumD(b),R=D.R,vd='<div class="vd '+D.vc+'">'+D.vt+"</div>";
   return'<div class="crsum2"><h3 class="crh3" style="margin-top:0">Résumé</h3>'+R.map(function(r){return'<div class="crl'+(r[2]?" big":"")+'"><span>'+r[0]+"</span><b>"+r[1]+"</b></div>"}).join("")+vd+"</div>"}
-function crByLvl(b){if(!CRTAB[b.tb])return"";if(b.rl==null)return'<p class="cat" style="margin:6px 0 0">Choisis le niveau de métier pour voir la réussite à chaque niveau.</p>';
-  return'<div class="crlv"><div class="cat">Réussite selon ton niveau de métier</div>'+CRLV.map(function(l,i){var v=crSucc(b,l);return'<div class="crl'+(l==crL.lvl?" cur":"")+'"><span>'+CRLN[i]+'</span><b>'+(v?crPct(v)+" %":"niveau trop bas")+"</b></div>"}).join("")+"</div>"}
+function crByLvl(b){if(!CRTAB[b.tb])return"";if(b.rl==null)return'<p class="cat" style="margin:6px 0 0">Choisis le niveau de la recette pour voir la réussite à chaque niveau.</p>';
+  var L=CRLV.slice();if(L.indexOf(crL.lvl)<0)L.push(crL.lvl);L.sort(function(x,y){return x-y});
+  return'<div class="crlv"><div class="cat">Réussite selon ton niveau de métier (recette : '+crLvLab(+b.rl)+')</div>'+L.map(function(l){var v=crSucc(b,l);return'<div class="crl'+(l==crL.lvl?" cur":"")+'"><span>'+crLvLab(l)+'</span><b>'+(v?crPct(v)+" %":"niveau trop bas")+"</b></div>"}).join("")+"</div>"}
 function crPct(v){return(Math.round(v*10000)/100).toString().replace(".",",")}
 function crCalcModal(b){var N=Math.max(1,Math.round(+crL.att[b.id]||1)),t=crTbl(b,N),cc=t.cc,n1=function(v){return(Math.round(v*100)/100).toString().replace(".",",")};
   var res='<div class="crres"><div class="crl"><span>Coût total</span><b>'+(cc.cost?fmt(Math.round(cc.cost)):"—")+"</b></div>";
@@ -408,7 +411,7 @@ function crCalcModal(b){var N=Math.max(1,Math.round(+crL.att[b.id]||1)),t=crTbl(
     if(b.combo)res+='<div class="crl"><span>Avec combo : '+esc((findIt(b.combo)||{}).name||"?")+' <em>×'+n1(cc.cN)+"</em></span><b>"+(cc.pc?fmt(Math.round(cc.pc))+" l’unité · valeur "+fmt(Math.round(cc.rC)):"pas de prix")+"</b></div>";
   }
   res+="</div>";
-  var lv=CRTAB[b.tb]?'<label>Ton niveau de métier <select class="crf" data-f="lvl">'+CRLV.map(function(l,i){return'<option value="'+l+'"'+(l==crL.lvl?" selected":"")+">"+CRLN[i]+"</option>"}).join("")+"</select></label>":"";
+  var lv=CRTAB[b.tb]?'<label>Ton niveau de métier '+crLvPick("lvl",crL.lvl)+"</label>":"";
   return'<div class="crov" data-a="crbg"><div class="crmd" role="dialog" aria-modal="true" aria-label="'+esc(b.name)+'"><div class="crmh"><h2>'+esc(b.name||"Sans nom")+'</h2>'+(ED?'<button data-a="cred" data-v="'+b.id+'">✎ Modifier</button>':"")+'<button class="crx" data-a="crclose" aria-label="Fermer">×</button></div>'+
    '<div class="crmt"><label>Tentatives <input class="crf" data-f="att" inputmode="numeric" value="'+N+'"></label><span>Résultat : ×'+N+"</span>"+lv+'</div>'+(CRTAB[b.tb]?crByLvl(b):"")+'<p class="cat">Les quantités sont pour toutes les tentatives. Tape tes prix à l’unité (champ vide = prix de la liste) : ils restent dans ce navigateur.</p>'+
    '<table class="crt2"><thead><tr><th>Matériau</th><th class="r">Par tentative</th><th class="r">Nécessaire</th><th class="r">Prix à l’unité</th><th class="r">Total</th></tr></thead><tbody>'+t.h+'</tbody><tfoot><tr><td colspan="4">Total à acheter</td><td class="r">'+(cc.cost?fmt(Math.round(cc.cost)):"0")+"</td></tr></tfoot></table>"+(cc.miss?'<p class="crwarn">Certains prix manquent : le total est sous-estimé.</p>':"")+crSum(b)+res+"</div></div>"}
@@ -427,7 +430,7 @@ function crEdModal(b){
    '<label>Nom<input class="crf" data-f="name" value="'+esc(b.name||"")+'"></label><label>Groupe<input class="crf" data-f="grp" value="'+esc(b.grp||"")+'" placeholder="ex : Colliers" list="crgl"></label></div>'+
    '<h3 class="crh3">Réussite <span class="cat">calculée avec ton niveau de métier si tu choisis un palier</span></h3><div class="crgrid3">'+
    '<label>Palier<select class="crf" data-f="tb">'+tbs.map(function(t){return'<option value="'+t[0]+'"'+((b.tb||"")==t[0]?" selected":"")+">"+t[1]+"</option>"}).join("")+"</select></label>"+
-   (CRTAB[b.tb]?'<label>Niveau de métier<select class="crf" data-f="rl"><option value=""'+(b.rl==null?" selected":"")+'>Choisir…</option>'+CRRL.concat(b.rl!=null&&CRRL.indexOf(+b.rl)<0?[+b.rl]:[]).sort(function(x,y){return x-y}).map(function(l){return'<option value="'+l+'"'+(b.rl!=null&&+b.rl==l?" selected":"")+">"+crLvLab(l)+"</option>"}).join("")+"</select></label>":'<label>Réussite (%)<input class="crf" data-f="s" inputmode="decimal" value="'+Math.round(crS_(b)*100)+'"></label>')+
+   (CRTAB[b.tb]?'<label>Niveau de métier de la recette '+crLvPick("rl",b.rl)+"</label>":'<label>Réussite (%)<input class="crf" data-f="s" inputmode="decimal" value="'+Math.round(crS_(b)*100)+'"></label>')+
    '<label>Chance de combo (%)<input class="crf" data-f="c" inputmode="decimal" value="'+Math.round(crC_(b)*100)+'"></label></div>'+
    (CRTAB[b.tb]?crByLvl(b):"")+
    '<datalist id="crgl">'+crGroups().map(function(g){return'<option value="'+esc(g)+'">'}).join("")+"</datalist>"+
@@ -449,13 +452,13 @@ function crAtList(b,pp){if(pp===""||pp==null)return b.ing=b.ing||[];var x=crAtIt
 function crAtItem(b,p){var ps=String(p).split("/").map(Number),list=b.ing,x=null;for(var i=0;i<ps.length;i++){x=list[ps[i]];if(!x)return null;if(i<ps.length-1)list=x.sub||[]}return x}
 function crChange(t){var f=t.dataset.f,b=crM&&crBlock(crM.id),num=function(v){return parseFloat(String(v).replace(",","."))};
   if(f=="att"){if(b){crL.att[b.id]=Math.max(1,Math.round(num(t.value)||1));crSave();render()}return true}
-    if(f=="lvl"){crL.lvl=+t.value;crSave();render();return true}
+    if(f=="lvlg"||f=="lvln"){var P=t.closest(".crlp"),n=Math.round(num(P.querySelector("input").value)),g=+P.querySelector("select").value;if(!isFinite(n)||n<1)n=1;n=Math.min(50,n);crL.lvl=g*50+n;crSave();render();return true}
   if(f=="pu"){var v=parseK(t.value);if(v>0)crL.me[t.dataset.it]=v;else delete crL.me[t.dataset.it];crSave();render();return true}
   if(!ED||!b)return t.classList.contains("crf");
   if(f=="name"||f=="sub"||f=="grp"){b[f]=t.value.trim();if(!b[f]&&f!="name")delete b[f];save();render();return true}
   if(f=="s"||f=="c"){var n=Math.min(100,Math.max(0,num(t.value)));if(isFinite(n))b[f]=n;save();render();return true}
   if(f=="tb"){if(t.value)b.tb=t.value;else delete b.tb;save();render();return true}
-  if(f=="rl"){var r=num(t.value);if(t.value!==""&&isFinite(r))b.rl=Math.max(0,Math.round(r));else delete b.rl;save();render();return true}
+  if(f=="rlg"||f=="rln"){var P2=t.closest(".crlp"),v2=P2.querySelector("input").value,n2=Math.round(num(v2)),g2=+P2.querySelector("select").value;if(v2!==""&&isFinite(n2)){b.rl=g2*50+Math.min(50,Math.max(1,n2))}else delete b.rl;save();render();return true}
   if(f=="ingq"){var x=crAtItem(b,t.dataset.p);if(x){x.q=Math.max(1,Math.round(num(t.value)||1));save()}render();return true}
   if(f=="ingmk"){var x2=crAtItem(b,t.dataset.p);if(x2){x2.mk=t.checked;save()}render();return true}
   if(f=="pe"){var it=findIt(t.dataset.it),p=parseK(t.value);if(it&&p>0&&p!==stats(it).p){it.h.push(pt(Date.now(),p));db.chk=Date.now()}save();render();return true}
