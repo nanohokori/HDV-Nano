@@ -133,7 +133,7 @@ tbody tr{transition:background-color .15s ease}
 .crtg::before,.crtg::after{content:"";position:absolute;left:50%;top:50%;background:var(--ac);border-radius:1px;transform:translate(-50%,-50%)}
 .crtg::before{width:8px;height:2px}.crtg::after{width:2px;height:8px;transition:transform .15s,opacity .15s}
 .crtg.open::after{transform:translate(-50%,-50%) scaleY(0);opacity:0}.crtg:hover{background:rgba(255,159,28,.15)}.crtp{width:20px;height:20px;flex:none}
-.crset{display:flex;flex-wrap:wrap;gap:6px 20px;justify-content:space-between;align-items:center;font-size:13px;color:var(--mu);margin-top:4px}.crset label{display:flex;gap:6px;align-items:center}.crset b{color:var(--tx)}.crset input{width:56px;height:28px;padding:2px 6px;text-align:right}
+.crsum2{margin-top:14px;border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:5px}.crsum2 .vd.na{background:var(--chip);color:var(--mu)}.crset{display:flex;flex-wrap:wrap;gap:6px 20px;justify-content:space-between;align-items:center;font-size:13px;color:var(--mu);margin-top:4px}.crset label{display:flex;gap:6px;align-items:center}.crset b{color:var(--tx)}.crset input{width:56px;height:28px;padding:2px 6px;text-align:right}
 .crgrid3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}.crgrid3 label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mu)}.crgrid3 input,.crgrid3 select{height:34px}
 .crsb{padding:0 8px;height:34px;color:var(--mu)}.crsb.act{color:var(--ac);border-color:var(--ac)}
 .crmt select{height:32px}
@@ -338,6 +338,8 @@ function crBlock(id){return crBl().filter(function(b){return b.id==id})[0]||null
 function crP(id){var m=+crL.me[id];if(m>0)return m;var it=findIt(id);return it?stats(it).p:0}
 function crS_(b){return Math.min(100,Math.max(0,b.s==null?100:+b.s))/100}
 function crC_(b){return Math.min(100,Math.max(0,b.c==null?25:+b.c))/100}
+function crLvLab(l){return l<=50?"Novice "+l:"Professionnel "+(l-50)}
+var CRRL=[1,3,5,10,15,20,25,30,35,40,51,55,60,85,100];
 function crSucc(b){var t=b.tb&&CRTAB[b.tb];if(t){var d=crL.lvl-(+b.rl||0);if(d<0)return 0;return t[Math.min(d,t.length-1)]/100}return crS_(b)}
 function crProb(b){var p=crSucc(b),c=b.combo?crC_(b):0,q=p*c*p;return{p:p,c:c,q:q,pl:p-q}}
 function crMaker(id,seen){var f=null,k=0;crBl().forEach(function(b){if(f||seen[b.id])return;var P=crProb(b);if(b.out==id){f=b;k=P.pl}else if(b.combo==id){f=b;k=P.q}});
@@ -352,7 +354,7 @@ function crNode(x,mult,path){var u=crUnit(x,{}),need=mult*x.q,n={x:x,it:findIt(x
   if(x.sub&&x.sub.length){n.sub=x.sub.map(function(y,j){return crNode(y,need,path+"/"+j)});n.subTot=0;n.sub.forEach(function(c){n.subTot+=c.tot})}return n}
 function crCalc(b,N){var rows=(b.ing||[]).map(function(x,j){return crNode(x,N,String(j))});
   var cost=0,miss=false;rows.forEach(function(r){cost+=r.tot;if(!r.u)miss=true});
-  var P=crProb(b),fee=1-crL.fee/100,pN=N*P.pl,cN=N*P.q,pp=b.out?crP(b.out):0,pc=b.combo?crP(b.combo):0,rP=pN*pp*fee,rC=cN*pc*fee;
+  var P=crProb(b),fee=1,pN=N*P.pl,cN=N*P.q,pp=b.out?crP(b.out):0,pc=b.combo?crP(b.combo):0,rP=pN*pp*fee,rC=cN*pc*fee;
   var per=cN>0?(cost-rP)/cN:(pN>0?cost/pN:0);
   return{rows:rows,cost:cost,miss:miss,s:P.p,c:P.c,pN:pN,cN:cN,pp:pp,pc:pc,rP:rP,rC:rC,per:per}}
 function crUid(){return"b"+Date.now().toString(36)+Math.floor(Math.random()*46656).toString(36)}
@@ -362,7 +364,7 @@ function crBuildOpts(){crOpts=db.items.slice().sort(function(a,b){return String(
 function crSel(cls,attrs,cur,ph){var o=crOpts;if(cur)o=o.replace('value="'+esc(cur)+'"','value="'+esc(cur)+'" selected');return'<select class="crf '+cls+'" '+attrs+' aria-label="'+esc(ph)+'">'+(cur?"":'<option value="">'+esc(ph)+"</option>")+'<option value="__new">+ Nouvel objet…</option>'+o+"</select>"}
 function crChip(x){var it=findIt(x.it);return'<span class="crchip" title="'+esc(it?it.name:"?")+'">'+ico(it||{name:"?"},"s",true)+"<b>"+x.q+"</b></span>"}
 function crCard(b){var N=1,cc=crCalc(b,1),it=b.combo&&findIt(b.combo),ad=ED?'<span class="crad"><button data-a="cred" data-v="'+b.id+'" title="Modifier le bloc" aria-label="Modifier">✎</button><button data-a="crdup" data-v="'+b.id+'" title="Dupliquer" aria-label="Dupliquer">⧉</button><button data-a="crup" data-v="'+b.id+'" title="Monter" aria-label="Monter">↑</button><button data-a="crdn" data-v="'+b.id+'" title="Descendre" aria-label="Descendre">↓</button></span>':"";
-  return'<div class="crb" data-a="cropen" data-v="'+b.id+'" tabindex="0" role="button" aria-label="Calculer '+esc(b.name)+'"><div class="crbh">'+ico(crFake(b),"l",true)+'<div class="crbt"><div class="crbn">'+esc(b.name||"Sans nom")+'</div>'+(b.sub?'<div class="crbs">'+esc(b.sub)+"</div>":"")+"</div>"+ad+"</div>"+
+  return'<div class="crb" data-a="cropen" data-v="'+b.id+'" tabindex="0" role="button" aria-label="Calculer '+esc(b.name)+'"><div class="crbh">'+ico(crFake(b),"l",true)+'<div class="crbt"><div class="crbn">'+esc(b.name||"Sans nom")+'</div>'+"</div>"+ad+"</div>"+
    '<div class="crbi">'+((b.ing||[]).map(crChip).join("")||'<span class="cat">Aucun ingrédient</span>')+"</div>"+
    (b.combo?'<div class="crbc">Avec une chance de <b>'+esc(it?it.name:"?")+"</b> "+Math.round(crC_(b)*100)+" %</div>":"")+
    '<div class="crbp">'+(cc.cost?"Coût par tentative : <b>"+fmt(Math.round(cc.cost))+"</b>":'<span class="cat">Pas encore de prix</span>')+(cc.cost&&b.combo&&cc.cN>0?'<br>Par résultat avec combo : <b>'+fmt(Math.round(cc.per))+"</b>":"")+"</div>"+
@@ -376,21 +378,31 @@ function crRowsHtml(b,nodes,d){var h="";
 function crTbl(b,N){var cc=crCalc(b,N),h=crRowsHtml(b,cc.rows,0);
   if(!cc.rows.length)h='<tr><td colspan="5" class="cat" style="padding:14px">Aucun ingrédient.'+(ED?" Clique sur « ✎ Modifier » pour en ajouter.":"")+"</td></tr>";
   return{h:h,cc:cc}}
+function crSum(b){var c1=crCalc(b,1),tb=CRTAB[b.tb],P=crProb(b),tgt=b.combo||b.out,pr=tgt?crP(tgt):0,R=[],n1=function(v){return(Math.round(v*10)/10).toString().replace(".",",")};
+  R.push(["Un craft",c1.cost?fmt(Math.round(c1.cost)):"—"]);
+  if(tb)R.push(["Recette",b.rl!=null?crLvLab(+b.rl):"—"],["Ton niveau",CRLN[CRLV.indexOf(crL.lvl)]||crL.lvl]);
+  R.push(["Réussite (basique)",P.p?crPct(P.p)+" %":"—"]);
+  if(b.combo)R.push(["Réussite (combo)",P.q?crPct(P.q)+" %":"—"]);
+  var tries=b.combo?(P.q?1/P.q:0):(P.p?1/P.p:0);
+  R.push([b.combo?"Crafts pour 1 objet avec combo":"Crafts pour 1 objet",tries?n1(tries):"—"]);
+  var avg=b.combo?c1.cN>0?c1.per:0:c1.pN>0?c1.cost/c1.pN:0;
+  R.push(["Coût moyen",avg&&c1.cost?fmt(Math.round(avg)):"—","big"]);
+  if(b.combo&&c1.rP&&c1.cN>0)R.push(["Coût moyen sans revente",fmt(Math.round(c1.cost/c1.cN))]);
+  R.push(["Prix HDV",pr?fmt(Math.round(pr)):"—"]);
+  var vd="";if(P.p===0&&tb)vd='<div class="vd bad">Niveau de métier insuffisant</div>';else if(pr&&avg&&c1.cost)vd=pr>=avg?'<div class="vd good">Crafter est rentable ('+fmt(Math.round(pr-avg))+" d’économie)</div>":'<div class="vd bad">Acheter est plus rentable ('+fmt(Math.round(avg-pr))+" d’économie)</div>";else vd='<div class="vd na">Pas de prix HDV</div>';
+  return'<div class="crsum2"><h3 class="crh3" style="margin-top:0">Résumé</h3>'+R.map(function(r){return'<div class="crl'+(r[2]?" big":"")+'"><span>'+r[0]+"</span><b>"+r[1]+"</b></div>"}).join("")+vd+"</div>"}
 function crPct(v){return(Math.round(v*10000)/100).toString().replace(".",",")}
 function crCalcModal(b){var N=Math.max(1,Math.round(+crL.att[b.id]||1)),t=crTbl(b,N),cc=t.cc,n1=function(v){return(Math.round(v*100)/100).toString().replace(".",",")};
   var res='<div class="crres"><div class="crl"><span>Coût total</span><b>'+(cc.cost?fmt(Math.round(cc.cost)):"—")+"</b></div>";
   if(b.out||b.combo){
-    if(b.out)res+='<div class="crl"><span>Sans combo : '+esc((findIt(b.out)||{}).name||"?")+' <em>×'+n1(cc.pN)+"</em></span><b>"+(cc.pp?fmt(Math.round(cc.pp))+" l’unité · revente nette "+fmt(Math.round(cc.rP)):"pas de prix")+"</b></div>";
-    if(b.combo)res+='<div class="crl"><span>Avec combo : '+esc((findIt(b.combo)||{}).name||"?")+' <em>×'+n1(cc.cN)+"</em></span><b>"+(cc.pc?fmt(Math.round(cc.pc))+" l’unité · valeur nette "+fmt(Math.round(cc.rC)):"pas de prix")+"</b></div>";
-    if(b.combo&&cc.cN>0&&cc.cost){res+='<div class="crl big"><span>Coût par objet avec combo'+(cc.rP?" (après revente de l’objet sans combo)":"")+"</span><b>"+fmt(Math.round(cc.per))+"</b></div>";
-      if(cc.pc)res+=cc.pc*(1-crL.fee/100)>=cc.per?'<div class="vd good">Crafter est rentable : '+fmt(Math.round(cc.pc*(1-crL.fee/100)-cc.per))+" de gain par objet</div>":'<div class="vd bad">Acheter est plus rentable : '+fmt(Math.round(cc.per-cc.pc*(1-crL.fee/100)))+" d’économie par objet</div>"}}
-  if(cc.s===0&&b.tb)res+='<div class="vd bad">Niveau de métier insuffisant pour cette recette.</div>';
-  res+='<div class="crset"><label title="Réussite du craft, selon ton niveau de métier si un palier est choisi dans le bloc">Réussite : <b>'+crPct(cc.s)+" %</b>"+(b.combo?" · combo : <b>"+crPct(cc.c)+" %</b>":"")+'</label><label title="Pourcentage retiré par l’hôtel des ventes quand tu revends un objet">Frais de vente de l’HDV <input class="crf crfee" data-f="fee" inputmode="decimal" value="'+crL.fee+'" aria-label="Frais de vente en pourcentage"> %</label></div></div>';
-  var lv=b.tb?'<label>Ton niveau de métier <select class="crf" data-f="lvl">'+CRLV.map(function(l,i){return'<option value="'+l+'"'+(l==crL.lvl?" selected":"")+">"+CRLN[i]+"</option>"}).join("")+"</select></label>":"";
+    if(b.out)res+='<div class="crl"><span>Sans combo : '+esc((findIt(b.out)||{}).name||"?")+' <em>×'+n1(cc.pN)+"</em></span><b>"+(cc.pp?fmt(Math.round(cc.pp))+" l’unité · revente "+fmt(Math.round(cc.rP)):"pas de prix")+"</b></div>";
+    if(b.combo)res+='<div class="crl"><span>Avec combo : '+esc((findIt(b.combo)||{}).name||"?")+' <em>×'+n1(cc.cN)+"</em></span><b>"+(cc.pc?fmt(Math.round(cc.pc))+" l’unité · valeur "+fmt(Math.round(cc.rC)):"pas de prix")+"</b></div>";
+  }
+  res+="</div>";
+  var lv=CRTAB[b.tb]?'<label>Ton niveau de métier <select class="crf" data-f="lvl">'+CRLV.map(function(l,i){return'<option value="'+l+'"'+(l==crL.lvl?" selected":"")+">"+CRLN[i]+"</option>"}).join("")+"</select></label>":"";
   return'<div class="crov" data-a="crbg"><div class="crmd" role="dialog" aria-modal="true" aria-label="'+esc(b.name)+'"><div class="crmh"><h2>'+esc(b.name||"Sans nom")+'</h2>'+(ED?'<button data-a="cred" data-v="'+b.id+'">✎ Modifier</button>':"")+'<button class="crx" data-a="crclose" aria-label="Fermer">×</button></div>'+
-   (b.sub?'<div class="cat" style="margin:-4px 0 8px">'+esc(b.sub)+"</div>":"")+
    '<div class="crmt"><label>Tentatives <input class="crf" data-f="att" inputmode="numeric" value="'+N+'"></label><span>Résultat : ×'+N+"</span>"+lv+'</div><p class="cat">Les quantités sont pour toutes les tentatives. Tape tes prix à l’unité (champ vide = prix de la liste) : ils restent dans ce navigateur.</p>'+
-   '<table class="crt2"><thead><tr><th>Matériau</th><th class="r">Par tentative</th><th class="r">Nécessaire</th><th class="r">Prix à l’unité</th><th class="r">Total</th></tr></thead><tbody>'+t.h+'</tbody><tfoot><tr><td colspan="4">Total à acheter</td><td class="r">'+(cc.cost?fmt(Math.round(cc.cost)):"0")+"</td></tr></tfoot></table>"+(cc.miss?'<p class="crwarn">Certains prix manquent : le total est sous-estimé.</p>':"")+res+"</div></div>"}
+   '<table class="crt2"><thead><tr><th>Matériau</th><th class="r">Par tentative</th><th class="r">Nécessaire</th><th class="r">Prix à l’unité</th><th class="r">Total</th></tr></thead><tbody>'+t.h+'</tbody><tfoot><tr><td colspan="4">Total à acheter</td><td class="r">'+(cc.cost?fmt(Math.round(cc.cost)):"0")+"</td></tr></tfoot></table>"+(cc.miss?'<p class="crwarn">Certains prix manquent : le total est sous-estimé.</p>':"")+crSum(b)+res+"</div></div>"}
 function crEdRows(list,pre,d){var h="";(list||[]).forEach(function(x,j){var p=pre+j,it=findIt(x.it),at='data-p="'+p+'"',has=!!x.sub;
   h+='<div class="cred" style="margin-left:'+(d*20)+'px"><div class="credi">'+(it?ico(it,"s"):ico({name:"?"},"s",true))+'</div>'+crSel("crit",at,x.it,"Choisir l’objet…")+'<button class="crren" data-a="crren" data-v="'+esc(x.it)+'" title="Renommer l’objet" aria-label="Renommer">✎</button><input class="crf crq" data-f="ingq" '+at+' inputmode="numeric" value="'+x.q+'" aria-label="Quantité" title="Quantité"><input class="crf crpe" data-f="pe" data-it="'+esc(x.it)+'" inputmode="decimal" value="'+(it&&stats(it).p?fmt(stats(it).p):"")+'" placeholder="prix" aria-label="Prix dans la liste">'+
    (d<3?'<button class="crsb'+(has?" act":"")+'" data-a="crsub" data-v="'+p+'" title="'+(has?"Retirer le sous-craft":"Cet objet peut se crafter : ajouter ses composants")+'" aria-label="Sous-craft">⚒</button>':"")+
@@ -400,15 +412,15 @@ function crEdRows(list,pre,d){var h="";(list||[]).forEach(function(x,j){var p=pr
 function crEdModal(b){
   var rows=crEdRows(b.ing,"",0);
   function res(key,lab){var it=b[key]&&findIt(b[key]);return'<div class="cred"><div class="credl">'+lab+'</div><div class="credi">'+(it?ico(it,"s"):ico({name:"?"},"s",true))+"</div>"+crSel("crsl",'data-k="'+key+'"',b[key]||"","Aucun")+(it?'<button class="crren" data-a="crren" data-v="'+esc(it.id)+'" title="Renommer l’objet" aria-label="Renommer">✎</button><input class="crf crpe" data-f="pe" data-it="'+esc(it.id)+'" inputmode="decimal" value="'+(stats(it).p?fmt(stats(it).p):"")+'" placeholder="prix" aria-label="Prix dans la liste">':"")+"</div>"}
-  var img=crFake(b),tbs=[["","Réussite fixe (je la tape)"],["w","Blanc → vert"],["e","Vert → bleu"],["a","Bleu → doré"],["s1","Star / True"]];
+  var img=crFake(b),tbs=[["b","Blanc"],["w","Blanc > Vert"],["e","Vert > Bleu"],["a","Bleu > Gold"],["s1","Star / True"],["","Réussite fixe (je la tape)"]];
   return'<div class="crov" data-a="crbg"><div class="crmd wide" role="dialog" aria-modal="true" aria-label="Modifier le bloc"><div class="crmh"><h2>Modifier le bloc</h2><button data-a="crcalc" data-v="'+b.id+'">Calculer</button><button class="crx" data-a="crclose" aria-label="Fermer">×</button></div>'+
    '<div class="crgrid2"><div class="crimgbox">'+ico(img,"l",true)+'<button data-a="crimg" data-v="'+b.id+'">Image…</button>'+(b.img?'<button class="del" data-a="crimgdel" data-v="'+b.id+'">Retirer</button>':"")+'</div>'+
-   '<label>Nom<input class="crf" data-f="name" value="'+esc(b.name||"")+'"></label><label>Sous-titre<input class="crf" data-f="sub" value="'+esc(b.sub||"")+'" placeholder="ex : Sculpteur, maîtrise 60"></label><label>Groupe<input class="crf" data-f="grp" value="'+esc(b.grp||"")+'" placeholder="ex : Colliers" list="crgl"></label></div>'+
+   '<label>Nom<input class="crf" data-f="name" value="'+esc(b.name||"")+'"></label><label>Groupe<input class="crf" data-f="grp" value="'+esc(b.grp||"")+'" placeholder="ex : Colliers" list="crgl"></label></div>'+
    '<h3 class="crh3">Réussite <span class="cat">calculée avec ton niveau de métier si tu choisis un palier</span></h3><div class="crgrid3">'+
    '<label>Palier<select class="crf" data-f="tb">'+tbs.map(function(t){return'<option value="'+t[0]+'"'+((b.tb||"")==t[0]?" selected":"")+">"+t[1]+"</option>"}).join("")+"</select></label>"+
-   (b.tb?'<label>Niveau de la recette<input class="crf" data-f="rl" inputmode="numeric" value="'+(b.rl==null?"":b.rl)+'" placeholder="ex : 3"></label>':'<label>Réussite (%)<input class="crf" data-f="s" inputmode="decimal" value="'+Math.round(crS_(b)*100)+'"></label>')+
+   (CRTAB[b.tb]?'<label>Niveau de la recette<select class="crf" data-f="rl"><option value=""'+(b.rl==null?" selected":"")+'>Choisir…</option>'+CRRL.concat(b.rl!=null&&CRRL.indexOf(+b.rl)<0?[+b.rl]:[]).sort(function(x,y){return x-y}).map(function(l){return'<option value="'+l+'"'+(b.rl!=null&&+b.rl==l?" selected":"")+">"+crLvLab(l)+"</option>"}).join("")+"</select></label>":'<label>Réussite (%)<input class="crf" data-f="s" inputmode="decimal" value="'+Math.round(crS_(b)*100)+'"></label>')+
    '<label>Chance de combo (%)<input class="crf" data-f="c" inputmode="decimal" value="'+Math.round(crC_(b)*100)+'"></label></div>'+
-   (b.tb?'<p class="cat" style="margin:6px 0 0">Avec ton niveau actuel ('+(CRLN[CRLV.indexOf(crL.lvl)]||crL.lvl)+") : réussite "+crPct(crSucc(b))+" %.</p>":"")+
+   (CRTAB[b.tb]?'<p class="cat" style="margin:6px 0 0">Avec ton niveau actuel ('+(CRLN[CRLV.indexOf(crL.lvl)]||crL.lvl)+") : réussite "+crPct(crSucc(b))+" %.</p>":"")+
    '<datalist id="crgl">'+crGroups().map(function(g){return'<option value="'+esc(g)+'">'}).join("")+"</datalist>"+
    '<h3 class="crh3">Ingrédients <span class="cat">par tentative · ⚒ = cet objet peut se crafter (ajoute ses composants) · le prix modifié met à jour la liste Marché</span></h3>'+rows+'<div class="cred">'+crSel("cradd",'data-p=""',"","+ Ajouter un ingrédient…")+"</div>"+
    '<h3 class="crh3">Résultats</h3>'+res("out","Sans combo")+res("combo","Avec combo")+
@@ -428,14 +440,13 @@ function crAtList(b,pp){if(pp===""||pp==null)return b.ing=b.ing||[];var x=crAtIt
 function crAtItem(b,p){var ps=String(p).split("/").map(Number),list=b.ing,x=null;for(var i=0;i<ps.length;i++){x=list[ps[i]];if(!x)return null;if(i<ps.length-1)list=x.sub||[]}return x}
 function crChange(t){var f=t.dataset.f,b=crM&&crBlock(crM.id),num=function(v){return parseFloat(String(v).replace(",","."))};
   if(f=="att"){if(b){crL.att[b.id]=Math.max(1,Math.round(num(t.value)||1));crSave();render()}return true}
-  if(f=="fee"){crL.fee=Math.min(99,Math.max(0,num(t.value)||0));crSave();render();return true}
-  if(f=="lvl"){crL.lvl=+t.value;crSave();render();return true}
+    if(f=="lvl"){crL.lvl=+t.value;crSave();render();return true}
   if(f=="pu"){var v=parseK(t.value);if(v>0)crL.me[t.dataset.it]=v;else delete crL.me[t.dataset.it];crSave();render();return true}
   if(!ED||!b)return t.classList.contains("crf");
   if(f=="name"||f=="sub"||f=="grp"){b[f]=t.value.trim();if(!b[f]&&f!="name")delete b[f];save();render();return true}
   if(f=="s"||f=="c"){var n=Math.min(100,Math.max(0,num(t.value)));if(isFinite(n))b[f]=n;save();render();return true}
   if(f=="tb"){if(t.value)b.tb=t.value;else delete b.tb;save();render();return true}
-  if(f=="rl"){var r=num(t.value);if(isFinite(r))b.rl=Math.max(0,Math.round(r));else delete b.rl;save();render();return true}
+  if(f=="rl"){var r=num(t.value);if(t.value!==""&&isFinite(r))b.rl=Math.max(0,Math.round(r));else delete b.rl;save();render();return true}
   if(f=="ingq"){var x=crAtItem(b,t.dataset.p);if(x){x.q=Math.max(1,Math.round(num(t.value)||1));save()}render();return true}
   if(f=="ingmk"){var x2=crAtItem(b,t.dataset.p);if(x2){x2.mk=t.checked;save()}render();return true}
   if(f=="pe"){var it=findIt(t.dataset.it),p=parseK(t.value);if(it&&p>0&&p!==stats(it).p){it.h.push(pt(Date.now(),p));db.chk=Date.now()}save();render();return true}
