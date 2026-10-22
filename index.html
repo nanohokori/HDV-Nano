@@ -113,7 +113,7 @@ tbody tr{transition:background-color .15s ease}
 .crc .ft{border-top:1px solid var(--line);padding-top:6px}.crc .ft div{display:flex;justify-content:space-between;padding:1px 0}.crc .ft span{color:var(--mu)}.crc .ft .big b{font-size:15px;color:var(--ac)}
 .vd{margin-top:6px;font-size:12px;border-radius:6px;padding:4px 8px;display:block!important}.vd.good{background:rgba(52,211,153,.12);color:var(--up)}.vd.bad{background:rgba(248,113,113,.12);color:var(--dn)}.vd.na,.vd.lock{background:var(--chip);color:var(--mu)}
 .crwarn{color:var(--dn);font-size:12px}.crh{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}.crh .cat{flex:1;min-width:200px}
-.crgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px 14px;margin-top:10px}.crrst{font-size:11px;padding:3px 8px;margin:0 0 6px}.cred{gap:4px}.cred .crq{width:44px;height:28px;padding:2px 4px;text-align:center;box-sizing:border-box}.cred select{flex:1;min-width:0;height:28px;font-size:12px;padding:2px 4px}.crx{padding:0 8px;height:28px}.crtsel{width:100%;height:30px;font-weight:700}.crhelp{margin:0 0 8px}.crcomps h4{margin:0 0 6px}.crcomp{border:1px solid var(--line);border-radius:8px;padding:8px;margin:6px 0}.crcomp ul{list-style:none;margin:6px 0 0;padding:0}.crch{display:flex;justify-content:space-between;gap:8px;align-items:center}.crcomp li{display:flex}.crsel{max-width:110px;height:28px;font-size:11px;padding:2px 4px}.crren{border:0;background:none;padding:0 4px;color:var(--mu);cursor:pointer;font-size:12px}.crren:hover{color:var(--ac)}.crl{display:flex;gap:8px;align-items:center;font-size:12px}.crl .tx{flex:1;min-width:0}.crl input{width:100px;text-align:right;height:28px;padding:2px 8px;box-sizing:border-box}.crl input:not(:placeholder-shown){border-color:var(--ac);font-weight:700}.crfoot{margin-top:8px}
+.crgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px 14px;margin-top:10px}.crr{flex-wrap:wrap}.crbr{flex:0 0 100%;height:0}.crtg{width:20px;height:20px;padding:0;line-height:1;border-radius:50%;font-size:14px;color:var(--ac);border-color:var(--ac);flex:none}.crsub{list-style:none;margin:4px 0 4px 18px;padding:0 0 0 10px;border-left:2px solid var(--line);width:calc(100% - 18px);font-size:12px}.crsub li{flex-wrap:wrap}.crsub .n{color:var(--mu)}.crsubed{display:block!important}.crsubed .crsub{margin-left:8px;width:auto}.crmk{padding:0 7px;height:28px;color:var(--ac)}.crrst{font-size:11px;padding:3px 8px;margin:0 0 6px}.cred{gap:4px}.cred .crq{width:44px;height:28px;padding:2px 4px;text-align:center;box-sizing:border-box}.cred select{flex:1;min-width:0;height:28px;font-size:12px;padding:2px 4px}.crx{padding:0 8px;height:28px}.crtsel{width:100%;height:30px;font-weight:700}.crhelp{margin:0 0 8px}.crcomps h4{margin:0 0 6px}.crcomp{border:1px solid var(--line);border-radius:8px;padding:8px;margin:6px 0}.crcomp ul{list-style:none;margin:6px 0 0;padding:0}.crch{display:flex;justify-content:space-between;gap:8px;align-items:center}.crcomp li{display:flex}.crsel{max-width:110px;height:28px;font-size:11px;padding:2px 4px}.crren{border:0;background:none;padding:0 4px;color:var(--mu);cursor:pointer;font-size:12px}.crren:hover{color:var(--ac)}.crl{display:flex;gap:8px;align-items:center;font-size:12px}.crl .tx{flex:1;min-width:0}.crl input{width:100px;text-align:right;height:28px;padding:2px 8px;box-sizing:border-box}.crl input:not(:placeholder-shown){border-color:var(--ac);font-weight:700}.crfoot{margin-top:8px}
 .qe{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}.qe label{flex:1;min-width:160px}
 select option,select optgroup{background:var(--panel);color:var(--tx)}
 .qi.pend{outline:2px solid var(--ac)}
@@ -343,7 +343,8 @@ function crCompute(){
       return{v:v,s:miss?"none":"craft",alt:m?m.v:0}}
     return m||{v:0,s:"none"}}
   ch.forEach(function(st,i){var k=CRD.K[i];
-    var rows=crStepIng(i).map(function(x,j){var pr=price(x[0]);return{ref:x[0],q:x[1],j:j,u:pr.v,s:pr.s,a:pr.v*x[1],alt:pr.alt||0,it:crRefItem(x[0])}});
+    function tree(ref,mult,d){var r=crIngr(ref);if(!r||d>3)return null;return r.map(function(y){var p2=price(y[0]);return{ref:y[0],q:y[1]*mult,u:p2.v,a:p2.v*y[1]*mult,s:p2.s,alt:p2.alt||0,it:crRefItem(y[0]),sub:tree(y[0],y[1]*mult,d+1)}})}
+    var rows=crStepIng(i).map(function(x,j){var pr=price(x[0]);return{ref:x[0],q:x[1],j:j,u:pr.v,s:pr.s,a:pr.v*x[1],alt:pr.alt||0,it:crRefItem(x[0]),sub:tree(x[0],x[1],0)}});
     var M=0,miss=false;rows.forEach(function(r){M+=r.a;if(!r.u)miss=true});
     var prev=i?crCanon(crTarget(ch[i-1],CRD.K[i-1])):null,exp,x={};
     if(/^(w|e|a)$/.test(k)){var p=crChance(st[0],k),q=p*c*p;x.succ=p;x.lv=st[0];x.tries=q?1/q:Infinity;exp=q?M/q:Infinity}
@@ -355,16 +356,23 @@ function crCompute(){
   return out}
 function crNum(v){return isFinite(v)?fmt(Math.round(v)):"—"}
 function crIco(ref,it){return ico(it||{name:crName(ref)},"xs",!(ED&&it&&it.id))}
-var crE=false,crOpts="";
+var crE=false,crOpts="",crXp={};
+function crSubHtml(l){return'<ul class="crsub">'+l.map(function(y){var tag=y.s=="me"?' <small class="crt me">mon prix</small>':y.s=="fix"?' <small class="crt">PNJ</small>':y.s=="craft"?' <small class="crt'+(y.alt?" me":"")+'">craft</small>':"";
+  return'<li'+(y.u?"":' class="miss"')+'><span class="q">'+fmt(y.q)+'×</span>'+crIco(y.ref,y.it)+'<span class="n">'+esc(crName(y.ref))+tag+'</span><span class="v">'+(y.u?fmt(Math.round(y.a)):"—")+"</span>"+(y.sub?'<span class="crbr"></span>'+crSubHtml(y.sub):"")+"</li>"}).join("")+"</ul>"}
 function crBuildOpts(){crOpts=db.items.slice().sort(function(a,b){return String(a.name).localeCompare(String(b.name),"fr")}).map(function(i){return'<option value="'+esc(i.id)+'">'+esc(i.name)+"</option>"}).join("")}
 function crSelHtml(cls,attrs,cur,ph){var o=crOpts;if(cur)o=o.replace('value="'+esc(cur)+'"','value="'+esc(cur)+'" selected');return'<select class="'+cls+'" '+attrs+' aria-label="'+esc(ph)+'">'+(cur?"":'<option value="">'+esc(ph)+"</option>")+o+"</select>"}
 function crEdRow(t,sid,x,j){var it=crRefItem(x[0]),at='data-t="'+t+'" data-s="'+esc(sid)+'" data-j="'+j+'"';
   return'<li class="cred"><input class="crq" '+at+' inputmode="numeric" value="'+x[1]+'" aria-label="Quantité">'+crSelHtml("crisel",at+' data-r="'+esc(x[0])+'"',it?it.id:"",crName(x[0])+" — choisir…")+'<button class="del crx" data-a="crdel" data-t="'+t+'" data-s="'+esc(sid)+'" data-j="'+j+'" title="Retirer" aria-label="Retirer">×</button></li>'}
 function crCard(r){var li="",ed=ED&&crE;
   r.rows.forEach(function(x){
-    if(ed){li+=crEdRow("s",r.i,[x.ref,x.q],x.j);return}
+    if(ed){var kk=crCanon(x.ref),cr=db.crint&&db.crint[kk]!=null||x.sub,rw=crEdRow("s",r.i,[x.ref,x.q],x.j);
+      if(!cr)rw=rw.replace(/<\/li>$/,'<button class="crmk" data-a="crmk" data-s="'+r.i+'" data-j="'+x.j+'" title="Ajouter un sous-craft (cet objet se fabrique)" aria-label="Sous-craft">⚒</button></li>');
+      li+=rw;
+      if(cr){var sl=crIngr(x.ref)||[],so=String(kk)+"|"+String(x.ref);li+='<li class="cred crsubed"><ul class="crsub">'+sl.map(function(y,j){return crEdRow("c",so,y,j)}).join("")+'<li class="cred">'+crSelHtml("cradd",'data-t="c" data-s="'+esc(so)+'"',"","+ Ajouter au sous-craft…")+"</li></ul></li>"}
+      return}
     var tag=x.s=="me"?' <small class="crt me">mon prix</small>':x.s=="fix"?' <small class="crt">PNJ</small>':x.s=="craft"?' <small class="crt'+(x.alt?" me":"")+'">'+(x.alt?"craft moins cher que l’HDV":"craft")+"</small>":"";
-    li+='<li'+(x.u?"":' class="miss"')+'><span class="q">'+x.q+'×</span>'+crIco(x.ref,x.it)+'<span class="n">'+esc(crName(x.ref))+tag+crRen(x.it,x.ref)+'</span><span class="v">'+(x.u?fmt(Math.round(x.a)):"—")+"</span></li>"});
+    var xk=r.i+"|"+x.j,op=x.sub&&crXp[xk];if(x.sub&&x.s=="site")tag+=' <small class="crt">HDV moins cher</small>';
+    li+='<li class="crr'+(x.u?"":" miss")+'">'+(x.sub?'<button class="crtg" data-a="crx" data-v="'+xk+'" title="Voir le sous-craft" aria-label="Voir le sous-craft" aria-expanded="'+(op?"true":"false")+'">'+(op?"−":"+")+"</button>":"")+'<span class="q">'+x.q+'×</span>'+crIco(x.ref,x.it)+'<span class="n">'+esc(crName(x.ref))+tag+crRen(x.it,x.ref)+'</span><span class="v">'+(x.u?fmt(Math.round(x.a)):"—")+"</span>"+(op?'<span class="crbr"></span>'+crSubHtml(x.sub):"")+"</li>"});
   if(ed)li+='<li class="cred">'+crSelHtml("cradd",'data-t="s" data-s="'+r.i+'"',"","+ Ajouter un composant…")+"</li>";
   var ft="",vd="";
   if(r.x.up){ft+='<div class="big"><span>Coût de l’amélioration</span><b>'+crNum(r.M)+"</b></div>";if(r.x.combo)ft+="<div><span>Combo (Splendent direct)</span><b>25 %</b></div>";vd='<div class="vd na">'+(r.x.combo?"25 % de chance d’obtenir directement la version Splendent":"Obtenable uniquement par ce craft")+"</div>"}
@@ -458,7 +466,7 @@ function icoLoad(file,id){var r=new FileReader();r.onload=function(){var im=new 
     var it=db.items.filter(function(i){return i.id==id})[0];if(it){it.img=u;save();render()}};
   im.src=r.result};r.onerror=function(){showToast("Image illisible.")};r.readAsDataURL(file)}
 function stale(){return db.stale||60}
-var TAX=12,prevSig=null,page="market",ED=false,pnFoc=false,pseudo="",sent={},props=[],propOpen=false,pnOpen=false,pnThen=false,fbMsg="",pubRev=0,EDIT={crren:1,cre:1,crdel:1,crrst:1,crcdel:1,qmake:1,crmake:1,prop:1,propok:1,propno:1,propall:1,propnone:1,fbgo:1,fboff:1,fbcopy:1,undo:1,rencat:1,savecr:1,cancelcr:1,newsub:1,savesub:1,mansub:1,rensub:1,savesr:1,cancelsr:1,delsub:1,psmode:1,psadd:1,psdel:1,psok:1,pst:1,pstx:1,pstgo:1,pstback:1,pstok:1,syn:1,synx:1,syngo:1,synoff:1,synnow:1,add:1,create:1,newcat:1,mancat:1,delcat:1,savecat:1,addpt:1,delpt:1,saveinfo:1,delitem:1,io:1,reset:1,fav:1,clean:1,ioload:1,chk:1,ico:1,icodel:1};
+var TAX=12,prevSig=null,page="market",ED=false,pnFoc=false,pseudo="",sent={},props=[],propOpen=false,pnOpen=false,pnThen=false,fbMsg="",pubRev=0,EDIT={crmk:1,crren:1,cre:1,crdel:1,crrst:1,crcdel:1,qmake:1,crmake:1,prop:1,propok:1,propno:1,propall:1,propnone:1,fbgo:1,fboff:1,fbcopy:1,undo:1,rencat:1,savecr:1,cancelcr:1,newsub:1,savesub:1,mansub:1,rensub:1,savesr:1,cancelsr:1,delsub:1,psmode:1,psadd:1,psdel:1,psok:1,pst:1,pstx:1,pstgo:1,pstback:1,pstok:1,syn:1,synx:1,syngo:1,synoff:1,synnow:1,add:1,create:1,newcat:1,mancat:1,delcat:1,savecat:1,addpt:1,delpt:1,saveinfo:1,delitem:1,io:1,reset:1,fav:1,clean:1,ioload:1,chk:1,ico:1,icodel:1};
 function sigp(){return db.sig||15}
 function sg(it){var s=stats(it),p=s.p,lo=it.lo,hi=it.hi;if(lo||hi)return lo&&p<=lo?-1:hi&&p>=hi?1:0;if(s.n<3||!s.med)return 0;var x=sigp()/100;return p<=s.med*(1-x)?-1:p>=s.med*(1+x)?1:0}
 function isAl(it){return sg(it)!=0}
@@ -535,6 +543,8 @@ document.addEventListener("click",function(e){
   else if(a=="crmake"){crMake()}
   else if(a=="crren"){crRename(v)}
   else if(a=="cre"){crE=!crE}
+  else if(a=="crx"){crXp[v]=!crXp[v]}
+  else if(a=="crmk"){var rr=crStepIng(+el.dataset.s)[+el.dataset.j][0],km=crCanon(rr);db.crint=db.crint||{};if(db.crint[km]==null){var dd=typeof rr=="number"?crInter(rr):null;db.crint[km]=dd?dd.map(function(y){return[y[0],y[1]]}):[]}save()}
   else if(a=="crdel"){crListOf(el).splice(+el.dataset.j,1);save()}
   else if(a=="crrst"){if(db.crx&&db.crx[crS.sub]){delete db.crx[crS.sub][v];save()}}
   else if(a=="crcdel"){var ec=el,kc=ec.dataset.s,rc=crRef(ec.dataset.r);db.crint=db.crint||{};if(typeof rc=="number"&&crInter(rc))db.crint[kc]=[];else delete db.crint[kc];save()}
