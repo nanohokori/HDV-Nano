@@ -125,6 +125,22 @@ tbody tr{transition:background-color .15s ease}
 .cred{display:flex;gap:6px;align-items:center;margin:4px 0}.cred select{flex:1;min-width:0;height:34px}.cred .crq{width:56px;height:34px;text-align:center}.cred .crpe{width:100px;height:34px;text-align:right}.credi{flex:none}.credl{width:80px;font-size:12px;color:var(--mu);flex:none}.crren{border:0;background:none;color:var(--mu);padding:0 6px}.crren:hover{color:var(--ac)}.crmk{display:flex;gap:4px;align-items:center;font-size:12px;color:var(--mu);white-space:nowrap}.crxx{padding:0 10px;height:34px}
 .crfoot2{display:flex;justify-content:space-between;margin-top:16px}
 @media(max-width:640px){.cred{flex-wrap:wrap}.cred select{flex:1 1 60%}}
+.crt2{table-layout:fixed;width:100%;min-width:0!important}.crt2 td{white-space:normal}.crt2 th:nth-child(1){width:auto}.crt2 th:nth-child(2){width:84px}.crt2 th:nth-child(3){width:84px}.crt2 th:nth-child(4){width:116px}.crt2 th:nth-child(5){width:96px}
+.crt2 td,.crt2 th{padding:8px 4px}.crt2 .crpu{width:100%;min-width:0;box-sizing:border-box}.crt2 .crq2{width:64px;height:30px;text-align:right;padding:2px 6px;box-sizing:border-box}
+.crnc{min-width:0}.crn{overflow-wrap:anywhere;line-height:1.25}
+.crsr{background:rgba(255,255,255,.03)}.crsr td{font-size:13px}.crsr .crn{color:var(--mu)}
+.crtg{position:relative;width:20px;height:20px;padding:0;border-radius:50%;border:1.5px solid var(--ac);background:transparent;cursor:pointer;display:block;flex:none}
+.crtg::before,.crtg::after{content:"";position:absolute;left:50%;top:50%;background:var(--ac);border-radius:1px;transform:translate(-50%,-50%)}
+.crtg::before{width:8px;height:2px}.crtg::after{width:2px;height:8px;transition:transform .15s,opacity .15s}
+.crtg.open::after{transform:translate(-50%,-50%) scaleY(0);opacity:0}.crtg:hover{background:rgba(255,159,28,.15)}.crtp{width:20px;height:20px;flex:none}
+.crset{display:flex;flex-wrap:wrap;gap:6px 20px;justify-content:space-between;align-items:center;font-size:13px;color:var(--mu);margin-top:4px}.crset label{display:flex;gap:6px;align-items:center}.crset b{color:var(--tx)}.crset input{width:56px;height:28px;padding:2px 6px;text-align:right}
+.crgrid3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}.crgrid3 label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mu)}.crgrid3 input,.crgrid3 select{height:34px}
+.crsb{padding:0 8px;height:34px;color:var(--mu)}.crsb.act{color:var(--ac);border-color:var(--ac)}
+.crmt select{height:32px}
+@media(max-width:640px){.crt2,.crt2 tbody,.crt2 tr,.crt2 td,.crt2 tfoot{display:block}.crt2 thead{display:none}.crt2{table-layout:auto}
+ .crt2 tbody tr{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 8px;padding:8px 0;border-bottom:1px solid var(--line)}.crt2 td{border:0;padding:0}.crt2 td.cn{grid-column:1/-1}
+ .crt2 td.r{text-align:left}.crt2 td[data-l]::before{content:attr(data-l);display:block;font-size:10px;color:var(--mu)}.crt2 .crq2,.crt2 .crpu{width:100%}
+ .crt2 tfoot tr{display:flex;justify-content:space-between;padding-top:10px}.crt2 tfoot td{display:block}.crgrid3{grid-template-columns:1fr}}
 .qe{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}.qe label{flex:1;min-width:160px}
 select option,select optgroup{background:var(--panel);color:var(--tx)}
 .qi.pend{outline:2px solid var(--ac)}
@@ -313,23 +329,32 @@ function qunaPage(){var R=qunaRows(),bb=qBest(R,"buy",false),bs=qBest(R,"sell",t
   '<div class="qfoot"><span>Les prix en Quna se modifient dans la liste d’objets.</span>'+set+(go?'<button data-a="qgo">Aller aux coffres</button>':"")+(ED&&miss?'<button class="pri" data-a="qmake">Ajouter les coffres manquants</button>':"")+"</div>"}
 /* ===== Onglet Craft : blocs créés à la main ===== */
 function parseK(s){s=String(s||"").trim().toLowerCase().replace(/[\s  ]/g,"");if(!s)return 0;var m=s.match(/^(\d+(?:[.,]\d+)?)([kmb])?$/);if(!m){s=s.replace(/[.,](?=\d{3}(\D|$))/g,"");m=s.match(/^(\d+(?:[.,]\d+)?)([kmb])?$/)}if(!m)return 0;return Math.round(parseFloat(m[1].replace(",","."))*({k:1e3,m:1e6,b:1e9}[m[2]]||1))}
-var crM=null,crG="",crOpts="",crL={me:{},fee:12,att:{}};
-try{var crl0=JSON.parse(localStorage.getItem("hdv_craft2")||"null");if(crl0){if(crl0.me&&typeof crl0.me=="object")crL.me=crl0.me;if(crl0.att&&typeof crl0.att=="object")crL.att=crl0.att;if(crl0.fee!=null&&isFinite(+crl0.fee))crL.fee=Math.min(99,Math.max(0,+crl0.fee))}}catch(e){}
+var crM=null,crG="",crOpts="",crXp={},crL={me:{},fee:12,att:{},lvl:100};var CRTAB={w:[74.011698,74.718902,75.631177,77.467106,77.669025,78.187021,79.129959,80.157193,80.991798,81.227508,81.43995,82.755613,83.462816,84.356316,84.662035,84.662035,84.662035,85.511803,86.547794,86.547794,87.390018,87.761514,87.761514,87.761514,87.761514,88.157714,88.157714,89.432365,89.432365,90.252757,90.252757,90.676961,90.676961,90.676961,90.676961,90.676961,90.676961,90.676961,91.865563,91.865563,91.865563,92.71533,92.71533,92.71533,93.121326],e:[77.981229,78.681229,79.381229,80.081229,80.781229,81.481229,82.181229,82.881229,83.645249,84.508476,85.061212,85.207336,85.600142,86.372065,87.164426,87.773575,88.05,88.33,88.6,88.87595,89.631358,90.258876,90.467432,90.467432,90.467432,90.467432,91.0588,91.84441,91.84441,92.428919,92.428919,92.671025,92.671025,92.671025,92.671025,92.921018,92.921018,93.808071,93.808071,94.371089,94.371089,94.371089,94.633946],a:[79.571081,80.124386,80.926125,82.284634,82.883323,83.573495,84.114718,85.476782,85.793152,86.556753,87.198972,87.923635,88.210967,88.356177,88.887385,90.030461,90.05525,90.526988,90.526988,90.804885,91.392014,91.969241,92.390526,92.50524,92.50524,92.60178,93.157574,93.157574,93.703275,94.12331,94.12331,94.258973,94.258973,94.258973,94.645133,94.645133,95.200927,95.200927,95.587774,95.587774,95.724539,95.739046,95.739046,95.739046,95.739046,95.888298,95.888298,96.467538,96.467538,96.467538,96.837241],s1:[67.506212,68.198244,69.824562,71.774814,72.773479,74.093554,75.222343,76.203609,77.541261,78.466072,79.033485,80.772127,81.148839,81.583644,82.889213,83.38122,83.713424,84.62849,85.309191,85.836292,86.168055,86.922289,87.551611,88.112297,88.383568,88.600967,89.048631,89.610372,89.9,90.19,90.474499,90.594902,90.971587,91.491841,91.491841,92.029715,92.360459,92.443413,92.443413,92.673487,92.673487,93.175734,93.662103,93.662103,94.008885,94.008885,94.102514,94.179641,94.179641,94.639789]};
+var CRLV=[1,30,51,85,100],CRLN=["Novice 1","Novice 30","Professionnel 1","Professionnel 35","Professionnel 50"];
+try{var crl0=JSON.parse(localStorage.getItem("hdv_craft2")||"null");if(crl0){if(crl0.me&&typeof crl0.me=="object")crL.me=crl0.me;if(crl0.att&&typeof crl0.att=="object")crL.att=crl0.att;if(CRLV.indexOf(+crl0.lvl)>-1)crL.lvl=+crl0.lvl;if(crl0.fee!=null&&isFinite(+crl0.fee))crL.fee=Math.min(99,Math.max(0,+crl0.fee))}}catch(e){}
 function crSave(){try{localStorage.setItem("hdv_craft2",JSON.stringify(crL))}catch(e){}}
 function crBl(){return db.cr2&&db.cr2.blocks||[]}
 function crBlock(id){return crBl().filter(function(b){return b.id==id})[0]||null}
 function crP(id){var m=+crL.me[id];if(m>0)return m;var it=findIt(id);return it?stats(it).p:0}
 function crS_(b){return Math.min(100,Math.max(0,b.s==null?100:+b.s))/100}
 function crC_(b){return Math.min(100,Math.max(0,b.c==null?25:+b.c))/100}
-function crMaker(id,seen){var f=null,k=0;crBl().forEach(function(b){if(f||seen[b.id])return;if(b.out==id){f=b;k=crS_(b)*(1-(b.combo?crC_(b):0))}else if(b.combo==id){f=b;k=crS_(b)*crC_(b)}});
+function crSucc(b){var t=b.tb&&CRTAB[b.tb];if(t){var d=crL.lvl-(+b.rl||0);if(d<0)return 0;return t[Math.min(d,t.length-1)]/100}return crS_(b)}
+function crProb(b){var p=crSucc(b),c=b.combo?crC_(b):0,q=p*c*p;return{p:p,c:c,q:q,pl:p-q}}
+function crMaker(id,seen){var f=null,k=0;crBl().forEach(function(b){if(f||seen[b.id])return;var P=crProb(b);if(b.out==id){f=b;k=P.pl}else if(b.combo==id){f=b;k=P.q}});
   if(!f||!k)return 0;var s2={};for(var q in seen)s2[q]=1;s2[f.id]=1;return crCost(f,s2)/k}
-function crUnit(x,seen){var m=crP(x.it);if(x.mk){var u=crMaker(x.it,seen);if(u>0&&(!m||u<m))return{v:u,s:"mk"}}return{v:m,s:+crL.me[x.it]>0?"me":"mk0"}}
+function crSubCost(x,seen){var t=0;(x.sub||[]).forEach(function(y){t+=crUnit(y,seen).v*y.q});return t}
+function crUnit(x,seen){var me=+crL.me[x.it];if(me>0)return{v:me,s:"me"};var m=crP(x.it),best={v:m,s:"mk0"};
+  if(x.sub&&x.sub.length){var u=crSubCost(x,seen);if(u>0&&(!m||u<m))best={v:u,s:"sub"}}
+  if(x.mk){var u2=crMaker(x.it,seen);if(u2>0&&(!best.v||u2<best.v))best={v:u2,s:"mk"}}
+  return best}
 function crCost(b,seen){seen=seen||{};seen[b.id]=1;var t=0;(b.ing||[]).forEach(function(x){t+=crUnit(x,seen).v*x.q});return t}
-function crCalc(b,N){var rows=(b.ing||[]).map(function(x){var u=crUnit(x,{});u.s=u.s=="mk"?"mk":u.s;return{x:x,it:findIt(x.it),q:x.q,need:x.q*N,u:u.v,s:u.s,tot:u.v*x.q*N}});
+function crNode(x,mult,path){var u=crUnit(x,{}),need=mult*x.q,n={x:x,it:findIt(x.it),q:x.q,need:need,u:u.v,s:u.s,tot:u.v*need,path:path,sub:null};
+  if(x.sub&&x.sub.length){n.sub=x.sub.map(function(y,j){return crNode(y,need,path+"/"+j)});n.subTot=0;n.sub.forEach(function(c){n.subTot+=c.tot})}return n}
+function crCalc(b,N){var rows=(b.ing||[]).map(function(x,j){return crNode(x,N,String(j))});
   var cost=0,miss=false;rows.forEach(function(r){cost+=r.tot;if(!r.u)miss=true});
-  var s=crS_(b),c=b.combo?crC_(b):0,fee=1-crL.fee/100,pN=N*s*(1-c),cN=N*s*c,pp=b.out?crP(b.out):0,pc=b.combo?crP(b.combo):0,rP=pN*pp*fee,rC=cN*pc*fee;
-  var per=cN>0?(cost-rP)/cN:(pN>0?(cost)/pN:0);
-  return{rows:rows,cost:cost,miss:miss,s:s,c:c,pN:pN,cN:cN,pp:pp,pc:pc,rP:rP,rC:rC,per:per,perRaw:cN>0?cost/cN:0}}
+  var P=crProb(b),fee=1-crL.fee/100,pN=N*P.pl,cN=N*P.q,pp=b.out?crP(b.out):0,pc=b.combo?crP(b.combo):0,rP=pN*pp*fee,rC=cN*pc*fee;
+  var per=cN>0?(cost-rP)/cN:(pN>0?cost/pN:0);
+  return{rows:rows,cost:cost,miss:miss,s:P.p,c:P.c,pN:pN,cN:cN,pp:pp,pc:pc,rP:rP,rC:rC,per:per}}
 function crUid(){return"b"+Date.now().toString(36)+Math.floor(Math.random()*46656).toString(36)}
 function crNewItem(name){var cat="Craft";if(db.cats.indexOf(cat)<0)db.cats.push(cat);var it={id:"i"+Date.now()+Math.floor(Math.random()*1e4),name:name,cat:cat,rar:0,h:[]};db.items.push(it);return it}
 function crFake(b){var it=b.out&&findIt(b.out)||b.combo&&findIt(b.combo);return{name:b.name||"?",img:b.img||(it&&it.img)||"",rar:it?it.rar:0}}
@@ -342,11 +367,16 @@ function crCard(b){var N=1,cc=crCalc(b,1),it=b.combo&&findIt(b.combo),ad=ED?'<sp
    (b.combo?'<div class="crbc">Avec une chance de <b>'+esc(it?it.name:"?")+"</b> "+Math.round(crC_(b)*100)+" %</div>":"")+
    '<div class="crbp">'+(cc.cost?"Coût par tentative : <b>"+fmt(Math.round(cc.cost))+"</b>":'<span class="cat">Pas encore de prix</span>')+(cc.cost&&b.combo&&cc.cN>0?'<br>Par résultat avec combo : <b>'+fmt(Math.round(cc.per))+"</b>":"")+"</div>"+
    '<div class="crbb"><button class="pri" data-a="cropen" data-v="'+b.id+'">Calculer</button></div></div>'}
-function crTbl(b,N){var cc=crCalc(b,N),h="";
-  cc.rows.forEach(function(r){var it=r.it,tag=r.s=="mk"?' <small class="crt me">fabriqué</small>':"";
-    h+='<tr><td><div class="crnc">'+ico(it||{name:"?"},"xs",true)+'<span class="crn">'+esc(it?it.name:"(objet supprimé)")+tag+'</span></div></td><td class="r">'+fmt(r.need)+'</td><td class="r">'+(r.s=="mk"?'<span class="crmu">'+fmt(Math.round(r.u))+"</span>":'<input class="crf crpu" data-f="pu" data-it="'+esc(r.x.it)+'" inputmode="decimal" value="'+(+crL.me[r.x.it]>0?fmt(+crL.me[r.x.it]):"")+'" placeholder="'+(r.u?fmt(r.u):"—")+'" aria-label="Prix à l’unité">')+'</td><td class="r">'+(r.u?fmt(Math.round(r.tot)):"—")+"</td></tr>"});
-  if(!cc.rows.length)h='<tr><td colspan="4" class="cat" style="padding:14px">Aucun ingrédient.'+(ED?" Clique sur « ✎ Modifier » pour en ajouter.":"")+"</td></tr>";
+function crRowsHtml(b,nodes,d){var h="";
+  nodes.forEach(function(r){var it=r.it,key=b.id+"|"+r.path,op=r.sub&&crXp[key],tag=r.s=="mk"?' <small class="crt me">fabriqué</small>':r.s=="sub"?' <small class="crt me">craft moins cher</small>':(r.sub&&r.s=="mk0"?' <small class="crt">HDV moins cher</small>':"");
+    var tg=r.sub?'<button class="crtg'+(op?" open":"")+'" data-a="crx" data-v="'+esc(key)+'" aria-expanded="'+(op?"true":"false")+'" aria-label="Voir le sous-craft"></button>':'<span class="crtp"></span>';
+    var qc=ED?'<input class="crf crq2" data-f="ingq" data-p="'+r.path+'" inputmode="numeric" value="'+r.q+'" aria-label="Quantité par tentative">':String(r.q);
+    h+='<tr class="'+(d?"crsr":"")+'"><td class="cn"><div class="crnc" style="padding-left:'+(d*18)+'px">'+tg+ico(it||{name:"?"},"xs",true)+'<span class="crn">'+esc(it?it.name:"(objet supprimé)")+tag+'</span></div></td><td class="r" data-l="Par tentative">'+qc+'</td><td class="r" data-l="Nécessaire">'+fmt(Math.round(r.need*100)/100)+'</td><td class="r" data-l="Prix à l’unité"><input class="crf crpu" data-f="pu" data-it="'+esc(r.x.it)+'" inputmode="decimal" value="'+(+crL.me[r.x.it]>0?fmt(+crL.me[r.x.it]):"")+'" placeholder="'+(r.u?fmt(Math.round(r.u)):"—")+'" aria-label="Prix à l’unité"></td><td class="r" data-l="Total">'+(r.u?fmt(Math.round(r.tot)):"—")+"</td></tr>";
+    if(op)h+=crRowsHtml(b,r.sub,d+1)});return h}
+function crTbl(b,N){var cc=crCalc(b,N),h=crRowsHtml(b,cc.rows,0);
+  if(!cc.rows.length)h='<tr><td colspan="5" class="cat" style="padding:14px">Aucun ingrédient.'+(ED?" Clique sur « ✎ Modifier » pour en ajouter.":"")+"</td></tr>";
   return{h:h,cc:cc}}
+function crPct(v){return(Math.round(v*10000)/100).toString().replace(".",",")}
 function crCalcModal(b){var N=Math.max(1,Math.round(+crL.att[b.id]||1)),t=crTbl(b,N),cc=t.cc,n1=function(v){return(Math.round(v*100)/100).toString().replace(".",",")};
   var res='<div class="crres"><div class="crl"><span>Coût total</span><b>'+(cc.cost?fmt(Math.round(cc.cost)):"—")+"</b></div>";
   if(b.out||b.combo){
@@ -354,22 +384,33 @@ function crCalcModal(b){var N=Math.max(1,Math.round(+crL.att[b.id]||1)),t=crTbl(
     if(b.combo)res+='<div class="crl"><span>Avec combo : '+esc((findIt(b.combo)||{}).name||"?")+' <em>×'+n1(cc.cN)+"</em></span><b>"+(cc.pc?fmt(Math.round(cc.pc))+" l’unité · valeur nette "+fmt(Math.round(cc.rC)):"pas de prix")+"</b></div>";
     if(b.combo&&cc.cN>0&&cc.cost){res+='<div class="crl big"><span>Coût par objet avec combo'+(cc.rP?" (après revente de l’objet sans combo)":"")+"</span><b>"+fmt(Math.round(cc.per))+"</b></div>";
       if(cc.pc)res+=cc.pc*(1-crL.fee/100)>=cc.per?'<div class="vd good">Crafter est rentable : '+fmt(Math.round(cc.pc*(1-crL.fee/100)-cc.per))+" de gain par objet</div>":'<div class="vd bad">Acheter est plus rentable : '+fmt(Math.round(cc.per-cc.pc*(1-crL.fee/100)))+" d’économie par objet</div>"}}
-  res+='<div class="crl sm"><span>Réussite '+Math.round(cc.s*100)+" % · combo "+Math.round(cc.c*100)+" % · frais de vente</span><input class=\"crf crfee\" data-f=\"fee\" inputmode=\"decimal\" value=\""+crL.fee+'" aria-label="Frais de vente en %"> %</div></div>';
+  if(cc.s===0&&b.tb)res+='<div class="vd bad">Niveau de métier insuffisant pour cette recette.</div>';
+  res+='<div class="crset"><label title="Réussite du craft, selon ton niveau de métier si un palier est choisi dans le bloc">Réussite : <b>'+crPct(cc.s)+" %</b>"+(b.combo?" · combo : <b>"+crPct(cc.c)+" %</b>":"")+'</label><label title="Pourcentage retiré par l’hôtel des ventes quand tu revends un objet">Frais de vente de l’HDV <input class="crf crfee" data-f="fee" inputmode="decimal" value="'+crL.fee+'" aria-label="Frais de vente en pourcentage"> %</label></div></div>';
+  var lv=b.tb?'<label>Ton niveau de métier <select class="crf" data-f="lvl">'+CRLV.map(function(l,i){return'<option value="'+l+'"'+(l==crL.lvl?" selected":"")+">"+CRLN[i]+"</option>"}).join("")+"</select></label>":"";
   return'<div class="crov" data-a="crbg"><div class="crmd" role="dialog" aria-modal="true" aria-label="'+esc(b.name)+'"><div class="crmh"><h2>'+esc(b.name||"Sans nom")+'</h2>'+(ED?'<button data-a="cred" data-v="'+b.id+'">✎ Modifier</button>':"")+'<button class="crx" data-a="crclose" aria-label="Fermer">×</button></div>'+
    (b.sub?'<div class="cat" style="margin:-4px 0 8px">'+esc(b.sub)+"</div>":"")+
-   '<div class="crmt"><label>Tentatives <input class="crf" data-f="att" inputmode="numeric" value="'+N+'"></label><span>Résultat : ×'+N+'</span></div><p class="cat">Les quantités sont pour toutes les tentatives. Tape tes prix à l’unité (champ vide = prix de la liste) : ils restent dans ce navigateur.</p>'+
-   '<div class="scroll"><table class="crt2"><thead><tr><th>Matériau</th><th class="r">Nécessaire</th><th class="r">Prix à l’unité</th><th class="r">Total</th></tr></thead><tbody>'+t.h+'</tbody><tfoot><tr><td colspan="3">Total à acheter</td><td class="r">'+(cc.cost?fmt(Math.round(cc.cost)):"0")+"</td></tr></tfoot></table></div>"+(cc.miss?'<p class="crwarn">Certains prix manquent : le total est sous-estimé.</p>':"")+res+"</div></div>"}
+   '<div class="crmt"><label>Tentatives <input class="crf" data-f="att" inputmode="numeric" value="'+N+'"></label><span>Résultat : ×'+N+"</span>"+lv+'</div><p class="cat">Les quantités sont pour toutes les tentatives. Tape tes prix à l’unité (champ vide = prix de la liste) : ils restent dans ce navigateur.</p>'+
+   '<table class="crt2"><thead><tr><th>Matériau</th><th class="r">Par tentative</th><th class="r">Nécessaire</th><th class="r">Prix à l’unité</th><th class="r">Total</th></tr></thead><tbody>'+t.h+'</tbody><tfoot><tr><td colspan="4">Total à acheter</td><td class="r">'+(cc.cost?fmt(Math.round(cc.cost)):"0")+"</td></tr></tfoot></table>"+(cc.miss?'<p class="crwarn">Certains prix manquent : le total est sous-estimé.</p>':"")+res+"</div></div>"}
+function crEdRows(list,pre,d){var h="";(list||[]).forEach(function(x,j){var p=pre+j,it=findIt(x.it),at='data-p="'+p+'"',has=!!x.sub;
+  h+='<div class="cred" style="margin-left:'+(d*20)+'px"><div class="credi">'+(it?ico(it,"s"):ico({name:"?"},"s",true))+'</div>'+crSel("crit",at,x.it,"Choisir l’objet…")+'<button class="crren" data-a="crren" data-v="'+esc(x.it)+'" title="Renommer l’objet" aria-label="Renommer">✎</button><input class="crf crq" data-f="ingq" '+at+' inputmode="numeric" value="'+x.q+'" aria-label="Quantité" title="Quantité"><input class="crf crpe" data-f="pe" data-it="'+esc(x.it)+'" inputmode="decimal" value="'+(it&&stats(it).p?fmt(stats(it).p):"")+'" placeholder="prix" aria-label="Prix dans la liste">'+
+   (d<3?'<button class="crsb'+(has?" act":"")+'" data-a="crsub" data-v="'+p+'" title="'+(has?"Retirer le sous-craft":"Cet objet peut se crafter : ajouter ses composants")+'" aria-label="Sous-craft">⚒</button>':"")+
+   (d==0?'<label class="crmk" title="Cet objet est fabriqué par un autre de tes blocs : on utilise son coût de fabrication s’il est moins cher"><input type="checkbox" class="crf" data-f="ingmk" '+at+(x.mk?" checked":"")+'> bloc</label>':"")+
+   '<button class="del crxx" data-a="crdeli" data-v="'+p+'" aria-label="Retirer">×</button></div>';
+  if(has)h+=crEdRows(x.sub,p+"/",d+1)+'<div class="cred" style="margin-left:'+((d+1)*20)+'px">'+crSel("cradd",'data-p="'+p+'"',"","+ Ajouter un composant de "+(it?it.name:"…")+"…")+"</div>"});return h}
 function crEdModal(b){
-  var rows=(b.ing||[]).map(function(x,j){var it=findIt(x.it),at='data-j="'+j+'"';
-    return'<div class="cred"><div class="credi">'+(it?ico(it,"s"):ico({name:"?"},"s",true))+'</div>'+crSel("crit",at,x.it,"Choisir l’objet…")+'<button class="crren" data-a="crren" data-v="'+esc(x.it)+'" title="Renommer l’objet" aria-label="Renommer">✎</button><input class="crf crq" data-f="ingq" '+at+' inputmode="numeric" value="'+x.q+'" aria-label="Quantité"><input class="crf crpe" data-f="pe" data-it="'+esc(x.it)+'" inputmode="decimal" value="'+(it&&stats(it).p?fmt(stats(it).p):"")+'" placeholder="prix" aria-label="Prix dans la liste"><label class="crmk" title="Cet objet est fabriqué par un autre bloc : on utilise son coût de fabrication s’il est moins cher"><input type="checkbox" class="crf" data-f="ingmk" '+at+(x.mk?" checked":"")+'> fabriqué</label><button class="del crxx" data-a="crdeli" data-v="'+j+'" aria-label="Retirer">×</button></div>'}).join("");
+  var rows=crEdRows(b.ing,"",0);
   function res(key,lab){var it=b[key]&&findIt(b[key]);return'<div class="cred"><div class="credl">'+lab+'</div><div class="credi">'+(it?ico(it,"s"):ico({name:"?"},"s",true))+"</div>"+crSel("crsl",'data-k="'+key+'"',b[key]||"","Aucun")+(it?'<button class="crren" data-a="crren" data-v="'+esc(it.id)+'" title="Renommer l’objet" aria-label="Renommer">✎</button><input class="crf crpe" data-f="pe" data-it="'+esc(it.id)+'" inputmode="decimal" value="'+(stats(it).p?fmt(stats(it).p):"")+'" placeholder="prix" aria-label="Prix dans la liste">':"")+"</div>"}
-  var img=crFake(b);
+  var img=crFake(b),tbs=[["","Réussite fixe (je la tape)"],["w","Blanc → vert"],["e","Vert → bleu"],["a","Bleu → doré"],["s1","Star / True"]];
   return'<div class="crov" data-a="crbg"><div class="crmd wide" role="dialog" aria-modal="true" aria-label="Modifier le bloc"><div class="crmh"><h2>Modifier le bloc</h2><button data-a="crcalc" data-v="'+b.id+'">Calculer</button><button class="crx" data-a="crclose" aria-label="Fermer">×</button></div>'+
    '<div class="crgrid2"><div class="crimgbox">'+ico(img,"l",true)+'<button data-a="crimg" data-v="'+b.id+'">Image…</button>'+(b.img?'<button class="del" data-a="crimgdel" data-v="'+b.id+'">Retirer</button>':"")+'</div>'+
-   '<label>Nom<input class="crf" data-f="name" value="'+esc(b.name||"")+'"></label><label>Sous-titre<input class="crf" data-f="sub" value="'+esc(b.sub||"")+'" placeholder="ex : Sculpteur, maîtrise 60"></label><label>Groupe<input class="crf" data-f="grp" value="'+esc(b.grp||"")+'" placeholder="ex : Colliers" list="crgl"></label>'+
-   '<label>Réussite (%)<input class="crf" data-f="s" inputmode="decimal" value="'+Math.round(crS_(b)*100)+'"></label><label>Chance de combo (%)<input class="crf" data-f="c" inputmode="decimal" value="'+Math.round(crC_(b)*100)+'"></label></div>'+
+   '<label>Nom<input class="crf" data-f="name" value="'+esc(b.name||"")+'"></label><label>Sous-titre<input class="crf" data-f="sub" value="'+esc(b.sub||"")+'" placeholder="ex : Sculpteur, maîtrise 60"></label><label>Groupe<input class="crf" data-f="grp" value="'+esc(b.grp||"")+'" placeholder="ex : Colliers" list="crgl"></label></div>'+
+   '<h3 class="crh3">Réussite <span class="cat">calculée avec ton niveau de métier si tu choisis un palier</span></h3><div class="crgrid3">'+
+   '<label>Palier<select class="crf" data-f="tb">'+tbs.map(function(t){return'<option value="'+t[0]+'"'+((b.tb||"")==t[0]?" selected":"")+">"+t[1]+"</option>"}).join("")+"</select></label>"+
+   (b.tb?'<label>Niveau de la recette<input class="crf" data-f="rl" inputmode="numeric" value="'+(b.rl==null?"":b.rl)+'" placeholder="ex : 3"></label>':'<label>Réussite (%)<input class="crf" data-f="s" inputmode="decimal" value="'+Math.round(crS_(b)*100)+'"></label>')+
+   '<label>Chance de combo (%)<input class="crf" data-f="c" inputmode="decimal" value="'+Math.round(crC_(b)*100)+'"></label></div>'+
+   (b.tb?'<p class="cat" style="margin:6px 0 0">Avec ton niveau actuel ('+(CRLN[CRLV.indexOf(crL.lvl)]||crL.lvl)+") : réussite "+crPct(crSucc(b))+" %.</p>":"")+
    '<datalist id="crgl">'+crGroups().map(function(g){return'<option value="'+esc(g)+'">'}).join("")+"</datalist>"+
-   '<h3 class="crh3">Ingrédients <span class="cat">par tentative · le prix modifié ici met à jour la liste Marché</span></h3>'+rows+'<div class="cred">'+crSel("cradd","","","+ Ajouter un ingrédient…")+"</div>"+
+   '<h3 class="crh3">Ingrédients <span class="cat">par tentative · ⚒ = cet objet peut se crafter (ajoute ses composants) · le prix modifié met à jour la liste Marché</span></h3>'+rows+'<div class="cred">'+crSel("cradd",'data-p=""',"","+ Ajouter un ingrédient…")+"</div>"+
    '<h3 class="crh3">Résultats</h3>'+res("out","Sans combo")+res("combo","Avec combo")+
    '<div class="crfoot2"><button class="del" data-a="crdelb" data-v="'+b.id+'">Supprimer le bloc</button><button class="pri" data-a="crclose">Terminer</button></div></div></div>'}
 function crGroups(){var g={},o=[];crBl().forEach(function(b){if(b.grp&&!g[b.grp]){g[b.grp]=1;o.push(b.grp)}});return o}
@@ -383,18 +424,23 @@ function crImgLoad(file,id){var r=new FileReader();r.onload=function(){var im=ne
 var crIT=null,crIf=document.createElement("input");crIf.type="file";crIf.accept="image/*";crIf.style.display="none";document.body.appendChild(crIf);crIf.addEventListener("change",function(){var f=crIf.files&&crIf.files[0];if(f&&crIT)crImgLoad(f,crIT)});
 function crMv(id,d){var a=crBl(),i=a.findIndex(function(b){return b.id==id}),j=i+d;if(i<0||j<0||j>=a.length)return;var t=a[i];a[i]=a[j];a[j]=t;save()}
 function crItemPick(t){var v=t.value;if(v=="__new"){var n=prompt("Nom du nouvel objet (il sera ajouté à la liste, catégorie Craft) :");if(!n||!n.trim())return"";return crNewItem(n.trim()).id}return v}
-function crChange(t){var f=t.dataset.f,b=crM&&crBlock(crM.id);
-  if(f=="att"){if(b){crL.att[b.id]=Math.max(1,Math.round(parseFloat(String(t.value).replace(",","."))||1));crSave();render()}return true}
-  if(f=="fee"){crL.fee=Math.min(99,Math.max(0,parseFloat(String(t.value).replace(",","."))||0));crSave();render();return true}
+function crAtList(b,pp){if(pp===""||pp==null)return b.ing=b.ing||[];var x=crAtItem(b,pp);return x.sub=x.sub||[]}
+function crAtItem(b,p){var ps=String(p).split("/").map(Number),list=b.ing,x=null;for(var i=0;i<ps.length;i++){x=list[ps[i]];if(!x)return null;if(i<ps.length-1)list=x.sub||[]}return x}
+function crChange(t){var f=t.dataset.f,b=crM&&crBlock(crM.id),num=function(v){return parseFloat(String(v).replace(",","."))};
+  if(f=="att"){if(b){crL.att[b.id]=Math.max(1,Math.round(num(t.value)||1));crSave();render()}return true}
+  if(f=="fee"){crL.fee=Math.min(99,Math.max(0,num(t.value)||0));crSave();render();return true}
+  if(f=="lvl"){crL.lvl=+t.value;crSave();render();return true}
   if(f=="pu"){var v=parseK(t.value);if(v>0)crL.me[t.dataset.it]=v;else delete crL.me[t.dataset.it];crSave();render();return true}
   if(!ED||!b)return t.classList.contains("crf");
   if(f=="name"||f=="sub"||f=="grp"){b[f]=t.value.trim();if(!b[f]&&f!="name")delete b[f];save();render();return true}
-  if(f=="s"||f=="c"){var n=Math.min(100,Math.max(0,parseFloat(String(t.value).replace(",","."))));if(isFinite(n))b[f]=n;save();render();return true}
-  if(f=="ingq"){b.ing[+t.dataset.j].q=Math.max(1,Math.round(parseFloat(String(t.value).replace(",","."))||1));save();render();return true}
-  if(f=="ingmk"){b.ing[+t.dataset.j].mk=t.checked;save();render();return true}
+  if(f=="s"||f=="c"){var n=Math.min(100,Math.max(0,num(t.value)));if(isFinite(n))b[f]=n;save();render();return true}
+  if(f=="tb"){if(t.value)b.tb=t.value;else delete b.tb;save();render();return true}
+  if(f=="rl"){var r=num(t.value);if(isFinite(r))b.rl=Math.max(0,Math.round(r));else delete b.rl;save();render();return true}
+  if(f=="ingq"){var x=crAtItem(b,t.dataset.p);if(x){x.q=Math.max(1,Math.round(num(t.value)||1));save()}render();return true}
+  if(f=="ingmk"){var x2=crAtItem(b,t.dataset.p);if(x2){x2.mk=t.checked;save()}render();return true}
   if(f=="pe"){var it=findIt(t.dataset.it),p=parseK(t.value);if(it&&p>0&&p!==stats(it).p){it.h.push(pt(Date.now(),p));db.chk=Date.now()}save();render();return true}
-  if(t.classList.contains("crit")){var id=crItemPick(t);if(id){b.ing[+t.dataset.j].it=id;save()}render();return true}
-  if(t.classList.contains("cradd")){var id2=crItemPick(t);if(id2){b.ing=b.ing||[];b.ing.push({it:id2,q:1});save()}render();return true}
+  if(t.classList.contains("crit")){var id=crItemPick(t);if(id){var x3=crAtItem(b,t.dataset.p);if(x3){x3.it=id;save()}}render();return true}
+  if(t.classList.contains("cradd")){var id2=crItemPick(t);if(id2){crAtList(b,t.dataset.p).push({it:id2,q:1});save()}render();return true}
   if(t.classList.contains("crsl")){var id3=crItemPick(t);if(t.value==""||id3){if(id3)b[t.dataset.k]=id3;else delete b[t.dataset.k];save()}render();return true}
   return t.classList.contains("crf")}
 function crAct(a,v,el,e){
@@ -409,11 +455,13 @@ function crAct(a,v,el,e){
   else if(a=="crup"){crMv(v,-1)}
   else if(a=="crdn"){crMv(v,1)}
   else if(a=="crdelb"){if(confirm("Supprimer ce bloc ?")){db.cr2.blocks=db.cr2.blocks.filter(function(b){return b.id!=v});save();crM=null}}
-  else if(a=="crdeli"){var b2=crBlock(crM&&crM.id);if(b2){b2.ing.splice(+v,1);save()}}
+  else if(a=="crdeli"){var b2=crBlock(crM&&crM.id);if(b2){var ps=String(v).split("/"),last=+ps.pop(),lst=ps.length?crAtItem(b2,ps.join("/")).sub:b2.ing;lst.splice(last,1);save()}}
+  else if(a=="crsub"){var b4=crBlock(crM&&crM.id),x4=b4&&crAtItem(b4,v);if(x4){if(x4.sub)delete x4.sub;else x4.sub=[];save()}}
+  else if(a=="crx"){crXp[v]=!crXp[v]}
   else if(a=="crimg"){crIT=v;crIf.value="";crIf.click();return}
   else if(a=="crimgdel"){var b3=crBlock(v);if(b3){delete b3.img;save()}}
   else if(a=="crren"){var it=findIt(v);if(it){var nv=prompt("Nouveau nom de l’objet :",it.name);if(nv&&nv.trim()&&nv.trim()!==it.name){it.name=nv.trim();save()}}}}
-var CRA={crbg:1,cropen:1,crcalc:1,cred:1,crclose:1,crgrp:1,crnew:1,crdup:1,crup:1,crdn:1,crdelb:1,crdeli:1,crimg:1,crimgdel:1,crren:1};
+var CRA={crsub:1,crx:1,crbg:1,cropen:1,crcalc:1,cred:1,crclose:1,crgrp:1,crnew:1,crdup:1,crup:1,crdn:1,crdelb:1,crdeli:1,crimg:1,crimgdel:1,crren:1};
 function buildDoc(){var css=document.getElementById("css").textContent,code=document.getElementById("code").textContent,data=JSON.stringify(db).replace(/</g,"\\u003c");
   return'<!DOCTYPE html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n<meta name="color-scheme" content="dark">\n<title>HDV Nano</title>\n<style id="css">'+css+'</style>\n</head>\n<body class="ro">\n<div class="wrap" id="app"></div>\n<script id="data" type="application/json">'+data+'<\/script>\n<script id="code">'+code+'<\/script>\n</body>\n</html>'}
 function dl(){save();var b=new Blob([buildDoc()],{type:"text/html"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="index.html";document.body.appendChild(a);a.click();setTimeout(function(){a.remove()},500);showToast("Fichier index.html téléchargé : mets-le en ligne pour que la guilde voie les changements.")}
@@ -454,7 +502,7 @@ function icoLoad(file,id){var r=new FileReader();r.onload=function(){var im=new 
     var it=db.items.filter(function(i){return i.id==id})[0];if(it){it.img=u;save();render()}};
   im.src=r.result};r.onerror=function(){showToast("Image illisible.")};r.readAsDataURL(file)}
 function stale(){return db.stale||60}
-var TAX=12,prevSig=null,page="market",ED=false,pnFoc=false,pseudo="",sent={},props=[],propOpen=false,pnOpen=false,pnThen=false,fbMsg="",pubRev=0,EDIT={crnew:1,cred:1,crdup:1,crup:1,crdn:1,crdelb:1,crdeli:1,crimg:1,crimgdel:1,crren:1,qmake:1,prop:1,propok:1,propno:1,propall:1,propnone:1,fbgo:1,fboff:1,fbcopy:1,undo:1,rencat:1,savecr:1,cancelcr:1,newsub:1,savesub:1,mansub:1,rensub:1,savesr:1,cancelsr:1,delsub:1,psmode:1,psadd:1,psdel:1,psok:1,pst:1,pstx:1,pstgo:1,pstback:1,pstok:1,syn:1,synx:1,syngo:1,synoff:1,synnow:1,add:1,create:1,newcat:1,mancat:1,delcat:1,savecat:1,addpt:1,delpt:1,saveinfo:1,delitem:1,io:1,reset:1,fav:1,clean:1,ioload:1,chk:1,ico:1,icodel:1};
+var TAX=12,prevSig=null,page="market",ED=false,pnFoc=false,pseudo="",sent={},props=[],propOpen=false,pnOpen=false,pnThen=false,fbMsg="",pubRev=0,EDIT={crsub:1,crnew:1,cred:1,crdup:1,crup:1,crdn:1,crdelb:1,crdeli:1,crimg:1,crimgdel:1,crren:1,qmake:1,prop:1,propok:1,propno:1,propall:1,propnone:1,fbgo:1,fboff:1,fbcopy:1,undo:1,rencat:1,savecr:1,cancelcr:1,newsub:1,savesub:1,mansub:1,rensub:1,savesr:1,cancelsr:1,delsub:1,psmode:1,psadd:1,psdel:1,psok:1,pst:1,pstx:1,pstgo:1,pstback:1,pstok:1,syn:1,synx:1,syngo:1,synoff:1,synnow:1,add:1,create:1,newcat:1,mancat:1,delcat:1,savecat:1,addpt:1,delpt:1,saveinfo:1,delitem:1,io:1,reset:1,fav:1,clean:1,ioload:1,chk:1,ico:1,icodel:1};
 function sigp(){return db.sig||15}
 function sg(it){var s=stats(it),p=s.p,lo=it.lo,hi=it.hi;if(lo||hi)return lo&&p<=lo?-1:hi&&p>=hi?1:0;if(s.n<3||!s.med)return 0;var x=sigp()/100;return p<=s.med*(1-x)?-1:p>=s.med*(1+x)?1:0}
 function isAl(it){return sg(it)!=0}
