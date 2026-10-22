@@ -113,7 +113,7 @@ tbody tr{transition:background-color .15s ease}
 .crc .ft{border-top:1px solid var(--line);padding-top:6px}.crc .ft div{display:flex;justify-content:space-between;padding:1px 0}.crc .ft span{color:var(--mu)}.crc .ft .big b{font-size:15px;color:var(--ac)}
 .vd{margin-top:6px;font-size:12px;border-radius:6px;padding:4px 8px;display:block!important}.vd.good{background:rgba(52,211,153,.12);color:var(--up)}.vd.bad{background:rgba(248,113,113,.12);color:var(--dn)}.vd.na,.vd.lock{background:var(--chip);color:var(--mu)}
 .crwarn{color:var(--dn);font-size:12px}.crh{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}.crh .cat{flex:1;min-width:200px}
-.crgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px 14px;margin-top:10px}.crren{border:0;background:none;padding:0 4px;color:var(--mu);cursor:pointer;font-size:12px}.crren:hover{color:var(--ac)}.crl{display:flex;gap:8px;align-items:center;font-size:12px}.crl .tx{flex:1;min-width:0}.crl input{width:100px;text-align:right;height:28px;padding:2px 8px;box-sizing:border-box}.crl input:not(:placeholder-shown){border-color:var(--ac);font-weight:700}.crfoot{margin-top:8px}
+.crgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px 14px;margin-top:10px}.crsel{max-width:110px;height:28px;font-size:11px;padding:2px 4px}.crren{border:0;background:none;padding:0 4px;color:var(--mu);cursor:pointer;font-size:12px}.crren:hover{color:var(--ac)}.crl{display:flex;gap:8px;align-items:center;font-size:12px}.crl .tx{flex:1;min-width:0}.crl input{width:100px;text-align:right;height:28px;padding:2px 8px;box-sizing:border-box}.crl input:not(:placeholder-shown){border-color:var(--ac);font-weight:700}.crfoot{margin-top:8px}
 .qe{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}.qe label{flex:1;min-width:160px}
 select option,select optgroup{background:var(--panel);color:var(--tx)}
 .qi.pend{outline:2px solid var(--ac)}
@@ -318,6 +318,8 @@ function crFixed(n){if(!/\(lie\)$/.test(crNorm(n)))return 0;var x=crNorm(n);if(/
 var crIdx=null,crIdxN=-1;
 function crMap(){if(crIdx&&crIdxN===db.items.length)return crIdx;crIdx={};db.items.forEach(function(i){var k=crNorm(i.name);if(!crIdx[k])crIdx[k]=i});crIdxN=db.items.length;return crIdx}
 function crItem(i){var id=db.crmap&&db.crmap[i],x=id&&findIt(id);return x||crMap()[crNorm(CRD.F[i])]||null}
+function crKeys(it){var o=[];for(var i=0;i<CRD.F.length;i++)if(crItem(i)===it)o.push(i);return o}
+function crLink(ks,it){if(!ks.length)return;db.crmap=db.crmap||{};ks.forEach(function(i){db.crmap[i]=it.id});crIdx=null}
 function crRen(it,n){return ED&&it?'<button class="crren" data-a="crren" data-v="'+n+'" title="Renommer l’objet" aria-label="Renommer">✎</button>':""}
 function crRename(n){var it=crItem(n);if(!it)return;var v=prompt("Nouveau nom de l’objet :",it.name);if(v==null)return;v=v.trim();if(!v||v===it.name)return;it.name=v;db.crmap=db.crmap||{};db.crmap[n]=it.id;crIdx=null;save();showToast("Objet renommé.")}
 var crINT=null;function crInter(i){if(!crINT){crINT={};CRD.I.forEach(function(r){crINT[r[0]]=r[1]})}return crINT[i]||null}
@@ -326,11 +328,14 @@ function crChance(lv,k){if(lv<0)return 1;var d=crS.lvl-lv,t=CRTAB[k]||CRTAB.w;if
 function crCompute(){
   var ch=CRD.CH[crS.sub],eff={},out=[],pS=1,c=.25;
   function mkt(n){var m=+crS.me[n];if(m>0)return{v:m,s:"me"};var it=crItem(n),p=it?stats(it).p:0;if(p>0)return{v:p,s:"site",it:it};var f=crFixed(CRD.F[n]);if(f)return{v:f,s:"fix"};return null}
-  function price(n,seen){if(eff[n]!=null)return{v:eff[n],s:"chain"};var m=mkt(n);if(m)return m;var r=crInter(n);
-    if(r){seen=seen||{};if(seen[n])return{v:0,s:"none"};seen[n]=1;var v=0,miss=false;r.forEach(function(x){var p=price(x[0],seen);v+=p.v*x[1];if(!p.v)miss=true});return{v:v,s:miss?"none":"craft"}}
-    return{v:0,s:"none"}}
+  function price(n,seen){if(eff[n]!=null)return{v:eff[n],s:"chain"};var m=mkt(n),r=crInter(n);
+    if(m&&(m.s=="me"||!r))return m;
+    if(r){seen=seen||{};if(seen[n])return m||{v:0,s:"none"};seen[n]=1;var v=0,miss=false;r.forEach(function(x){var p=price(x[0],seen);v+=p.v*x[1];if(!p.v)miss=true});delete seen[n];
+      if(m&&(miss||m.v<=v))return m;
+      return{v:v,s:miss?"none":"craft",alt:m?m.v:0}}
+    return m||{v:0,s:"none"}}
   ch.forEach(function(st,i){var k=CRD.K[i];
-    var rows=st[3].map(function(x){var pr=price(x[0]);return{n:x[0],q:x[1],u:pr.v,s:pr.s,a:pr.v*x[1],it:crItem(x[0])}});
+    var rows=st[3].map(function(x){var pr=price(x[0]);return{n:x[0],q:x[1],u:pr.v,s:pr.s,a:pr.v*x[1],alt:pr.alt||0,it:crItem(x[0])}});
     var M=0,miss=false;rows.forEach(function(r){M+=r.a;if(!r.u)miss=true});
     var prev=i?crTarget(ch[i-1],CRD.K[i-1]):null,exp,x={};
     if(/^(w|e|a)$/.test(k)){var p=crChance(st[0],k),q=p*c*p;x.succ=p;x.lv=st[0];x.tries=q?1/q:Infinity;exp=q?M/q:Infinity}
@@ -343,7 +348,7 @@ function crCompute(){
 function crNum(v){return isFinite(v)?fmt(Math.round(v)):"—"}
 function crIco(n,it){return ico(it||{name:CRD.F[n]},"xs",!(ED&&it&&it.id))}
 function crCard(r){var li="";
-  r.rows.forEach(function(x){var tag=x.s=="me"?' <small class="crt me">mon prix</small>':x.s=="fix"?' <small class="crt">PNJ</small>':x.s=="craft"?' <small class="crt">craft</small>':"";
+  r.rows.forEach(function(x){var tag=x.s=="me"?' <small class="crt me">mon prix</small>':x.s=="fix"?' <small class="crt">PNJ</small>':x.s=="craft"?' <small class="crt'+(x.alt?" me":"")+'">'+(x.alt?"craft moins cher que l’HDV":"craft")+"</small>":"";
     li+='<li'+(x.u?"":' class="miss"')+'><span class="q">'+x.q+'×</span>'+crIco(x.n,x.it)+'<span class="n">'+esc(x.it?x.it.name:CRD.F[x.n])+tag+crRen(x.it,x.n)+'</span><span class="v">'+(x.u?fmt(Math.round(x.a)):"—")+"</span></li>"});
   var ft="",vd="";
   if(r.x.up){ft+='<div class="big"><span>Coût de l’amélioration</span><b>'+crNum(r.M)+"</b></div>";if(r.x.combo)ft+="<div><span>Combo (Splendent direct)</span><b>25 %</b></div>";vd='<div class="vd na">'+(r.x.combo?"25 % de chance d’obtenir directement la version Splendent":"Obtenable uniquement par ce craft")+"</div>"}
@@ -374,7 +379,7 @@ function crPage(){
   need.forEach(function(n){if(+crS.me[n]>0)mine++});
   var rowsP=need.slice().sort(function(a,b){return a-b}).filter(function(n){return!crFixed(CRD.F[n])}).map(function(n){
     var it=crItem(n),p=it?stats(it).p:0,v=+crS.me[n]>0?fmt(+crS.me[n]):"",ph=p>0?fmt(p):"";
-    return'<label class="crl">'+crIco(n,it)+'<span class="tx">'+esc(it?it.name:CRD.F[n])+crRen(it,n)+(it?"":' <small class="crt">pas dans la liste</small>')+'</span><input class="cri" data-n="'+n+'" inputmode="decimal" value="'+v+'" placeholder="'+(ph||"prix")+'"></label>'}).join("");
+    return'<label class="crl">'+crIco(n,it)+'<span class="tx">'+esc(it?it.name:CRD.F[n])+crRen(it,n)+(it?"":' <small class="crt">pas dans la liste</small>')+'</span>'+(!it&&ED?'<select class="crsel" data-n="'+n+'" aria-label="Lier à un objet de la liste"><option value="">Lier à…</option>'+db.items.map(function(i){return'<option value="'+i.id+'">'+esc(i.name)+"</option>"}).join("")+"</select>":"")+'<input class="cri" data-n="'+n+'" inputmode="decimal" value="'+v+'" placeholder="'+(ph||"prix")+'"></label>'}).join("");
   var missing=need.filter(function(n){return!crFixed(CRD.F[n])&&!crItem(n)}).length;
   var pr='<div class="panel crp"><div class="crh"><b>Mes prix</b><span class="cat">Champ vide = prix de la liste d’objets. Enregistré dans ce navigateur (k / m acceptés : 250k, 1,5m).</span><button data-a="crtog">'+(crS.open?"Masquer":"Afficher")+" ("+total+" objets"+(mine?", "+mine+" à moi":"")+")</button></div>"+(crS.open?'<div class="crgrid">'+rowsP+'</div><div class="crfoot">'+(mine?'<button data-a="crclr" class="del">Effacer mes prix</button>':"")+"</div>":"")+"</div>";
   var foot='<div class="qfoot"><span>'+found+" objet"+(found>1?"s":"")+" sur "+total+" trouvé"+(found>1?"s":"")+" dans la liste ; outils PNJ à prix fixe. Pour changer un prix, utilise la liste d’objets ou « Mes prix ».</span>"+(ED&&missing?'<button class="pri" data-a="crmake">Ajouter les '+missing+" objets manquants à la liste</button>":"")+"</div>";
@@ -577,11 +582,11 @@ document.addEventListener("click",function(e){
     var p=+val("np")||0;db.items.push({id:"i"+Date.now(),name:nm,cat:val("nc"),sub:(subs(val("nc")).indexOf(val("ns"))>-1?val("ns"):undefined),rar:+val("nr"),h:[pt(Date.now(),p)]});adding=false;save()}
   else if(a=="addpt"){it=cur();var t=val("ed")?new Date(val("ed")).getTime():Date.now();it.h.push(pt(t,+val("ep")||0));save()}
   else if(a=="delpt"){it=cur();if(it.h.length>1){(db.dt=db.dt||[]).push(it.id+":"+it.h[+v].t);it.h.splice(+v,1);save()}}
-  else if(a=="saveinfo"){it=cur();it.name=val("in").trim()||it.name;it.cat=val("ic");var sv=val("is");if(sv&&subs(it.cat).indexOf(sv)>-1)it.sub=sv;else delete it.sub;it.rar=+val("ir");it.lo=+val("il")||0;it.hi=+val("ih")||0;save()}
+  else if(a=="saveinfo"){it=cur();var ck0=crKeys(it);it.name=val("in").trim()||it.name;crLink(ck0,it);it.cat=val("ic");var sv=val("is");if(sv&&subs(it.cat).indexOf(sv)>-1)it.sub=sv;else delete it.sub;it.rar=+val("ir");it.lo=+val("il")||0;it.hi=+val("ih")||0;save()}
   else if(a=="delitem"){if(pc=="delitem"){(db.dt=db.dt||[]).push(view);db.items=db.items.filter(function(i){return i.id!=view});view=null;save()}else conf="delitem"}
   hNav(pv,pp);render();pFocus();
 });
-document.addEventListener("change",function(e){var t=e.target;if(t.classList&&t.classList.contains("cri")){var cv=parseK(t.value);if(cv>0)crS.me[t.dataset.n]=cv;else delete crS.me[t.dataset.n];crSave();render();return}if(t.id=="ic"||t.id=="nc"){var se=document.getElementById(t.id=="ic"?"is":"ns");if(se)se.innerHTML=subOpts(t.value,"");return}
+document.addEventListener("change",function(e){var t=e.target;if(t.classList&&t.classList.contains("crsel")){if(t.value){db.crmap=db.crmap||{};db.crmap[t.dataset.n]=t.value;crIdx=null;save();render()}return}if(t.classList&&t.classList.contains("cri")){var cv=parseK(t.value);if(cv>0)crS.me[t.dataset.n]=cv;else delete crS.me[t.dataset.n];crSave();render();return}if(t.id=="ic"||t.id=="nc"){var se=document.getElementById(t.id=="ic"?"is":"ns");if(se)se.innerHTML=subOpts(t.value,"");return}
   if(t.classList.contains("ss")){if(!ED)return;var si=db.items.filter(function(i){return i.id==t.dataset.id})[0];if(si){if(t.value)si.sub=t.value;else delete si.sub;save();render()}return}
   if(t.classList.contains("rs")){pSync();pst.fi=+t.dataset.i;render();pFocus();return}if(t.classList.contains("qsel")){db.qmap=db.qmap||{};if(t.value)db.qmap[t.dataset.k]=t.value;else delete db.qmap[t.dataset.k];save();render();return}if(t.id=="qm"){db.qm=Math.max(0,+t.value||0);save();render();return}if(t.id=="qf"){db.qf=Math.min(99,Math.max(0,+t.value||0));save();render();return}if(t.id=="sp"){db.sig=Math.max(1,+t.value||15);save();render();return}if(t.id=="sa"){db.stale=Math.max(1,+t.value||60);save();render();return}return});
 var AUTOP=30;
