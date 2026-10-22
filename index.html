@@ -316,12 +316,12 @@ function crSave(){try{localStorage.setItem("hdv_craft",JSON.stringify({sub:crS.s
 function crNorm(n){return String(n).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[’`´]/g,"'").replace(/\s+/g," ").trim()}
 function crFixed(n){if(!/\(lie\)$/.test(crNorm(n)))return 0;var x=crNorm(n);if(/^(solvant|abrasif|catalyseur|papier de verre)/.test(x))return 400;if(/zircon|inferieur/.test(x))return 4650;if(/lazuli|intermediaire/.test(x))return 5600;if(/pierre de lune|superieur/.test(x))return 6550;return 0}
 var crIdx=null,crIdxN=-1;
-function crMap(){if(crIdx&&crIdxN===db.items.length)return crIdx;crIdx={};db.items.forEach(function(i){var k=crNorm(i.name);if(!crIdx[k])crIdx[k]=i});crIdxN=db.items.length;return crIdx}
-function crItem(i){var id=db.crmap&&db.crmap[i],x=id&&findIt(id);return x||crMap()[crNorm(CRD.F[i])]||null}
+function crMap(){if(crIdx&&crIdxN===db.items.length)return crIdx;crIdx={};db.items.forEach(function(i){var k=crNorm(i.name),o=crIdx[k];if(!o||(!o.h.length&&i.h.length))crIdx[k]=i});crIdxN=db.items.length;return crIdx}
+function crItem(i){var id=db.crmap&&db.crmap[i],x=id&&findIt(id);if(x){if(!x.h.length){var a=crMap()[crNorm(x.name)];if(a&&a!==x&&a.h.length)return a}return x}return crMap()[crNorm(CRD.F[i])]||null}
 function crKeys(it){var o=[];for(var i=0;i<CRD.F.length;i++)if(crItem(i)===it)o.push(i);return o}
 function crLink(ks,it){if(!ks.length)return;db.crmap=db.crmap||{};ks.forEach(function(i){db.crmap[i]=it.id});crIdx=null}
 function crRen(it,n){return ED&&it?'<button class="crren" data-a="crren" data-v="'+n+'" title="Renommer l’objet" aria-label="Renommer">✎</button>':""}
-function crRename(n){var it=crItem(n);if(!it)return;var v=prompt("Nouveau nom de l’objet :",it.name);if(v==null)return;v=v.trim();if(!v||v===it.name)return;it.name=v;db.crmap=db.crmap||{};db.crmap[n]=it.id;crIdx=null;save();showToast("Objet renommé.")}
+function crRename(n){var it=crItem(n);if(!it)return;var v=prompt("Nouveau nom de l’objet :",it.name);if(v==null)return;v=v.trim();if(!v||v===it.name)return;crIdx=null;var ex=crMap()[crNorm(v)];db.crmap=db.crmap||{};if(ex&&ex!==it){db.crmap[n]=ex.id;crIdx=null;save();showToast("Un objet « "+ex.name+" » existe déjà : le Craft l’utilise maintenant (prix et image). L’ancien est inutilisé, tu peux le supprimer de la liste.");return}it.name=v;db.crmap[n]=it.id;crIdx=null;save();showToast("Objet renommé.")}
 var crINT=null;function crInter(i){if(!crINT){crINT={};CRD.I.forEach(function(r){crINT[r[0]]=r[1]})}return crINT[i]||null}
 function crTarget(st,k){return/^(w|e|a)$/.test(k)?st[2]:st[1]}
 function crChance(lv,k){if(lv<0)return 1;var d=crS.lvl-lv,t=CRTAB[k]||CRTAB.w;if(d<0)return 0;return t[Math.min(d,t.length-1)]/100}
