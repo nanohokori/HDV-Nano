@@ -113,7 +113,7 @@ tbody tr{transition:background-color .15s ease}
 .crc .ft{border-top:1px solid var(--line);padding-top:6px}.crc .ft div{display:flex;justify-content:space-between;padding:1px 0}.crc .ft span{color:var(--mu)}.crc .ft .big b{font-size:15px;color:var(--ac)}
 .vd{margin-top:6px;font-size:12px;border-radius:6px;padding:4px 8px;display:block!important}.vd.good{background:rgba(52,211,153,.12);color:var(--up)}.vd.bad{background:rgba(248,113,113,.12);color:var(--dn)}.vd.na,.vd.lock{background:var(--chip);color:var(--mu)}
 .crwarn{color:var(--dn);font-size:12px}.crh{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}.crh .cat{flex:1;min-width:200px}
-.crgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px 14px;margin-top:10px}.crl{display:flex;gap:8px;align-items:center;font-size:12px}.crl .tx{flex:1;min-width:0}.crl input{width:100px;text-align:right;height:28px;padding:2px 8px;box-sizing:border-box}.crl input:not(:placeholder-shown){border-color:var(--ac);font-weight:700}.crfoot{margin-top:8px}
+.crgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px 14px;margin-top:10px}.crren{border:0;background:none;padding:0 4px;color:var(--mu);cursor:pointer;font-size:12px}.crren:hover{color:var(--ac)}.crl{display:flex;gap:8px;align-items:center;font-size:12px}.crl .tx{flex:1;min-width:0}.crl input{width:100px;text-align:right;height:28px;padding:2px 8px;box-sizing:border-box}.crl input:not(:placeholder-shown){border-color:var(--ac);font-weight:700}.crfoot{margin-top:8px}
 .qe{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}.qe label{flex:1;min-width:160px}
 select option,select optgroup{background:var(--panel);color:var(--tx)}
 .qi.pend{outline:2px solid var(--ac)}
@@ -142,7 +142,7 @@ function seedItems(){
     return{id:"i"+n,name:x[0],cat:"Gather Resource",rar:x[1],h:h};
   });
 }
-var db,view=null,filter="Tout",q="",range="7d",adding=false,conf=null,addingCat=false,manCat=false,catEdit=null,sort={k:"",d:1},qu=false,io=false,ioMsg="";
+var db,view=null,filter="Tout",q="",range="Tout",adding=false,conf=null,addingCat=false,manCat=false,catEdit=null,sort={k:"",d:1},qu=false,io=false,ioMsg="";
 function load(){var emb=null;try{emb=JSON.parse(document.getElementById("data").textContent)}catch(e){}
   db=emb&&emb.items?emb:{cats:["Gather Resource","Craft Resource","Conversion Resource"],items:seedItems()};pubRev=db.rev||0;
   if(ED){try{var r=JSON.parse(localStorage.getItem(KEY));if(r&&r.items&&r.cats&&(r.rev||0)>=pubRev)db=r}catch(e){}}if(emb&&emb.ph){db.ph=emb.ph;EMBPH=emb.ph}uMark()}
@@ -317,7 +317,9 @@ function crNorm(n){return String(n).toLowerCase().normalize("NFD").replace(/[̀-
 function crFixed(n){if(!/\(lie\)$/.test(crNorm(n)))return 0;var x=crNorm(n);if(/^(solvant|abrasif|catalyseur|papier de verre)/.test(x))return 400;if(/zircon|inferieur/.test(x))return 4650;if(/lazuli|intermediaire/.test(x))return 5600;if(/pierre de lune|superieur/.test(x))return 6550;return 0}
 var crIdx=null,crIdxN=-1;
 function crMap(){if(crIdx&&crIdxN===db.items.length)return crIdx;crIdx={};db.items.forEach(function(i){var k=crNorm(i.name);if(!crIdx[k])crIdx[k]=i});crIdxN=db.items.length;return crIdx}
-function crItem(i){return crMap()[crNorm(CRD.F[i])]||null}
+function crItem(i){var id=db.crmap&&db.crmap[i],x=id&&findIt(id);return x||crMap()[crNorm(CRD.F[i])]||null}
+function crRen(it,n){return ED&&it?'<button class="crren" data-a="crren" data-v="'+n+'" title="Renommer l’objet" aria-label="Renommer">✎</button>':""}
+function crRename(n){var it=crItem(n);if(!it)return;var v=prompt("Nouveau nom de l’objet :",it.name);if(v==null)return;v=v.trim();if(!v||v===it.name)return;it.name=v;db.crmap=db.crmap||{};db.crmap[n]=it.id;crIdx=null;save();showToast("Objet renommé.")}
 var crINT=null;function crInter(i){if(!crINT){crINT={};CRD.I.forEach(function(r){crINT[r[0]]=r[1]})}return crINT[i]||null}
 function crTarget(st,k){return/^(w|e|a)$/.test(k)?st[2]:st[1]}
 function crChance(lv,k){if(lv<0)return 1;var d=crS.lvl-lv,t=CRTAB[k]||CRTAB.w;if(d<0)return 0;return t[Math.min(d,t.length-1)]/100}
@@ -328,7 +330,7 @@ function crCompute(){
     if(r){seen=seen||{};if(seen[n])return{v:0,s:"none"};seen[n]=1;var v=0,miss=false;r.forEach(function(x){var p=price(x[0],seen);v+=p.v*x[1];if(!p.v)miss=true});return{v:v,s:miss?"none":"craft"}}
     return{v:0,s:"none"}}
   ch.forEach(function(st,i){var k=CRD.K[i];
-    var rows=st[3].map(function(x){var pr=price(x[0]);return{n:x[0],q:x[1],u:pr.v,s:pr.s,a:pr.v*x[1],it:pr.it||null}});
+    var rows=st[3].map(function(x){var pr=price(x[0]);return{n:x[0],q:x[1],u:pr.v,s:pr.s,a:pr.v*x[1],it:crItem(x[0])}});
     var M=0,miss=false;rows.forEach(function(r){M+=r.a;if(!r.u)miss=true});
     var prev=i?crTarget(ch[i-1],CRD.K[i-1]):null,exp,x={};
     if(/^(w|e|a)$/.test(k)){var p=crChance(st[0],k),q=p*c*p;x.succ=p;x.lv=st[0];x.tries=q?1/q:Infinity;exp=q?M/q:Infinity}
@@ -339,10 +341,10 @@ function crCompute(){
     out.push({st:st,k:k,rows:rows,M:M,exp:exp,mk:mk,use:use,miss:miss,x:x,t:t})});
   return out}
 function crNum(v){return isFinite(v)?fmt(Math.round(v)):"—"}
-function crIco(n,it){return ico(it||{name:CRD.F[n]},"xs",true)}
+function crIco(n,it){return ico(it||{name:CRD.F[n]},"xs",!(ED&&it&&it.id))}
 function crCard(r){var li="";
   r.rows.forEach(function(x){var tag=x.s=="me"?' <small class="crt me">mon prix</small>':x.s=="fix"?' <small class="crt">PNJ</small>':x.s=="craft"?' <small class="crt">craft</small>':"";
-    li+='<li'+(x.u?"":' class="miss"')+'><span class="q">'+x.q+'×</span>'+crIco(x.n,x.it)+'<span class="n">'+esc(CRD.F[x.n])+tag+'</span><span class="v">'+(x.u?fmt(Math.round(x.a)):"—")+"</span></li>"});
+    li+='<li'+(x.u?"":' class="miss"')+'><span class="q">'+x.q+'×</span>'+crIco(x.n,x.it)+'<span class="n">'+esc(x.it?x.it.name:CRD.F[x.n])+tag+crRen(x.it,x.n)+'</span><span class="v">'+(x.u?fmt(Math.round(x.a)):"—")+"</span></li>"});
   var ft="",vd="";
   if(r.x.up){ft+='<div class="big"><span>Coût de l’amélioration</span><b>'+crNum(r.M)+"</b></div>";if(r.x.combo)ft+="<div><span>Combo (Splendent direct)</span><b>25 %</b></div>";vd='<div class="vd na">'+(r.x.combo?"25 % de chance d’obtenir directement la version Splendent":"Obtenable uniquement par ce craft")+"</div>"}
   else{ft+="<div><span>Un craft</span><b>"+crNum(r.M)+"</b></div>";
@@ -355,7 +357,7 @@ function crCard(r){var li="";
     if(r.x.succ===0)vd='<div class="vd lock">Niveau de métier insuffisant</div>';
     else vd=r.mk&&isFinite(r.exp)?(r.mk.v>=r.exp?'<div class="vd good">Crafter est rentable ('+fmt(Math.round(r.mk.v-r.exp))+" d’économie)</div>":'<div class="vd bad">Acheter est plus rentable ('+fmt(Math.round(r.exp-r.mk.v))+" d’économie)</div>"):'<div class="vd na">Pas de prix HDV</div>'}
   var it=r.mk&&r.mk.it||crItem(r.t);
-  return'<div class="crc" style="--c:'+CRCOL[r.k]+'"><div class="hd">'+ico(it||{name:CRD.F[r.t]},"s",true)+'<div><div class="st">'+CRST[r.k]+'</div><div class="nm">'+esc(CRD.F[r.t])+'</div></div></div><ul>'+li+'</ul><div class="ft">'+ft+vd+"</div></div>"}
+  return'<div class="crc" style="--c:'+CRCOL[r.k]+'"><div class="hd">'+ico(it||{name:CRD.F[r.t]},"s",!(ED&&it&&it.id))+'<div><div class="st">'+CRST[r.k]+'</div><div class="nm">'+esc(it?it.name:CRD.F[r.t])+crRen(it,r.t)+'</div></div></div><ul>'+li+'</ul><div class="ft">'+ft+vd+"</div></div>"}
 function crLvName(l){var i=CRLV.indexOf(l);if(i>-1)return CRLN[i];return(l<30?"Novice ":"Professionnel ")+l}
 function crNeeded(){var seen={},steps=CRD.CH[crS.sub];
   function add(n){if(seen[n])return;seen[n]=1;var r=crInter(n);if(r)r.forEach(function(x){add(x[0])})}
@@ -372,7 +374,7 @@ function crPage(){
   need.forEach(function(n){if(+crS.me[n]>0)mine++});
   var rowsP=need.slice().sort(function(a,b){return a-b}).filter(function(n){return!crFixed(CRD.F[n])}).map(function(n){
     var it=crItem(n),p=it?stats(it).p:0,v=+crS.me[n]>0?fmt(+crS.me[n]):"",ph=p>0?fmt(p):"";
-    return'<label class="crl">'+crIco(n,it)+'<span class="tx">'+esc(CRD.F[n])+(it?"":' <small class="crt">pas dans la liste</small>')+'</span><input class="cri" data-n="'+n+'" inputmode="decimal" value="'+v+'" placeholder="'+(ph||"prix")+'"></label>'}).join("");
+    return'<label class="crl">'+crIco(n,it)+'<span class="tx">'+esc(it?it.name:CRD.F[n])+crRen(it,n)+(it?"":' <small class="crt">pas dans la liste</small>')+'</span><input class="cri" data-n="'+n+'" inputmode="decimal" value="'+v+'" placeholder="'+(ph||"prix")+'"></label>'}).join("");
   var missing=need.filter(function(n){return!crFixed(CRD.F[n])&&!crItem(n)}).length;
   var pr='<div class="panel crp"><div class="crh"><b>Mes prix</b><span class="cat">Champ vide = prix de la liste d’objets. Enregistré dans ce navigateur (k / m acceptés : 250k, 1,5m).</span><button data-a="crtog">'+(crS.open?"Masquer":"Afficher")+" ("+total+" objets"+(mine?", "+mine+" à moi":"")+")</button></div>"+(crS.open?'<div class="crgrid">'+rowsP+'</div><div class="crfoot">'+(mine?'<button data-a="crclr" class="del">Effacer mes prix</button>':"")+"</div>":"")+"</div>";
   var foot='<div class="qfoot"><span>'+found+" objet"+(found>1?"s":"")+" sur "+total+" trouvé"+(found>1?"s":"")+" dans la liste ; outils PNJ à prix fixe. Pour changer un prix, utilise la liste d’objets ou « Mes prix ».</span>"+(ED&&missing?'<button class="pri" data-a="crmake">Ajouter les '+missing+" objets manquants à la liste</button>":"")+"</div>";
@@ -424,7 +426,7 @@ function icoLoad(file,id){var r=new FileReader();r.onload=function(){var im=new 
     var it=db.items.filter(function(i){return i.id==id})[0];if(it){it.img=u;save();render()}};
   im.src=r.result};r.onerror=function(){showToast("Image illisible.")};r.readAsDataURL(file)}
 function stale(){return db.stale||60}
-var TAX=12,prevSig=null,page="market",ED=false,pnFoc=false,pseudo="",sent={},props=[],propOpen=false,pnOpen=false,pnThen=false,fbMsg="",pubRev=0,EDIT={qmake:1,crmake:1,prop:1,propok:1,propno:1,propall:1,propnone:1,fbgo:1,fboff:1,fbcopy:1,undo:1,rencat:1,savecr:1,cancelcr:1,newsub:1,savesub:1,mansub:1,rensub:1,savesr:1,cancelsr:1,delsub:1,psmode:1,psadd:1,psdel:1,psok:1,pst:1,pstx:1,pstgo:1,pstback:1,pstok:1,syn:1,synx:1,syngo:1,synoff:1,synnow:1,add:1,create:1,newcat:1,mancat:1,delcat:1,savecat:1,addpt:1,delpt:1,saveinfo:1,delitem:1,io:1,reset:1,fav:1,clean:1,ioload:1,chk:1,ico:1,icodel:1};
+var TAX=12,prevSig=null,page="market",ED=false,pnFoc=false,pseudo="",sent={},props=[],propOpen=false,pnOpen=false,pnThen=false,fbMsg="",pubRev=0,EDIT={crren:1,qmake:1,crmake:1,prop:1,propok:1,propno:1,propall:1,propnone:1,fbgo:1,fboff:1,fbcopy:1,undo:1,rencat:1,savecr:1,cancelcr:1,newsub:1,savesub:1,mansub:1,rensub:1,savesr:1,cancelsr:1,delsub:1,psmode:1,psadd:1,psdel:1,psok:1,pst:1,pstx:1,pstgo:1,pstback:1,pstok:1,syn:1,synx:1,syngo:1,synoff:1,synnow:1,add:1,create:1,newcat:1,mancat:1,delcat:1,savecat:1,addpt:1,delpt:1,saveinfo:1,delitem:1,io:1,reset:1,fav:1,clean:1,ioload:1,chk:1,ico:1,icodel:1};
 function sigp(){return db.sig||15}
 function sg(it){var s=stats(it),p=s.p,lo=it.lo,hi=it.hi;if(lo||hi)return lo&&p<=lo?-1:hi&&p>=hi?1:0;if(s.n<3||!s.med)return 0;var x=sigp()/100;return p<=s.med*(1-x)?-1:p>=s.med*(1+x)?1:0}
 function isAl(it){return sg(it)!=0}
@@ -496,9 +498,10 @@ document.addEventListener("click",function(e){
   else if(a=="more"){colp[v+"All"]=!isAll(v)}
   else if(a=="fold"){colp[v]=!isShut(v)}
   else if(a=="undo"){undo()}
-  else if(a=="open"){view=v;range="24h"}
+  else if(a=="open"){view=v;range="Tout"}
   else if(a=="qmake"){qCreate()}
   else if(a=="crmake"){crMake()}
+  else if(a=="crren"){crRename(+v)}
   else if(a=="crsub"){crS.sub=+v;crSave()}
   else if(a=="crlv"){crS.lvl=+v;crSave()}
   else if(a=="crtog"){crS.open=!crS.open}
