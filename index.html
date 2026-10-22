@@ -377,7 +377,7 @@ function crCard(b){var N=1,cc=crCalc(b,1),it=b.combo&&findIt(b.combo),ad=ED?'<sp
    '<div class="crbb"><button class="pri" data-a="cropen" data-v="'+b.id+'">Calculer</button></div></div>'}
 function crMini(b,cc){var D=crSumD(b),P=D.P,h='';
   if(!cc.cost)return'<div class="crbp"><span class="cat">Pas encore de prix</span></div>';
-  h+='<div class="crmi"><span>Coût moyen</span><b>'+(D.avg?fmt(Math.round(D.avg)):"—")+'</b></div><div class="crmi"><span>Prix HDV</span><b>'+(D.pr?fmt(Math.round(D.pr)):"—")+'</b></div>';
+  h+='<div class="crmi"><span>Coût moyen</span><b>'+(D.avg<0?"gratuit · +"+fmt(Math.round(-D.avg)):D.avg?fmt(Math.round(D.avg)):"—")+'</b></div><div class="crmi"><span>Prix HDV</span><b>'+(D.pr?fmt(Math.round(D.pr)):"—")+'</b></div>';
   h+='<div class="crmi"><span>Réussite</span><b>'+(P.p?crPct(P.p)+" %":"—")+(b.combo?" · combo "+Math.round(crC_(b)*10000)/100+" %":"")+'</b></div>';
   return'<div class="crbp">'+h+'<div class="vd mini '+D.vc+'">'+D.vt+"</div></div>"}
 function crTrCard(b){var cc=crCalc(b,1),it=b.combo&&findIt(b.combo),ad=ED?'<span class="crad"><button data-a="cred" data-v="'+b.id+'" title="Modifier" aria-label="Modifier">✎</button><button data-a="crdup" data-v="'+b.id+'" title="Dupliquer" aria-label="Dupliquer">⧉</button><button data-a="crup" data-v="'+b.id+'" title="Monter" aria-label="Monter">↑</button><button data-a="crdn" data-v="'+b.id+'" title="Descendre" aria-label="Descendre">↓</button></span>':"";
@@ -400,9 +400,9 @@ function crSumD(b){var c1=crCalc(b,1),tb=CRTAB[b.tb],P=crProb(b),tgt=b.combo||b.
   if(b.combo)R.push(["Chance de combo",Math.round(crC_(b)*10000)/100+" %"],["Combo par tentative",P.q?crPct(P.q)+" %":"—"]);
   var tries=b.combo?(P.q?1/P.q:0):(P.p?1/P.p:0);
   R.push([b.combo?"Crafts pour 1 objet avec combo":"Crafts pour 1 objet",tries?n1(tries):"—"]);
-  var avg=b.combo?c1.cN>0?c1.per:0:c1.pN>0?c1.cost/c1.pN:0;
+  var avg=b.combo?c1.cN>0?c1.cost/c1.cN:0:c1.pN>0?c1.cost/c1.pN:0;
   R.push(["Coût moyen",avg&&c1.cost?fmt(Math.round(avg)):"—","big"]);
-  if(b.combo&&c1.rP&&c1.cN>0)R.push(["Coût moyen sans revente",fmt(Math.round(c1.cost/c1.cN))]);
+  if(b.combo&&c1.rP>0&&c1.cN>0)R.push(["Si tu revends les objets sans combo",c1.per<0?"gratuit · +"+fmt(Math.round(-c1.per)):fmt(Math.round(c1.per))]);
   R.push(["Prix HDV",pr?fmt(Math.round(pr)):"—"]);
   var vc,vt;if(P.p===0&&tb){vc="bad";vt="Niveau de métier insuffisant"}else if(pr&&avg&&c1.cost){if(pr>=avg){vc="good";vt="Crafter est rentable ("+fmt(Math.round(pr-avg))+" d’économie)"}else{vc="bad";vt="Acheter est plus rentable ("+fmt(Math.round(avg-pr))+" d’économie)"}}else{vc="na";vt="Pas de prix HDV"}
   return{R:R,vc:vc,vt:vt,P:P,avg:avg,pr:pr,c1:c1}}
