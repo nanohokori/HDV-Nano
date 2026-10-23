@@ -409,27 +409,22 @@ function crSumD(b){var c1=crCalc(b,1),tb=CRTAB[b.tb],P=crProb(b),tgt=b.combo||b.
   return{R:R,vc:vc,vt:vt,P:P,avg:avg,pr:pr,c1:c1}}
 function crSum(b){var D=crSumD(b),R=D.R,vd='<div class="vd '+D.vc+'">'+D.vt+"</div>";
   return'<div class="crsum2"><h3 class="crh3" style="margin-top:0">Résumé</h3>'+R.map(function(r){return'<div class="crl'+(r[2]?" big":"")+'"><span>'+r[0]+"</span><b>"+r[1]+"</b></div>"+(r[3]?'<div class="crnote">'+r[3]+"</div>":"")}).join("")+vd+crProf(b)+"</div>"}
-function crProf(b){if(!ED||!(b.out||b.combo))return"";var N=Math.max(1,Math.round(+crL.att[b.id]||1)),c=crCalc(b,N),f=function(v){return fmt(Math.round(v))},sg=function(v){return(v>0?"+":v<0?"−":"")+f(Math.abs(v))},rev=c.rP+c.rC,pf=rev-c.cost,miss=(b.out&&!c.pp)||(b.combo&&!c.pc)||!c.cost;
+function crProf(b){if(!ED||!(b.out||b.combo))return"";var c=crCalc(b,1),P=crProb(b),f=function(v){return fmt(Math.round(v))},sg=function(v){return(v>0?"+":v<0?"−":"")+f(Math.abs(v))},rev=c.rP+c.rC,pf=rev-c.cost,miss=(b.out&&!c.pp)||(b.combo&&!c.pc)||!c.cost,fe=(+crL.fee||0)+(+crL.lst||0);
   if(miss)return'<div class="crprof na"><h3 class="crh3" style="margin-top:0">Bénéfice HDV <span class="cat">admin</span></h3><p class="cat" style="margin:0">Il manque un prix (matériaux ou objets vendus) pour calculer le bénéfice.</p></div>';
-  var h='<div class="crprof '+(pf>=0?"good":"bad")+'"><h3 class="crh3" style="margin-top:0">Bénéfice HDV <span class="cat">admin · pour '+N+" tentative"+(N>1?"s":"")+'</span></h3>'+
-   '<div class="crl"><span>Achat des matériaux à l’HDV</span><b>−'+f(c.cost)+"</b></div>"+
-   (b.out?'<div class="crl"><span>Vente des objets sans combo</span><b>+'+f(c.rP)+"</b></div>":"")+
-   (b.combo?'<div class="crl"><span>Vente des objets avec combo</span><b>+'+f(c.rC)+"</b></div>":"")+
-   '<div class="crl big"><span>Bénéfice moyen</span><b>'+sg(pf)+" ("+(pf>=0?"+":"−")+Math.abs(Math.round(pf/c.cost*1000)/10).toString().replace(".",",")+" %)</b></div>"+
-   (b.combo&&c.cN>0?'<div class="crl"><span>Soit par objet avec combo obtenu</span><b>'+sg(pf/c.cN)+"</b></div>":"")+
-   (b.combo&&b.out?'<div class="crl"><span>Si tu ne vends que les objets avec combo</span><b>'+sg(c.rC-c.cost)+"</b></div>":"")+
-   '<div class="crnote">Moyenne sur beaucoup de crafts (une tentative peut échouer ou ne pas donner le combo). Matériaux au prix le moins cher'+((+crL.fee||0)+(+crL.lst||0)>0?" · frais HDV de "+((+crL.fee||0)+(+crL.lst||0))+" % déduits des ventes ("+(+crL.fee||0)+" % taxe + "+(+crL.lst||0)+" % mise en vente)":" · sans frais HDV")+'.</div></div>';
-  return h}
+  return'<div class="crprof '+(pf>=0?"good":"bad")+'"><h3 class="crh3" style="margin-top:0">Bénéfice HDV <span class="cat">admin · si tu craftes 1 fois</span></h3>'+
+   '<div class="crl"><span>Tu paies (matériaux)</span><b>−'+f(c.cost)+"</b></div>"+
+   '<div class="crl"><span>Tu récupères en vendant</span><b>+'+f(rev)+"</b></div>"+
+   '<div class="crl big"><span>Bénéfice</span><b>'+sg(pf)+"</b></div>"+
+   '<div class="crl"><span>Pour 100 crafts</span><b>'+sg(pf*100)+"</b></div>"+
+   '<div class="crnote">C’est une moyenne : sur 100 crafts'+(b.combo?", environ "+Math.round(P.q*100)+" donnent le combo":"")+(fe>0?". Frais HDV de "+fe+" % déjà déduits des ventes.":".")+"</div></div>"}
 function crByLvl(b){if(!CRTAB[b.tb])return"";if(b.rl==null)return'<p class="cat" style="margin:6px 0 0">Choisis le niveau de la recette pour voir la réussite à chaque niveau.</p>';
   var L=CRLV.slice();if(L.indexOf(crL.lvl)<0)L.push(crL.lvl);L.sort(function(x,y){return x-y});
   return'<div class="crlv"><div class="cat">Réussite selon ton niveau de métier (recette : '+crLvLab(+b.rl)+')</div>'+L.map(function(l){var v=crSucc(b,l);return'<div class="crl'+(l==crL.lvl?" cur":"")+'"><span>'+crLvLab(l)+'</span><b>'+(v?crPct(v)+" %":"niveau trop bas")+"</b></div>"}).join("")+"</div>"}
 function crPct(v){return(Math.round(v*10000)/100).toString().replace(".",",")}
 function crCalcModal(b){var N=Math.max(1,Math.round(+crL.att[b.id]||1)),t=crTbl(b,N),cc=t.cc,n1=function(v){return(Math.round(v*100)/100).toString().replace(".",",")};
-  var res='<div class="crres"><div class="crl"><span>Coût des matériaux ('+N+" tentative"+(N>1?"s":"")+')</span><b>'+(cc.cost?fmt(Math.round(cc.cost)):"—")+"</b></div>";
-  if(b.out||b.combo){res+='<div class="crnote">Objets obtenus en moyenne sur '+N+" tentative"+(N>1?"s":"")+' × leur prix = ce qu’ils rapportent :</div>';
-    if(b.out)res+='<div class="crl"><span>Sans combo : '+esc((findIt(b.out)||{}).name||"?")+"</span><b>"+(cc.pp?n1(cc.pN)+" × "+fmt(Math.round(cc.pp))+" = "+fmt(Math.round(cc.rP))+((+crL.fee||0)+(+crL.lst||0)>0?" après frais":""):"pas de prix")+"</b></div>";
-    if(b.combo)res+='<div class="crl"><span>Avec combo : '+esc((findIt(b.combo)||{}).name||"?")+"</span><b>"+(cc.pc?n1(cc.cN)+" × "+fmt(Math.round(cc.pc))+" = "+fmt(Math.round(cc.rC))+((+crL.fee||0)+(+crL.lst||0)>0?" après frais":""):"pas de prix")+"</b></div>";
-  }
+  var P=crProb(b),res='<div class="crres"><div class="crl"><span>Coût des matériaux ('+N+" tentative"+(N>1?"s":"")+')</span><b>'+(cc.cost?fmt(Math.round(cc.cost)):"—")+"</b></div>";
+  if(b.out)res+='<div class="crl"><span>Sans combo : '+esc((findIt(b.out)||{}).name||"?")+"</span><b>"+Math.round(P.pl*100)+" % des crafts · "+(cc.pp?"se vend "+fmt(Math.round(cc.pp)):"pas de prix")+"</b></div>";
+  if(b.combo)res+='<div class="crl"><span>Avec combo : '+esc((findIt(b.combo)||{}).name||"?")+"</span><b>"+Math.round(P.q*100)+" % des crafts · "+(cc.pc?"se vend "+fmt(Math.round(cc.pc)):"pas de prix")+"</b></div>";
   res+="</div>";
   var lv=CRTAB[b.tb]?'<label>Ton niveau de métier '+crLvPick("lvl",crL.lvl)+"</label>":"";
   return'<div class="crov" data-a="crbg"><div class="crmd" role="dialog" aria-modal="true" aria-label="'+esc(b.name)+'"><div class="crmh"><h2>'+esc(b.name||"Sans nom")+'</h2>'+(ED?'<button data-a="cred" data-v="'+b.id+'">✎ Modifier</button>':"")+'<button class="crx" data-a="crclose" aria-label="Fermer">×</button></div>'+
