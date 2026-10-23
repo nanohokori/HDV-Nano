@@ -416,6 +416,7 @@ function crProf(b){if(!ED||!(b.out||b.combo))return"";var N=Math.max(1,Math.roun
    (b.out?'<div class="crl"><span>Vente des objets sans combo</span><b>+'+f(c.rP)+"</b></div>":"")+
    (b.combo?'<div class="crl"><span>Vente des objets avec combo</span><b>+'+f(c.rC)+"</b></div>":"")+
    '<div class="crl big"><span>Bénéfice moyen</span><b>'+sg(pf)+" ("+(pf>=0?"+":"−")+Math.abs(Math.round(pf/c.cost*1000)/10).toString().replace(".",",")+" %)</b></div>"+
+   (b.combo&&c.cN>0?'<div class="crl"><span>Soit par objet avec combo obtenu</span><b>'+sg(pf/c.cN)+"</b></div>":"")+
    (b.combo&&b.out?'<div class="crl"><span>Si tu ne vends que les objets avec combo</span><b>'+sg(c.rC-c.cost)+"</b></div>":"")+
    '<div class="crnote">Moyenne sur beaucoup de crafts (une tentative peut échouer ou ne pas donner le combo). Matériaux au prix le moins cher'+((+crL.fee||0)+(+crL.lst||0)>0?" · frais HDV de "+((+crL.fee||0)+(+crL.lst||0))+" % déduits des ventes ("+(+crL.fee||0)+" % taxe + "+(+crL.lst||0)+" % mise en vente)":" · sans frais HDV")+'.</div></div>';
   return h}
