@@ -605,9 +605,10 @@ function render(){
   var app=document.getElementById("app"),it=view&&db.items.filter(function(i){return i.id==view})[0];
   var fo=document.activeElement&&document.activeElement.id==="q",bx=document.querySelector(".cards.panel"),wy=window.scrollY,vk=it?it.id:"";
   if(bx&&lsc>=0)lsc=bx.scrollTop;if(lsc<0)lsc=0;if(vk&&vk!==lastV)wyl=wy;
-  var cs0=document.querySelector(".crmd");cs0=cs0?cs0.scrollTop:0;
+  var cs0=document.querySelector(".crmd");cs0=cs0?cs0.scrollTop:0;var co0=document.querySelector(".crov"),co1=co0?co0.scrollTop:0;
   app.innerHTML=it?detail(it):page=="quna"?qunaPage():page=="craft"?crPage():list();initChart();notify();
   if(cs0){var cs1=document.querySelector(".crmd");if(cs1)cs1.scrollTop=cs0}
+  if(co1){var co2=document.querySelector(".crov");if(co2)co2.scrollTop=co1}
   document.body.style.overflow=(page=="craft"&&crM&&!it)?"hidden":"";
   var nb=document.querySelector(".cards.panel");setChh();if(nb&&lsc)nb.scrollTo({top:lsc,behavior:"instant"});
   if(vk!==lastV){window.scrollTo({top:vk?0:wyl,behavior:"instant"});lastV=vk}else if(Math.abs(window.scrollY-wy)>1)window.scrollTo({top:wy,behavior:"instant"});
