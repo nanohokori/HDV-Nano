@@ -249,6 +249,20 @@ button.sm{padding:5px 11px;font-size:13px;border-radius:9px}
 .jrst{display:flex;gap:10px;flex-wrap:wrap}.jrst>div{flex:1;min-width:130px;display:flex;flex-direction:column}
 .jrst span{font-size:11.5px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;font-weight:600}.jrst b{font-size:22px;font-variant-numeric:tabular-nums}.jrst small{color:var(--mu);font-size:12px}
 .jrn30{margin:0;font-size:12.5px}
+
+.jrgrid{grid-template-columns:repeat(auto-fill,minmax(290px,1fr))!important;gap:10px!important}
+.jrcard{padding:10px 12px!important;gap:8px!important;border-radius:12px}
+.jrh{gap:10px;align-items:center;justify-content:flex-start}.jrh .jrt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}.jrh .jrt b{font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.jrt .cat{font-size:11.5px}
+.jrrow{gap:6px!important}
+.jrc{min-width:80px!important;padding:5px 7px!important;gap:3px!important;border-radius:10px!important}
+.jrc span{font-size:10.5px!important}
+.jrn button{padding:0 7px!important;font-size:14px!important;line-height:1.5}
+.jrn input{padding:2px!important;font-size:14px!important;min-width:30px!important;width:30px!important}
+.jrst{display:flex;flex-wrap:wrap;gap:2px 14px;font-size:12.5px}.jrst span{text-transform:none!important;letter-spacing:0!important;font-weight:400!important;font-size:12.5px!important;color:var(--tx)!important}.jrst b{font-size:14px!important}.jrst small{font-size:11px!important}
+.jrn30{font-size:11.5px!important}
+
+.jrpf{font-size:12px;padding:3px 8px;border-radius:8px;line-height:1.35}.jrpf small{opacity:.8}
+.jrpf.up{background:rgba(74,222,128,.12);color:var(--up)}.jrpf.dn{background:rgba(248,113,113,.12);color:var(--dn)}
 </style>
 </head>
 <body class="ro">
@@ -455,11 +469,16 @@ function jrGet(id){var o=jr[id]||{};return{f:Math.max(0,+o.f||0),s:Math.max(0,+o
 function jrSet(id,k,v){var o=jrGet(id);o[k]=Math.max(0,Math.min(99999,Math.round(+v||0)));if(o.f+o.s+o.c)jr[id]=o;else delete jr[id];jrSave()}
 function jrWide(n,k){var p=n?k/n:0;return n?1.96*Math.sqrt(p*(1-p)/n):0}
 function jrCell(id,k,lab,cls){var o=jrGet(id);return'<div class="jrc '+cls+'"><span>'+lab+'</span><div class="jrn"><button data-a="jrp" data-v="'+esc(id)+'|'+k+'|-1" aria-label="Retirer un">−</button><input class="crf" data-f="jrn" data-b="'+esc(id)+'" data-k="'+k+'" inputmode="numeric" value="'+o[k]+'" aria-label="'+lab+'"><button data-a="jrp" data-v="'+esc(id)+'|'+k+'|1" aria-label="Ajouter un">+</button></div></div>'}
-function jrCard(b){var o=jrGet(b.id),n=o.f+o.s+o.c,P=crProb(b),pr=n?(o.s+o.c)/n:0,cr=n?o.c/n:0,w=jrWide(n,o.s+o.c),w2=jrWide(n,o.c);
-  var st=n?'<div class="jrst"><div><span>Réussite réelle</span><b>'+crPct(pr)+' %</b><small>théorie '+crPct(P.p)+' %'+(n>=30?' · ±'+crPct(w)+' pts':'')+'</small></div>'+(b.combo?'<div><span>Combo réel</span><b>'+crPct(cr)+' %</b><small>théorie '+crPct(P.q)+' %'+(n>=30?' · ±'+crPct(w2)+' pts':'')+'</small></div>':"")+'</div>'+(n<30?'<p class="cat jrn30">Encore peu d’essais ('+n+') : les pourcentages bougent beaucoup, attends 30 crafts ou plus pour comparer à la théorie.</p>':""):'<p class="cat jrn30">Aucun résultat noté pour l’instant.</p>';
-  return'<div class="panel jrcard"><div class="jrh"><div><b>'+esc(b.name||"Sans nom")+'</b>'+(n?' <span class="cat">· '+n+' craft'+(n>1?"s":"")+"</span>":"")+'</div>'+(n?'<button class="sm del" data-a="jrz" data-v="'+esc(b.id)+'">'+(jrConf==b.id?"Confirmer l’effacement":"Remettre à zéro")+"</button>":"")+'</div><div class="jrrow">'+jrCell(b.id,"s","Réussi","ok")+(b.combo?jrCell(b.id,"c","Réussi + combo","cb"):"")+jrCell(b.id,"f","Raté (cassé)","ko")+"</div>"+st+"</div>"}
+function jrPf(b,o){var n=o.f+o.s+o.c;if(!n)return"";var sv=crL.stock,cc;crL.stock={};try{cc=crCalc(b,1)}finally{crL.stock=sv}
+  if(!(cc.cost>0))return"";var k=1-((+crL.fee||0)+(+crL.lst||0))/100,po=b.out?crP(b.out)*k:0,pc=b.combo?crP(b.combo)*k:0,tot=n*cc.cost,fm=function(v){return(v>=0?"+":"−")+fmt(Math.abs(Math.round(v)))};
+  var line=function(lab,v){return'<div class="jrpf '+(v>=0?"up":"dn")+'"><b>'+(v>=0?"Rentable":"Pas rentable")+"</b> "+lab+" : "+fm(v)+' <small>('+fm(v/n)+" / craft)</small></div>"};
+  if(b.combo){if(!(pc>0))return"";var vc=o.c*pc-tot,h2=line("(combos seuls)",vc);if(b.out&&po>0&&o.s>0)h2+=line("(avec revente des objets sans combo)",o.c*pc+o.s*po-tot);return h2}
+  if(!(po>0))return"";return line("",o.s*po-tot)}
+function jrCard(b){var o=jrGet(b.id),n=o.f+o.s+o.c,P=crProb(b),pr=n?(o.s+o.c)/n:0,cr=n?o.c/n:0,w=jrWide(n,o.s+o.c),w2=jrWide(n,o.c),fk=crFake(b);
+  var st=n?'<div class="jrst"><span>Réussite <b>'+crPct(pr)+' %</b> <small>(théorie '+crPct(P.p)+' %'+(n>=30?' ±'+crPct(w):'')+')</small></span>'+(b.combo?'<span>Combo <b>'+crPct(cr)+' %</b> <small>(théorie '+crPct(P.q)+' %'+(n>=30?' ±'+crPct(w2):'')+')</small></span>':"")+"</div>"+jrPf(b,o)+(n<30?'<p class="cat jrn30">Peu d’essais ('+n+') : attends 30 crafts pour comparer.</p>':""):"";
+  return'<div class="panel jrcard"><div class="jrh">'+ico(fk,"s",true)+'<div class="jrt"><b class="r'+(+fk.rar||0)+'">'+esc(b.name||"Sans nom")+'</b>'+(n?'<span class="cat">'+n+' craft'+(n>1?"s":"")+"</span>":"")+'</div>'+(n?'<button class="sm del" data-a="jrz" data-v="'+esc(b.id)+'">'+(jrConf==b.id?"Confirmer":"Zéro")+"</button>":"")+'</div><div class="jrrow">'+jrCell(b.id,"s","Réussi","ok")+(b.combo?jrCell(b.id,"c","Combo","cb"):"")+jrCell(b.id,"f","Raté","ko")+"</div>"+st+"</div>"}
 function jrPage(){var bl=crBl().filter(function(b){return!b.tr}),tot=0;bl.forEach(function(b){var o=jrGet(b.id);tot+=o.f+o.s+o.c});
-  return'<header><div><h1 class="brand">HDV Nano</h1><p>Journal de tes crafts : note seulement les résultats, dans l’ordre que tu veux.</p></div></header><div class="bar">'+nav()+'</div><p class="hint">Ajoute avec <b>+</b> ou tape directement le total. Seul le nombre de chaque résultat compte, pas l’ordre. Les données restent dans ce navigateur (pas partagées, perdues si tu vides les données du site).</p>'+(bl.length?'<div class="jrgrid">'+bl.map(jrCard).join("")+"</div>":'<div class="panel crp"><p class="cat" style="margin:0">Crée d’abord un bloc dans l’onglet Craft.</p></div>')}
+  return'<header><div><h1 class="brand">HDV Nano</h1><p>Journal de tes crafts : note seulement les résultats, dans l’ordre que tu veux.</p></div></header><div class="bar">'+nav()+'</div><p class="hint">Ajoute avec <b>+</b> ou tape le total. Seul le nombre de chaque résultat compte, pas l’ordre. Données gardées dans ce navigateur seulement. Rentabilité calculée avec les prix actuels, taxes comprises.</p>'+(bl.length?'<div class="jrgrid">'+bl.map(jrCard).join("")+"</div>":'<div class="panel crp"><p class="cat" style="margin:0">Crée d’abord un bloc dans l’onglet Craft.</p></div>')}
 var crOdOpen=false,crOdAll=false,crOdSet=false;
 function crOdCfg(){var c=(db.cr2&&db.cr2.od)||{},m={},k;for(k=0;k<5;k++){var id=c.m&&c.m[k];if(id!=null){if(id&&!findIt(id))id=""}else{id="";(db.items||[]).some(function(i){if(+i.rar==k&&/^od(\s|$)/i.test(String(i.name||"").trim())){id=i.id;return true}})}m[k]=id}
   return{m:m,its:(c.i||[]).filter(function(id){return findIt(id)})}}
