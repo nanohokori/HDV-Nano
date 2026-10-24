@@ -153,6 +153,75 @@ select option,select optgroup{background:var(--panel);color:var(--tx)}
 .tabs.cat1{border-color:var(--ac)}.tabs.cat1>button{font-size:15px;font-weight:600;padding:9px 16px}.tabs.cat1>button:not(.on):not(.del){background:var(--bg);border:1px solid var(--line)}.tabs.sub>button{font-size:14px;font-weight:600;padding:7px 14px}.tabs.sub>button:not(.on):not(.del){background:var(--bg);border:1px solid var(--line)}
 .hs{font-style:normal;color:var(--ac);margin-left:6px;font-size:12px}.tabs button.on .hs{color:#111}
 select.ss{margin-top:4px;max-width:190px;font-size:12px;padding:3px 6px}
+/* ===== Refonte visuelle v81 : surcouche, aucune fonction modifiée ===== */
+:root{--bg:#0b0b0e;--panel:#141418;--panel2:#1a1a20;--line:#25252c;--tx:#ededf0;--mu:#8f8f9a;--ac:#ff9640;--acs:rgba(255,150,64,.13);--chip:#1f1f26;--rad:14px;--sh:0 1px 0 rgba(255,255,255,.04) inset,0 8px 24px rgba(0,0,0,.28)}
+body{background:radial-gradient(1100px 500px at 15% -10%,rgba(255,150,64,.07),transparent 60%),var(--bg);font-family:Inter,"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;letter-spacing:.005em;-webkit-font-smoothing:antialiased}
+.wrap{padding:26px 20px 72px}
+h1{font-size:30px;letter-spacing:-.8px}
+header{border-bottom:0;padding-bottom:6px;margin-bottom:18px}
+header p{font-size:14px}
+button,input,select{transition:background .15s,border-color .15s,color .15s,box-shadow .15s}
+button{background:var(--chip);border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-weight:500}
+button:hover{background:#26262f;border-color:#3a3a45}
+button.on{background:var(--acs);color:var(--ac);border-color:rgba(255,150,64,.45);font-weight:600}
+button.pri,.tabs button.on{background:var(--ac);color:#17110a;border-color:var(--ac);font-weight:700;box-shadow:0 4px 14px rgba(255,150,64,.22)}
+button.pri:hover{background:#ffa75c}
+button.del{color:var(--dn);background:transparent}
+input,select{background:#101015;border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+input:hover,select:hover{border-color:#3a3a45}
+input:focus,select:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(255,150,64,.16);outline:0}
+.tabs{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:4px;gap:2px}
+.tabs button{border:0;background:none;border-radius:10px;padding:8px 16px;color:var(--mu)}
+.tabs button:hover{background:none;color:var(--tx)}
+.tabs button.on:hover{background:var(--ac);color:#17110a}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--rad);box-shadow:var(--sh)}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);font-weight:600;padding:12px 10px}
+td{padding:13px 10px;border-bottom:1px solid rgba(255,255,255,.045)}
+tbody tr:hover{background:rgba(255,255,255,.035)}
+.name{font-size:16px;font-weight:500}
+.price{font-weight:650;font-variant-numeric:tabular-nums}
+td,.price,.stats b{font-variant-numeric:tabular-nums}
+.ico{border-radius:10px;background:linear-gradient(160deg,#272731,#1b1b22)}
+.ph{padding:14px 18px}
+.hint{font-size:13px;color:var(--mu)}
+.stats div{padding:16px 18px}
+.cathd{background:var(--panel)}
+/* cartes de craft */
+.crb{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:16px;padding:16px;gap:12px;box-shadow:var(--sh)}
+.crb:hover{border-color:rgba(255,150,64,.5);transform:translateY(-2px)}
+.crrv{border-radius:14px;background:rgba(255,255,255,.025)}
+/* fenêtre de calcul */
+.crov{background:rgba(5,5,8,.72);backdrop-filter:blur(6px)}
+.crmd{background:var(--panel);border:1px solid #2c2c35;border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.55)}
+.crmd input[type=number],.crmd input{border-radius:9px}
+.crmd table th{border-bottom:1px solid var(--line)}
+.crbuy{color:var(--ac)}
+@media (prefers-reduced-motion:reduce){.crb:hover{transform:none}}
+h1,h2,h3,h4,.crmd *{font-family:inherit}
+select{padding:8px 28px 8px 12px;line-height:1.3;min-height:38px}
+.crmd h2,.crmd h3{letter-spacing:-.3px}
+.crmh h2{font-family:inherit;font-size:21px;font-weight:650}
+/* ===== v81 : menu admin, barre d'outils marché, carte craft ===== */
+.hbar{align-items:center;gap:8px}
+.mnu{position:relative}
+.mnl{position:absolute;right:0;top:calc(100% + 6px);z-index:30;min-width:230px;background:var(--panel2);border:1px solid #33333d;border-radius:14px;padding:6px;box-shadow:0 18px 50px rgba(0,0,0,.55);display:flex;flex-direction:column;gap:2px}
+.mnl button{background:none;border:0;text-align:left;padding:9px 12px;border-radius:9px;width:100%}
+.mnl button:hover{background:rgba(255,255,255,.07)}
+.mnl hr{border:0;border-top:1px solid var(--line);margin:4px 2px}
+.syp{display:inline-flex;margin-top:8px;font-size:12.5px;padding:4px 11px;border-radius:999px;background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.4);color:var(--dn)}
+.syp:hover{background:rgba(248,113,113,.2)}
+.mtools{display:flex;justify-content:space-between;align-items:center;gap:10px 16px;flex-wrap:wrap;margin:0 0 12px}
+.mtl,.mtr{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+button.sm{padding:5px 11px;font-size:13px;border-radius:9px}
+.mnote{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:-4px 0 12px;font-size:13px}
+.mkp{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap;width:100%;padding:8px 0 2px}
+.mkp label{display:flex;align-items:center;gap:6px}
+.crbig{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04);margin-bottom:4px}
+.crbig small{font-size:11.5px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.crbig b{font-size:26px;letter-spacing:-.6px;font-variant-numeric:tabular-nums}
+.crbig.up{background:rgba(74,222,128,.09)}.crbig.up b{color:var(--up)}
+.crbig.dn{background:rgba(248,113,113,.09)}.crbig.dn b{color:var(--dn)}
+.crb .crmi{font-size:13px}
 </style>
 </head>
 <body class="ro">
@@ -297,6 +366,7 @@ function bh(h){var B=db.hb||1,days={},by=[],i,nd=0,nr=0;
   return head+'<div class="chips"><span>Acheter vers <b class="up">'+f(bi*B)+"–"+f((bi+1)*B%24)+"</b> ("+sgn(lo)+')</span><span>Vendre vers <b class="dn">'+f(si*B)+"–"+f((si+1)*B%24)+"</b> ("+sgn(hi)+')</span><span>Basé sur '+nr+" relevés sur "+nd+' jours</span></div><div style="padding:0 10px 6px"><svg viewBox="0 0 '+W+" "+H+'" role="img" aria-label="Écart moyen du prix par heure"><line x1="'+L+'" x2="'+(W-L)+'" y1="'+mid+'" y2="'+mid+'" stroke="var(--line)"/>'+bars+'</svg></div><div class="cat" style="padding:0 16px 14px">Écart moyen du prix par rapport à la médiane de sa journée, par heure locale. Vert : moins cher que d\'habitude. Rouge : plus cher.</div></div>'}
 function col(k){return!db.cols||db.cols.indexOf(k)>-1}
 function visN(){return["3","6","12","24","7","tr"].filter(col).length}
+var mnOpen=false,mkSet=false;
 function cb(){return'<div class="bar"><span class="cat">Colonnes</span>'+[["3","3h"],["6","6h"],["12","12h"],["24","24h"],["7","7j"],["tr","Tendance"]].map(function(c){return'<button data-a="col" data-v="'+c[0]+'" class="'+(col(c[0])?"on":"")+'">'+c[1]+"</button>"}).join("")+"</div>"}
 function cells(s){var o="";["3","6","12","24","7"].forEach(function(k){if(col(k))o+='<td data-l="'+(k=="7"?"7j":k+"h")+'">'+pct(s["d"+k])+pa(s["a"+k])+"</td>"});if(col("tr"))o+='<td class="sp">'+spark(s.h)+"</td>";return o}
 function nav(){return'<div class="tabs">'+[["market","Marché"],["quna","Quna"],["craft","Craft"]].map(function(p){return'<button data-a="page" data-v="'+p[0]+'" class="'+(page==p[0]?"on":"")+'">'+p[1]+"</button>"}).join("")+"</div>"}
@@ -381,8 +451,10 @@ function crMini(b,cc){var D=crSumD(b),P=D.P,h='';
   if(!cc.cost)return'<div class="crbp"><span class="cat">Pas encore de prix</span></div>';
   h+='<div class="crmi"><span>Coût moyen</span><b>'+(D.avg<0?"gratuit · +"+fmt(Math.round(-D.avg)):D.avg?fmt(Math.round(D.avg)):"—")+'</b></div><div class="crmi"><span>Prix HDV</span><b>'+(D.pr?fmt(Math.round(D.pr)):"—")+'</b></div>';
   h+='<div class="crmi"><span>Réussite</span><b>'+(P.p?crPct(P.p)+" %":"—")+(b.combo?" · combo "+Math.round(crC_(b)*10000)/100+" %":"")+'</b></div>';
-  if(ED&&(b.out||b.combo)){var pf=(b.combo?cc.rC:cc.rP+cc.rC)-cc.cost,okp=b.combo?cc.pc:cc.pp;if(okp)h+='<div class="crmi"><span>Bénéfice HDV'+(b.combo&&b.out?" (sans revente)":"")+'</span><b class="'+(pf>=0?"up":"dn")+'">'+(pf>=0?"+":"−")+fmt(Math.abs(Math.round(pf)))+" / craft</b></div>";if(b.combo&&b.out&&cc.pp){var pw=cc.rP+cc.rC-cc.cost;h+='<div class="crmi"><span>Avec revente</span><b class="'+(pw>=0?"up":"dn")+'">'+(pw>=0?"+":"−")+fmt(Math.abs(Math.round(pw)))+" / craft</b></div>"}}
-  return'<div class="crbp">'+h+'<div class="vd mini '+D.vc+'">'+D.vt+"</div></div>"}
+  if(ED&&(b.out||b.combo)){var pf=(b.combo?cc.rC:cc.rP+cc.rC)-cc.cost,okp=b.combo?cc.pc:cc.pp;if(b.combo&&b.out&&cc.pp){var pw=cc.rP+cc.rC-cc.cost;h+='<div class="crmi"><span>Avec revente</span><b class="'+(pw>=0?"up":"dn")+'">'+(pw>=0?"+":"−")+fmt(Math.abs(Math.round(pw)))+" / craft</b></div>"}}
+  return'<div class="crbp">'+crBig(b,cc)+h+'<div class="vd mini '+D.vc+'">'+D.vt+"</div></div>"}
+function crBig(b,cc){var D=crSumD(b);if(ED&&(b.out||b.combo)&&cc.cost){var pf=(b.combo?cc.rC:cc.rP+cc.rC)-cc.cost,okp=b.combo?cc.pc:cc.pp;if(okp)return'<div class="crbig '+(pf>=0?"up":"dn")+'"><small>Bénéfice par craft</small><b>'+(pf>=0?"+":"−")+fmt(Math.abs(Math.round(pf)))+"</b></div>"}
+  if(cc.cost&&D.avg>0)return'<div class="crbig"><small>Coût moyen</small><b>'+fmt(Math.round(D.avg))+"</b></div>";return""}
 function crTrCard(b){var cc=crCalc(b,1),it=b.combo&&findIt(b.combo),ad=ED?'<span class="crad"><button data-a="cred" data-v="'+b.id+'" title="Modifier" aria-label="Modifier">✎</button><button data-a="crdup" data-v="'+b.id+'" title="Dupliquer" aria-label="Dupliquer">⧉</button><button data-a="crup" data-v="'+b.id+'" title="Monter" aria-label="Monter">↑</button><button data-a="crdn" data-v="'+b.id+'" title="Descendre" aria-label="Descendre">↓</button></span>':"";
   var rows=cc.rows.map(function(r){var x=r.it;return'<div class="crtr"><span class="q">'+r.q+'×</span>'+ico(x||{name:"?"},"xs",true)+'<span class="n r'+((x&&+x.rar)||0)+'">'+esc(x?x.name:"(objet supprimé)")+'</span><b>'+(r.u?fmt(Math.round(r.tot)):"—")+"</b></div>"}).join("")||'<span class="cat">Aucun ingrédient</span>';
   return'<div class="crb crt3"'+(ED?' data-a="cred" data-v="'+b.id+'" tabindex="0" role="button"':"")+'><div class="crbh">'+ico(crFake(b),"l",true)+'<div class="crbt">'+(b.grp?'<div class="crtag">'+esc(b.grp)+"</div>":"")+'<div class="crbn">'+esc(b.name||"Sans nom")+"</div></div>"+ad+'</div><div class="crtrl">'+rows+'</div><div class="crtrc"><span>Coût de l’amélioration</span><b>'+(cc.cost?fmt(Math.round(cc.cost)):"—")+"</b></div>"+
@@ -591,10 +663,11 @@ function list(){
     return'<tr data-a="open" data-v="'+it.id+'" tabindex="0" title="Ouvrir la fiche de cet objet"><td><div style="display:flex;gap:8px;align-items:center"><button class="star" data-a="fav" data-v="'+it.id+'" aria-label="Favori">'+(it.fav?"★":"☆")+'</button>'+ico(it)+'<div><div class="name r'+it.rar+'">'+esc(it.name)+'<span class="go" aria-hidden="true">›</span></div><div class="cat">'+esc(it.cat)+'</div>'+(ED&&subMan&&subs(it.cat).length?'<select class="ss" data-id="'+it.id+'" aria-label="Sous-catégorie">'+subOpts(it.cat,it.sub)+"</select>":"")+'</div></div></td>'+
     '<td class="price'+fx+'">'+(qu?'<input class="qi" type="number" min="0" data-id="'+it.id+'" value="'+s.p+'" aria-label="Nouveau prix">':fmt(s.p)+am(it,s.p))+ag(s.h)+(qu&&!ED&&sent[it.id]!=null&&sent[it.id]!==s.p?'<div class="age" style="color:var(--ac)">proposé : '+fmt(sent[it.id])+" ✓</div>":"")+"</td>"+cells(s)+"</tr>"}).join("");markSeen(items);
   var form=adding?'<div class="panel form" style="margin-bottom:12px"><label>Nom<input id="nn" placeholder="Nom de l\'objet"></label><label>Catégorie<select id="nc">'+catOpts(filter)+'</select></label><label>Sous-catégorie<select id="ns">'+subOpts(db.cats.indexOf(filter)>-1?filter:db.cats[0],curSub()==="∅"?"":curSub())+'</select></label><label>Rareté<select id="nr">'+rarOpts(0)+'</select></label><label>Prix<input id="np" type="number" min="0"></label><div style="align-self:end;display:flex;gap:8px"><button class="pri" data-a="create">Ajouter</button><button data-a="cancel">Annuler</button></div></div>':"";
-  return'<header><div><h1 class="brand">HDV Nano</h1><p>'+(ED?"":"Prix partagés par la guilde (lecture seule).")+'</p>'+upd()+'</div><div class="bar">'+(SA&&ED?'<button data-a="prop" class="'+(propPend().length?"pri":"")+'">📥 Propositions'+(propPend().length?" ("+propPend().length+")":"")+'</button>':"")+(SA&&ED?'<button data-a="syn" class="'+(syn.st=="err"?"del":syn.tok?"":"pri")+'">'+synLabel()+"</button>":"")+(ED&&!(SA&&syn.tok)?'<button class="pri" data-a="pub">'+(db.rev>pubRev?(window.claude?"Publier pour la guilde":"Télécharger la mise à jour"):"Publié ✓")+"</button>":"")+(SA&&!ED?'<button data-a="adm">🔒 Admin</button>':"")+(ED&&uStack.length?'<button data-a="undo" title="Annuler la dernière modification (Ctrl+Z)">↶ Annuler</button>':"")+(SA&&ED?'<button data-a="out">Quitter le mode admin</button>':"")+'<button data-a="snd" class="'+(db.snd?"on":"")+'">Son : '+(db.snd?"activé":"désactivé")+'</button><button data-a="io">Sauvegarde</button><button data-a="reset" class="del">'+(conf=="reset"?"Confirmer":"Réinitialiser")+'</button></div></header>'+admPanel()+(SA&&ED&&!syn.tok?'<div class="panel form" style="margin-bottom:12px;flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap"><span class="dn">⚠ Synchro non activée : tes modifications restent sur cet appareil et ne sont pas publiées.</span><button class="pri" data-a="syn">☁ Activer la synchro</button></div>':"")+synPanel()+propPanel()+
+  return'<header><div><h1 class="brand">HDV Nano</h1><p>'+(ED?"":"Prix partagés par la guilde (lecture seule).")+'</p>'+upd()+(SA&&ED&&!syn.tok?'<button class="syp" data-a="syn" title="Tes modifications restent sur cet appareil et ne sont pas publiées">⚠ Synchro non activée · activer</button>':"")+'</div><div class="bar hbar">'+(SA&&ED?'<button data-a="prop" class="'+(propPend().length?"pri":"")+'">📥 Propositions'+(propPend().length?" ("+propPend().length+")":"")+'</button>':"")+(ED&&!(SA&&syn.tok)?'<button class="pri" data-a="pub">'+(db.rev>pubRev?(window.claude?"Publier pour la guilde":"Télécharger la mise à jour"):"Publié ✓")+"</button>":"")+(SA&&!ED?'<button data-a="adm">🔒 Admin</button>':"")+(ED&&uStack.length?'<button data-a="undo" title="Annuler la dernière modification (Ctrl+Z)">↶ Annuler</button>':"")+'<div class="mnu"><button data-a="mnu" aria-expanded="'+(mnOpen?"true":"false")+'">⚙ '+(ED?"Admin":"Menu")+' ▾</button>'+(mnOpen?'<div class="mnl">'+(SA&&ED?'<button data-a="syn" class="'+(syn.st=="err"?"del":"")+'">'+synLabel()+"</button>":"")+'<button data-a="snd">Son : '+(db.snd?"activé":"désactivé")+'</button><button data-a="io">Sauvegarde</button>'+(SA&&ED?'<button data-a="out">Quitter le mode admin</button>':"")+'<hr><button data-a="reset" class="del">'+(conf=="reset"?"Confirmer la réinitialisation":"Réinitialiser")+"</button></div>":"")+'</div></div></header>'+admPanel()+synPanel()+propPanel()+
   '<div class="bar">'+nav()+'</div>'+movers()+deals()+
   iop()+pstPanel()+form+
-  cb()+'<div class="hint"><b>Astuce :</b> clique sur un objet pour ouvrir sa fiche (graphique, historique, meilleures heures).</div>'+(ED||fbOn()?'<div class="bar" style="margin-top:10px">'+((ED||fbOn()?'<button data-a="qu" class="'+(qu?"on":"")+'">Changer Prix</button>':"")+(ED?'<button data-a="pst" class="'+(pst.open?"on":"")+'">⚡ Ajout rapide</button>':"")+(qu&&!ED&&pseudo?'<span class="cat">Pseudo : <b>'+esc(pseudo)+'</b></span><button data-a="pn">Changer</button><span class="cat">Tes prix sont envoyés en proposition (acceptés tout seuls à ±'+AUTOP+' % du prix actuel, sinon validés par l\'admin). Tape le prix puis Entrée.</span>':"")+(qu&&ED?'<button data-a="chk" title="Marque tous les prix comme vérifiés à l\'instant">Tout est à jour</button><span class="cat">Tape le prix puis Entrée (ou Tab) pour valider.</span>':""))+'</div>':"")+pnPanel()+'<div class="panel scroll cards'+(CP?" cp":"")+'"><div class="cathd">'+tabs()+'<div class="bar sbar"><input id="q" type="search" placeholder="Rechercher…" value="'+esc(q)+'"><button class="pri" data-a="add">+ Nouvel objet</button>'+'<label class="cat">Relevé périmé après <input id="sa" type="number" min="1" value="'+stale()+'"> min</label><label class="cat">Signal auto : ±<input id="sp" type="number" min="1" value="'+sigp()+'">% de la médiane 7j</label></div></div><table style="min-width:'+(360+80*visN())+'px"><thead>'+hd()+'</thead><tbody>'+
+  '<div class="mtools">'+(ED||fbOn()?'<div class="mtl"><button data-a="qu" class="'+(qu?"on":"")+'">Changer Prix</button>'+(ED?'<button data-a="pst" class="'+(pst.open?"on":"")+'">⚡ Ajout rapide</button>':"")+'</div>':"")+'<div class="mtr"><span class="cat">Colonnes</span>'+[["3","3h"],["6","6h"],["12","12h"],["24","24h"],["7","7j"],["tr","Tendance"]].map(function(c){return'<button data-a="col" data-v="'+c[0]+'" class="sm '+(col(c[0])?"on":"")+'">'+c[1]+"</button>"}).join("")+"</div></div>"+(qu||pst.open?'<div class="mnote">'+(qu&&!ED&&pseudo?'<span class="cat">Pseudo : <b>'+esc(pseudo)+'</b></span><button data-a="pn">Changer</button><span class="cat">Tes prix sont envoyés en proposition (acceptés tout seuls à ±'+AUTOP+' % du prix actuel, sinon validés par l\'admin). Tape le prix puis Entrée.</span>':"")+(qu&&ED?'<button data-a="chk" title="Marque tous les prix comme vérifiés à l\'instant">Tout est à jour</button><span class="cat">Tape le prix puis Entrée (ou Tab) pour valider.</span>':"")+"</div>":"")
+  +pnPanel()+'<div class="panel scroll cards'+(CP?" cp":"")+'"><div class="cathd">'+tabs()+'<div class="bar sbar"><input id="q" type="search" placeholder="Rechercher…" value="'+esc(q)+'"><button class="pri" data-a="add">+ Nouvel objet</button><button data-a="mks" class="sm" aria-expanded="'+(mkSet?"true":"false")+'">⚙ Réglages '+(mkSet?"▴":"▾")+'</button>'+(mkSet?'<div class="mkp"><label class="cat">Relevé périmé après <input id="sa" type="number" min="1" value="'+stale()+'"> min</label><label class="cat">Signal auto : ±<input id="sp" type="number" min="1" value="'+sigp()+'">% de la médiane 7j</label><span class="cat">Astuce : clique sur un objet pour ouvrir sa fiche.</span></div>':"")+'</div></div><table style="min-width:'+(360+80*visN())+'px"><thead>'+hd()+'</thead><tbody>'+
   (rows||'<tr><td colspan="8"><div class="empty">Aucun objet. Ajoutez-en un avec « Nouvel objet ».</div></td></tr>')+"</tbody></table></div>";
 }
 function detail(it){
@@ -632,11 +705,13 @@ function val(id){return document.getElementById(id).value}
 function cur(){return db.items.filter(function(i){return i.id==view})[0]}
 document.addEventListener("input",function(e){if(e.target.id==="q"){q=e.target.value;lsc=-1;render()}});
 document.addEventListener("click",function(e){
-  if(e.target.closest(".qi,.ss"))return;var el=e.target.closest("[data-a]");if(!el)return;if(el.dataset.a=="crbg"&&e.target!==el)return;var a=el.dataset.a,v=el.dataset.v,it,pc=conf;conf=null;if(!ED&&EDIT[a])return;var pv=view,pp=page;
+  if(e.target.closest(".qi,.ss"))return;var el=e.target.closest("[data-a]");if(!el){if(mnOpen&&!e.target.closest(".mnu")){mnOpen=false;render()}return}if(el.dataset.a=="crbg"&&e.target!==el)return;var a=el.dataset.a,v=el.dataset.v,it,pc=conf;conf=null;if(!ED&&EDIT[a])return;var pv=view,pp=page;if(a!="mnu")mnOpen=false;
   if(a=="srt"){var sp=v.split("|"),sc=srtGet(sp[0]);colp["s_"+sp[0]]=sp[1]+"|"+(sc.k==sp[1]?-sc.d:-1);try{localStorage.setItem("hdv_col3",JSON.stringify(colp))}catch(x){}}
   else if(a=="more"){colp[v+"All"]=!isAll(v)}
   else if(a=="fold"){colp[v]=!isShut(v)}
   else if(a=="undo"){undo()}
+  else if(a=="mnu"){mnOpen=!mnOpen}
+  else if(a=="mks"){mkSet=!mkSet}
   else if(a=="open"){view=v;range="Tout"}
   else if(a=="qmake"){qCreate()}
   else if(CRA[a]){crAct(a,v,el,e)}
