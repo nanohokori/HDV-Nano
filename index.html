@@ -236,6 +236,19 @@ button.sm{padding:5px 11px;font-size:13px;border-radius:9px}
 .crodh{padding:11px 16px;font-size:14px}.crodh .cat{font-size:12px}
 .crodfoot{display:flex;gap:8px;flex-wrap:wrap;padding:8px 14px 12px;border-top:1px solid var(--line)}
 .crodset .sm{font-size:11.5px;padding:3px 8px}.crodset .crodrow{gap:6px}.crodset select{font-size:12.5px}
+
+.jrgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(400px,1fr));gap:14px}
+.jrcard{padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.jrh{display:flex;justify-content:space-between;align-items:center;gap:8px}.jrh b{font-size:16px}
+.jrrow{display:flex;gap:8px;flex-wrap:wrap}
+.jrc{flex:1;min-width:118px;display:flex;flex-direction:column;gap:6px;padding:9px 10px;border-radius:12px;background:rgba(255,255,255,.035);border:1px solid var(--line)}
+.jrc span{font-size:11.5px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.jrc.ok{border-color:rgba(74,222,128,.3)}.jrc.cb{border-color:rgba(255,150,64,.4)}.jrc.ko{border-color:rgba(248,113,113,.3)}
+.jrn{display:flex;align-items:center;gap:4px}.jrn button{padding:2px 9px;font-size:16px;line-height:1.3}
+.jrn input{flex:1;min-width:40px;width:40px;text-align:center;padding:5px 2px;font-weight:700;font-size:16px}.jrn button{flex:none}
+.jrst{display:flex;gap:10px;flex-wrap:wrap}.jrst>div{flex:1;min-width:130px;display:flex;flex-direction:column}
+.jrst span{font-size:11.5px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;font-weight:600}.jrst b{font-size:22px;font-variant-numeric:tabular-nums}.jrst small{color:var(--mu);font-size:12px}
+.jrn30{margin:0;font-size:12.5px}
 </style>
 </head>
 <body class="ro">
@@ -383,7 +396,7 @@ function visN(){return["3","6","12","24","7","tr"].filter(col).length}
 var mnOpen=false,mkSet=false;
 function cb(){return'<div class="bar"><span class="cat">Colonnes</span>'+[["3","3h"],["6","6h"],["12","12h"],["24","24h"],["7","7j"],["tr","Tendance"]].map(function(c){return'<button data-a="col" data-v="'+c[0]+'" class="'+(col(c[0])?"on":"")+'">'+c[1]+"</button>"}).join("")+"</div>"}
 function cells(s){var o="";["3","6","12","24","7"].forEach(function(k){if(col(k))o+='<td data-l="'+(k=="7"?"7j":k+"h")+'">'+pct(s["d"+k])+pa(s["a"+k])+"</td>"});if(col("tr"))o+='<td class="sp">'+spark(s.h)+"</td>";return o}
-function nav(){return'<div class="tabs">'+[["market","Marché"],["quna","Quna"],["craft","Craft"]].map(function(p){return'<button data-a="page" data-v="'+p[0]+'" class="'+(page==p[0]?"on":"")+'">'+p[1]+"</button>"}).join("")+"</div>"}
+function nav(){return'<div class="tabs">'+[["market","Marché"],["quna","Quna"],["craft","Craft"]].concat(ED?[["journal","Journal"]]:[]).map(function(p){return'<button data-a="page" data-v="'+p[0]+'" class="'+(page==p[0]?"on":"")+'">'+p[1]+"</button>"}).join("")+"</div>"}
 var QC=[{v:4e5},{v:2e6},{v:1e7}];
 function qName(k){return"Coffre de "+fmt(+k)+" Kinah"}
 function findIt(id){return db.items.filter(function(i){return i.id==id})[0]}
@@ -436,6 +449,17 @@ function crProb(b){var p=crSucc(b),c=b.combo?crC_(b):0,q=p*c*p;return{p:p,c:c,q:
 function crMaker(id,seen){var f=null,k=0;crBl().forEach(function(b){if(f||seen[b.id])return;var P=crProb(b);if(b.out==id){f=b;k=P.pl}else if(b.combo==id){f=b;k=P.q}});
   if(!f||!k)return 0;var s2={};for(var q in seen)s2[q]=1;s2[f.id]=1;return crCost(f,s2)/k}
 function crSubCost(x,seen){var t=0;(x.sub||[]).forEach(function(y){t+=crUnit(y,seen).v*y.q});return t}
+var jr={},jrConf=null;try{var jr0=JSON.parse(localStorage.getItem("hdv_journal")||"null");if(jr0&&typeof jr0=="object")jr=jr0}catch(e){}
+function jrSave(){try{localStorage.setItem("hdv_journal",JSON.stringify(jr))}catch(e){}}
+function jrGet(id){var o=jr[id]||{};return{f:Math.max(0,+o.f||0),s:Math.max(0,+o.s||0),c:Math.max(0,+o.c||0)}}
+function jrSet(id,k,v){var o=jrGet(id);o[k]=Math.max(0,Math.min(99999,Math.round(+v||0)));if(o.f+o.s+o.c)jr[id]=o;else delete jr[id];jrSave()}
+function jrWide(n,k){var p=n?k/n:0;return n?1.96*Math.sqrt(p*(1-p)/n):0}
+function jrCell(id,k,lab,cls){var o=jrGet(id);return'<div class="jrc '+cls+'"><span>'+lab+'</span><div class="jrn"><button data-a="jrp" data-v="'+esc(id)+'|'+k+'|-1" aria-label="Retirer un">−</button><input class="crf" data-f="jrn" data-b="'+esc(id)+'" data-k="'+k+'" inputmode="numeric" value="'+o[k]+'" aria-label="'+lab+'"><button data-a="jrp" data-v="'+esc(id)+'|'+k+'|1" aria-label="Ajouter un">+</button></div></div>'}
+function jrCard(b){var o=jrGet(b.id),n=o.f+o.s+o.c,P=crProb(b),pr=n?(o.s+o.c)/n:0,cr=n?o.c/n:0,w=jrWide(n,o.s+o.c),w2=jrWide(n,o.c);
+  var st=n?'<div class="jrst"><div><span>Réussite réelle</span><b>'+crPct(pr)+' %</b><small>théorie '+crPct(P.p)+' %'+(n>=30?' · ±'+crPct(w)+' pts':'')+'</small></div>'+(b.combo?'<div><span>Combo réel</span><b>'+crPct(cr)+' %</b><small>théorie '+crPct(P.q)+' %'+(n>=30?' · ±'+crPct(w2)+' pts':'')+'</small></div>':"")+'</div>'+(n<30?'<p class="cat jrn30">Encore peu d’essais ('+n+') : les pourcentages bougent beaucoup, attends 30 crafts ou plus pour comparer à la théorie.</p>':""):'<p class="cat jrn30">Aucun résultat noté pour l’instant.</p>';
+  return'<div class="panel jrcard"><div class="jrh"><div><b>'+esc(b.name||"Sans nom")+'</b>'+(n?' <span class="cat">· '+n+' craft'+(n>1?"s":"")+"</span>":"")+'</div>'+(n?'<button class="sm del" data-a="jrz" data-v="'+esc(b.id)+'">'+(jrConf==b.id?"Confirmer l’effacement":"Remettre à zéro")+"</button>":"")+'</div><div class="jrrow">'+jrCell(b.id,"s","Réussi","ok")+(b.combo?jrCell(b.id,"c","Réussi + combo","cb"):"")+jrCell(b.id,"f","Raté (cassé)","ko")+"</div>"+st+"</div>"}
+function jrPage(){var bl=crBl().filter(function(b){return!b.tr}),tot=0;bl.forEach(function(b){var o=jrGet(b.id);tot+=o.f+o.s+o.c});
+  return'<header><div><h1 class="brand">HDV Nano</h1><p>Journal de tes crafts : note seulement les résultats, dans l’ordre que tu veux.</p></div></header><div class="bar">'+nav()+'</div><p class="hint">Ajoute avec <b>+</b> ou tape directement le total. Seul le nombre de chaque résultat compte, pas l’ordre. Les données restent dans ce navigateur (pas partagées, perdues si tu vides les données du site).</p>'+(bl.length?'<div class="jrgrid">'+bl.map(jrCard).join("")+"</div>":'<div class="panel crp"><p class="cat" style="margin:0">Crée d’abord un bloc dans l’onglet Craft.</p></div>')}
 var crOdOpen=false,crOdAll=false,crOdSet=false;
 function crOdCfg(){var c=(db.cr2&&db.cr2.od)||{},m={},k;for(k=0;k<5;k++){var id=c.m&&c.m[k];if(id!=null){if(id&&!findIt(id))id=""}else{id="";(db.items||[]).some(function(i){if(+i.rar==k&&/^od(\s|$)/i.test(String(i.name||"").trim())){id=i.id;return true}})}m[k]=id}
   return{m:m,its:(c.i||[]).filter(function(id){return findIt(id)})}}
@@ -577,6 +601,7 @@ function crAtList(b,pp){if(pp===""||pp==null)return b.ing=b.ing||[];var x=crAtIt
 function crAtItem(b,p){var ps=String(p).split("/").map(Number),list=b.ing,x=null;for(var i=0;i<ps.length;i++){x=list[ps[i]];if(!x)return null;if(i<ps.length-1)list=x.sub||[]}return x}
 function crChange(t){var f=t.dataset.f,b=crM&&crBlock(crM.id),num=function(v){return parseFloat(String(v).replace(",","."))};
   if(f=="oda"){if(!ED)return true;if(t.value){db.cr2=db.cr2||{blocks:[]};var o3=db.cr2.od=db.cr2.od||{};o3.i=crOdCfg().its.concat([t.value]);save()}render();return true}
+  if(f=="jrn"){if(ED){jrSet(t.dataset.b,t.dataset.k,String(t.value).replace(/\D/g,""))}render();return true}
   if(f=="odm"){if(!ED)return true;db.cr2=db.cr2||{blocks:[]};var o2=db.cr2.od=db.cr2.od||{};o2.m=o2.m||{};var cur=crOdCfg().m;for(var q=0;q<5;q++)if(o2.m[q]==null)o2.m[q]=cur[q];o2.m[t.dataset.r]=t.value;save();render();return true}
   if(f=="lst"){var lv2=num(t.value);crL.lst=isFinite(lv2)?Math.min(99,Math.max(0,Math.round(lv2*10)/10)):0;crSave();render();return true}
   if(f=="fee"){var fv=num(t.value);crL.fee=isFinite(fv)?Math.min(99,Math.max(0,Math.round(fv*10)/10)):0;crSave();render();return true}
@@ -665,7 +690,7 @@ function icoLoad(file,id){var r=new FileReader();r.onload=function(){var im=new 
     var it=db.items.filter(function(i){return i.id==id})[0];if(it){it.img=u;save();render()}};
   im.src=r.result};r.onerror=function(){showToast("Image illisible.")};r.readAsDataURL(file)}
 function stale(){return db.stale||60}
-var TAX=12,prevSig=null,page="market",ED=false,pnFoc=false,pseudo="",sent={},props=[],propOpen=false,pnOpen=false,pnThen=false,fbMsg="",pubRev=0,EDIT={crods:1,crodx:1,crodc:1,crsub:1,crnew:1,crnewt:1,cred:1,crdup:1,crup:1,crdn:1,crdelb:1,crdeli:1,crimg:1,crimgdel:1,crren:1,qmake:1,prop:1,propok:1,propno:1,propall:1,propnone:1,fbgo:1,fboff:1,fbcopy:1,undo:1,rencat:1,savecr:1,cancelcr:1,newsub:1,savesub:1,mansub:1,rensub:1,savesr:1,cancelsr:1,delsub:1,psmode:1,psadd:1,psdel:1,psok:1,pst:1,pstx:1,pstgo:1,pstback:1,pstok:1,syn:1,synx:1,syngo:1,synoff:1,synnow:1,add:1,create:1,newcat:1,mancat:1,delcat:1,savecat:1,addpt:1,delpt:1,saveinfo:1,delitem:1,io:1,reset:1,fav:1,clean:1,ioload:1,chk:1,ico:1,icodel:1};
+var TAX=12,prevSig=null,page="market",ED=false,pnFoc=false,pseudo="",sent={},props=[],propOpen=false,pnOpen=false,pnThen=false,fbMsg="",pubRev=0,EDIT={jrp:1,jrz:1,crods:1,crodx:1,crodc:1,crsub:1,crnew:1,crnewt:1,cred:1,crdup:1,crup:1,crdn:1,crdelb:1,crdeli:1,crimg:1,crimgdel:1,crren:1,qmake:1,prop:1,propok:1,propno:1,propall:1,propnone:1,fbgo:1,fboff:1,fbcopy:1,undo:1,rencat:1,savecr:1,cancelcr:1,newsub:1,savesub:1,mansub:1,rensub:1,savesr:1,cancelsr:1,delsub:1,psmode:1,psadd:1,psdel:1,psok:1,pst:1,pstx:1,pstgo:1,pstback:1,pstok:1,syn:1,synx:1,syngo:1,synoff:1,synnow:1,add:1,create:1,newcat:1,mancat:1,delcat:1,savecat:1,addpt:1,delpt:1,saveinfo:1,delitem:1,io:1,reset:1,fav:1,clean:1,ioload:1,chk:1,ico:1,icodel:1};
 function sigp(){return db.sig||15}
 function sg(it){var s=stats(it),p=s.p,lo=it.lo,hi=it.hi;if(lo||hi)return lo&&p<=lo?-1:hi&&p>=hi?1:0;if(s.n<3||!s.med)return 0;var x=sigp()/100;return p<=s.med*(1-x)?-1:p>=s.med*(1+x)?1:0}
 function isAl(it){return sg(it)!=0}
@@ -723,7 +748,7 @@ function render(){
   if(bx&&lsc>=0)lsc=bx.scrollTop;if(lsc<0)lsc=0;if(vk&&vk!==lastV)wyl=wy;
   var cs0=document.querySelector(".crmd");cs0=cs0?cs0.scrollTop:0;var co0=document.querySelector(".crov"),co1=co0?co0.scrollTop:0;
   var ae=document.activeElement,ak=null;if(ae&&ae.closest&&ae.closest(".crmd")&&ae.tagName=="INPUT"&&ae.dataset&&ae.dataset.f){var q0='input[data-f="'+ae.dataset.f+'"]';["p","it","k"].forEach(function(a){if(ae.dataset[a]!=null)q0+='[data-'+a+'="'+String(ae.dataset[a]).replace(/"/g,'\\"')+'"]'});ak={q:q0,v:ae.value,s:ae.selectionStart,e:ae.selectionEnd}}
-  app.innerHTML=it?detail(it):page=="quna"?qunaPage():page=="craft"?crPage():list();initChart();notify();
+  app.innerHTML=it?detail(it):page=="quna"?qunaPage():page=="craft"?crPage():page=="journal"&&ED?jrPage():list();initChart();notify();
   if(cs0){var cs1=document.querySelector(".crmd");if(cs1)cs1.scrollTop=cs0}
   if(co1){var co2=document.querySelector(".crov");if(co2)co2.scrollTop=co1}
   if(ak){try{var ne=document.querySelector(".crmd "+ak.q.replace(/^input/,"input"));if(ne){ne.value=ak.v;ne.focus({preventScroll:true});if(ak.s!=null)ne.setSelectionRange(ak.s,ak.e)}}catch(e){}}
@@ -739,12 +764,14 @@ function val(id){return document.getElementById(id).value}
 function cur(){return db.items.filter(function(i){return i.id==view})[0]}
 document.addEventListener("input",function(e){if(e.target.id==="q"){q=e.target.value;lsc=-1;render()}});
 document.addEventListener("click",function(e){
-  if(e.target.closest(".qi,.ss"))return;var el=e.target.closest("[data-a]");if(!el){if(mnOpen&&!e.target.closest(".mnu")){mnOpen=false;render()}return}if(el.dataset.a=="crbg"&&e.target!==el)return;var a=el.dataset.a,v=el.dataset.v,it,pc=conf;conf=null;if(!ED&&EDIT[a])return;var pv=view,pp=page;if(a!="mnu")mnOpen=false;
+  if(e.target.closest(".qi,.ss"))return;var el=e.target.closest("[data-a]");if(!el){if(mnOpen&&!e.target.closest(".mnu")){mnOpen=false;render()}return}if(el.dataset.a=="crbg"&&e.target!==el)return;var a=el.dataset.a,v=el.dataset.v,it,pc=conf;conf=null;if(!ED&&EDIT[a])return;var pv=view,pp=page;if(a!="mnu")mnOpen=false;if(a!="jrz")jrConf=null;
   if(a=="srt"){var sp=v.split("|"),sc=srtGet(sp[0]);colp["s_"+sp[0]]=sp[1]+"|"+(sc.k==sp[1]?-sc.d:-1);try{localStorage.setItem("hdv_col3",JSON.stringify(colp))}catch(x){}}
   else if(a=="more"){colp[v+"All"]=!isAll(v)}
   else if(a=="fold"){colp[v]=!isShut(v)}
   else if(a=="undo"){undo()}
   else if(a=="mnu"){mnOpen=!mnOpen}
+  else if(a=="jrp"){var q=v.split("|");jrSet(q[0],q[1],jrGet(q[0])[q[1]]+(+q[2]));jrConf=null}
+  else if(a=="jrz"){if(jrConf==v){delete jr[v];jrSave();jrConf=null}else jrConf=v}
   else if(a=="mks"){mkSet=!mkSet}
   else if(a=="open"){view=v;range="Tout"}
   else if(a=="qmake"){qCreate()}
