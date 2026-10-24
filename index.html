@@ -222,6 +222,15 @@ button.sm{padding:5px 11px;font-size:13px;border-radius:9px}
 .crbig.up{background:rgba(74,222,128,.09)}.crbig.up b{color:var(--up)}
 .crbig.dn{background:rgba(248,113,113,.09)}.crbig.dn b{color:var(--dn)}
 .crb .crmi{font-size:13px}
+
+.crod{margin:0 0 14px;padding:0}
+.crodh{display:flex;align-items:center;gap:12px;flex-wrap:wrap;width:100%;background:none;border:0;padding:14px 18px;text-align:left;border-radius:var(--rad)}
+.crodh:hover{background:rgba(255,255,255,.03)}.crodh .cat{flex:1;min-width:180px}
+.crok.no{background:rgba(255,255,255,.07);color:var(--mu)}
+.crodt{min-width:0;margin:0 0 4px}.crodt th,.crodt td{padding:9px 18px;text-align:left}.crodt th:not(:first-child),.crodt td:not(:first-child){text-align:right}
+.crodset{border-top:1px solid var(--line);padding:12px 18px;display:flex;flex-direction:column;gap:10px}
+.crodrow{display:flex;gap:10px 14px;flex-wrap:wrap;align-items:flex-end}.crodrow label{display:flex;flex-direction:column;gap:3px;font-size:12px}
+.crodrow select{max-width:220px}
 </style>
 </head>
 <body class="ro">
@@ -422,9 +431,14 @@ function crProb(b){var p=crSucc(b),c=b.combo?crC_(b):0,q=p*c*p;return{p:p,c:c,q:
 function crMaker(id,seen){var f=null,k=0;crBl().forEach(function(b){if(f||seen[b.id])return;var P=crProb(b);if(b.out==id){f=b;k=P.pl}else if(b.combo==id){f=b;k=P.q}});
   if(!f||!k)return 0;var s2={};for(var q in seen)s2[q]=1;s2[f.id]=1;return crCost(f,s2)/k}
 function crSubCost(x,seen){var t=0;(x.sub||[]).forEach(function(y){t+=crUnit(y,seen).v*y.q});return t}
+var crOdOpen=false;
+function crOdCfg(){var c=(db.cr2&&db.cr2.od)||{},m={},k;for(k=0;k<5;k++){var id=c.m&&c.m[k];if(id!=null){if(id&&!findIt(id))id=""}else{id="";(db.items||[]).some(function(i){if(+i.rar==k&&/^od(\s|$)/i.test(String(i.name||"").trim())){id=i.id;return true}})}m[k]=id}
+  var cats=c.c||(db.cats||[]).filter(function(x){return/^ressource/i.test(x)});return{m:m,cats:cats}}
+function crOdFor(it){if(!it)return"";var c=crOdCfg(),r=+it.rar||0;if(c.cats.indexOf(it.cat)<0)return"";var id=c.m[r];return id&&id!=it.id?id:""}
 function crUnit(x,seen){var me=+crL.me[x.it];if(me>0)return{v:me,s:"me"};var m=crP(x.it),best={v:m,s:"mk0"};
   if(x.sub&&x.sub.length){var u=crSubCost(x,seen);if(u>0&&(!m||u<m))best={v:u,s:"sub"}}
   if(x.mk){var u2=crMaker(x.it,seen);if(u2>0&&(!best.v||u2<best.v))best={v:u2,s:"mk"}}
+  var od=crOdFor(findIt(x.it));if(od){var pod=crP(od);if(pod>0&&(!best.v||pod<best.v))best={v:pod,s:"od"}}
   return best}
 function crCost(b,seen){seen=seen||{};seen[b.id]=1;var t=0;(b.ing||[]).forEach(function(x){t+=crUnit(x,seen).v*x.q});return t}
 function crNode(x,mult,path,bid){var u=crUnit(x,{}),need=mult*x.q,st=Math.min(need,Math.max(0,+crL.stock[bid+"|"+path]||0)),buy=need-st,n={x:x,it:findIt(x.it),q:x.q,need:need,stock:st,buy:buy,u:u.v,s:u.s,tot:u.v*buy,path:path,sub:null},lt=crLotsArr(x.it);
@@ -460,7 +474,7 @@ function crTrCard(b){var cc=crCalc(b,1),it=b.combo&&findIt(b.combo),ad=ED?'<span
   return'<div class="crb crt3"'+(ED?' data-a="cred" data-v="'+b.id+'" tabindex="0" role="button"':"")+'><div class="crbh">'+ico(crFake(b),"l",true)+'<div class="crbt">'+(b.grp?'<div class="crtag">'+esc(b.grp)+"</div>":"")+'<div class="crbn">'+esc(b.name||"Sans nom")+"</div></div>"+ad+'</div><div class="crtrl">'+rows+'</div><div class="crtrc"><span>Coût de l’amélioration</span><b>'+(cc.cost?fmt(Math.round(cc.cost)):"—")+"</b></div>"+
    (b.combo?'<div class="crtrc sm"><span>Combo'+(it?" ("+esc(it.name)+")":"")+'</span><b>'+Math.round(crC_(b)*100)+" %</b></div>":"")+"</div>"}
 function crRowsHtml(b,nodes,d){var h="";
-  nodes.forEach(function(r){var it=r.it,key=b.id+"|"+r.path,op=r.sub&&crXp[key],tag=r.s=="mk"?' <small class="crt me">fabriqué</small>':r.s=="sub"?' <small class="crt me">craft moins cher</small>':(r.sub&&r.s=="mk0"?' <small class="crt">HDV moins cher</small>':"");
+  nodes.forEach(function(r){var it=r.it,key=b.id+"|"+r.path,op=r.sub&&crXp[key],tag=r.s=="mk"?' <small class="crt me">fabriqué</small>':r.s=="sub"?' <small class="crt me">craft moins cher</small>':r.s=="od"?' <small class="crt me">via Od</small>':(r.sub&&r.s=="mk0"?' <small class="crt">HDV moins cher</small>':"");
     var tg=r.sub?'<button class="crtg'+(op?" open":"")+'" data-a="crx" data-v="'+esc(key)+'" aria-expanded="'+(op?"true":"false")+'" aria-label="Voir le sous-craft"></button>':'<span class="crtp"></span>';
     var nd=fmt(Math.round(r.need*100)/100)+(Math.abs(r.need-r.q)>1e-9&&r.q?' <small class="crmu">('+r.q+"×"+fmt(Math.round(r.need/r.q*100)/100)+")</small>":"");
     h+='<tr class="'+(d?"crsr":"")+'"><td class="cn"><div class="crnc" style="padding-left:'+(d*18)+'px">'+tg+ico(it||{name:"?"},"xs",true)+'<span class="crn">'+esc(it?it.name:"(objet supprimé)")+tag+'</span></div></td><td class="r" data-l="Besoin">'+nd+'</td><td class="r" data-l="J’en ai"><input class="crf crst" data-f="stk" data-p="'+r.path+'" inputmode="numeric" value="'+(r.stock>0?r.stock:"")+'" placeholder="0" aria-label="Quantité déjà en stock"></td><td class="r" data-l="À acheter"><b class="'+(r.stock>0?"crbuy":"")+'">'+fmt(Math.round(r.buy*100)/100)+'</b></td><td class="r" data-l="Prix à l’unité"><input class="crf crpu" data-f="pu" data-it="'+esc(r.x.it)+'" inputmode="decimal" value="'+(+crL.me[r.x.it]>0?fmt(+crL.me[r.x.it]):"")+'" placeholder="'+(r.u?fmt(Math.round(r.u)):"—")+'" aria-label="Prix à l’unité"><button class="crlotb'+(r.lot||crLotOpen[r.x.it]?" act":"")+'" data-a="crlot" data-v="'+esc(r.x.it)+'" title="Prix différents selon l’exemplaire" aria-label="Prix différents selon l’exemplaire">≡</button></td><td class="r" data-l="Total">'+(r.u?fmt(Math.round(r.tot)):"—")+"</td></tr>"+(crLotOpen[r.x.it]?'<tr class="crlotr"><td colspan="6"><label>Prix de chaque exemplaire <input class="crf crlot" data-f="lot" data-it="'+esc(r.x.it)+'" value="'+esc(crL.lots[r.x.it]||"")+'" placeholder="ex : 50000, 55000, 58000 ou 2x55000, 58000" aria-label="Prix de chaque exemplaire"></label><span class="cat">Un prix par exemplaire acheté, dans l’ordre (« 3x55000 » = 3 exemplaires à 55 000). Les exemplaires non listés utilisent le prix à l’unité.</span></td></tr>':"");
@@ -534,13 +548,20 @@ function crEdModal(b){
    '<h3 class="crh3">Résultats</h3>'+res("out",b.tr?"Résultat":"Sans combo")+res("combo",b.tr?"Combo direct":"Avec combo")+
    '<div class="crfoot2"><button class="del" data-a="crdelb" data-v="'+b.id+'">Supprimer le bloc</button><button class="pri" data-a="crclose">Terminer</button></div></div></div>'}
 function crGroups(){var g={},o=[];crBl().forEach(function(b){if(!b.tr&&b.grp&&!g[b.grp]){g[b.grp]=1;o.push(b.grp)}});return o}
+function crOdRows(){var c=crOdCfg(),rows=[];(db.items||[]).forEach(function(it){var od=crOdFor(it);if(!od)return;var pr=crP(it.id),po=crP(od);if(!(pr>0&&po>0))return;rows.push({it:it,od:findIt(od),pr:pr,po:po,g:pr-po})});rows.sort(function(a,b){return b.g/b.pr-a.g/a.pr});return rows}
+function crOdHtml(){var rows=crOdRows(),c=crOdCfg(),good=rows.filter(function(r){return r.g>0}).length;
+  if(!rows.length&&!ED)return"";
+  var h='<div class="panel crp crod"><button class="crodh" data-a="crod" aria-expanded="'+(crOdOpen?"true":"false")+'"><b>Conversion Od → ressource</b><span class="cat">1 Od = 1 ressource de même rareté · 100 % · sans frais</span><span class="crok'+(good?"":" no")+'">'+(good?good+" à convertir":"aucun gain")+"</span><span>"+(crOdOpen?"▴":"▾")+"</span></button>";
+  if(crOdOpen){h+=rows.length?'<table class="crodt"><thead><tr><th>Ressource</th><th>Prix HDV</th><th>Od</th><th>Verdict</th></tr></thead><tbody>'+rows.map(function(r){var vd=r.g>0?'<b class="up">Convertir : −'+fmt(Math.round(r.g))+" ("+Math.round(r.g/r.pr*100)+" %)</b>":'<span class="cat">Acheter direct'+(r.g<0?" (−"+fmt(Math.round(-r.g))+")":"")+"</span>";return'<tr><td><span class="r'+(+r.it.rar||0)+'">'+esc(r.it.name)+'</span></td><td>'+fmt(Math.round(r.pr))+'</td><td>'+fmt(Math.round(r.po))+' <small class="cat">'+esc(r.od?r.od.name:"")+'</small></td><td>'+vd+"</td></tr>"}).join("")+"</tbody></table>":'<p class="cat" style="margin:8px 0 0">Aucune paire avec deux prix connus. Vérifie les Od par rareté ci-dessous.</p>';
+   if(ED)h+='<div class="crodset"><b>Réglage admin</b><div class="crodrow">'+[0,1,2,3].map(function(k){return'<label class="cat">'+["Blanc","Vert","Bleu","Or"][k]+'<select class="crf" data-f="odm" data-r="'+k+'"><option value="">— aucun —</option>'+(db.items||[]).map(function(i){return'<option value="'+esc(i.id)+'"'+(c.m[k]==i.id?" selected":"")+">"+esc(i.name)+"</option>"}).join("")+"</select></label>"}).join("")+'</div><div class="crodrow"><span class="cat">Catégories convertibles :</span>'+(db.cats||[]).map(function(x){return'<button class="sm '+(c.cats.indexOf(x)>=0?"on":"")+'" data-a="crodc" data-v="'+esc(x)+'">'+esc(x)+"</button>"}).join("")+"</div></div>"}
+  return h+"</div>"}
 function crPage(){crBuildOpts();var all0=crBl(),all=all0.filter(function(b){return!b.tr}),trs=all0.filter(function(b){return b.tr}),gs=crGroups(),list=all.filter(function(b){return!crG||b.grp==crG});
   var chips=gs.length?'<div class="crg"><b>Groupe</b><button data-a="crgrp" data-v="" class="'+(crG?"":"on")+'">Tous</button>'+gs.map(function(g){return'<button data-a="crgrp" data-v="'+esc(g)+'" class="'+(crG==g?"on":"")+'">'+esc(g)+"</button>"}).join("")+"</div>":"";
   var body=list.length?'<div class="crbs2">'+list.map(crCard).join("")+"</div>":'<div class="panel crp"><p class="cat" style="margin:0">'+(all.length?"Aucun bloc dans ce groupe.":"Aucun bloc pour l’instant."+(ED?" Clique sur « + Nouveau bloc » pour créer ta première recette.":""))+"</p></div>";
   var trh=trs.length||ED?'<div class="crtrh"><h2>Transfer crafting</h2><span class="crok">réussite 100 %</span></div><p class="cat" style="margin:0 0 10px">Réussite garantie : on améliore l’arme qu’on possède déjà.</p>'+(trs.length?'<div class="crbs2 crbs3">'+trs.map(crTrCard).join("")+"</div>":'<div class="panel crp"><p class="cat" style="margin:0">Aucun transfer craft pour l’instant.'+(ED?" Clique sur « + Transfer craft ».":"")+"</p></div>"):"";
   var b=crM&&crBlock(crM.id),modal=b?(crM.m=="edit"&&ED?crEdModal(b):crCalcModal(b)):"";
   return'<header><div><h1 class="brand">HDV Nano</h1><p>Calcule le coût de tes crafts avec les prix de la liste.</p>'+upd()+'</div></header><div class="bar">'+nav()+"</div>"+
-   (ED||chips?'<div class="panel crp crtool">'+chips+(ED?'<button class="pri" data-a="crnew">+ Nouveau bloc</button><button class="pri" data-a="crnewt">+ Transfer craft</button>':"")+"</div>":"")+body+trh+modal}
+   (ED||chips?'<div class="panel crp crtool">'+chips+(ED?'<button class="pri" data-a="crnew">+ Nouveau bloc</button><button class="pri" data-a="crnewt">+ Transfer craft</button>':"")+"</div>":"")+crOdHtml()+body+trh+modal}
 function crImgLoad(file,id){var r=new FileReader();r.onload=function(){var im=new Image();im.onerror=function(){showToast("Image illisible.")};im.onload=function(){var S=96,c=document.createElement("canvas");c.width=S;c.height=S;var x=c.getContext("2d"),m=Math.min(im.width,im.height);x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,S,S);var u;try{u=c.toDataURL("image/webp",.85);if(u.indexOf("data:image/webp")!=0)u=c.toDataURL("image/png")}catch(e){u=c.toDataURL("image/png")}var b=crBlock(id);if(b){b.img=u;save();render()}};im.src=r.result};r.readAsDataURL(file)}
 var crIT=null,crIf=document.createElement("input");crIf.type="file";crIf.accept="image/*";crIf.style.display="none";document.body.appendChild(crIf);crIf.addEventListener("change",function(){var f=crIf.files&&crIf.files[0];if(f&&crIT)crImgLoad(f,crIT)});
 function crMv(id,d){var a=crBl(),i=a.findIndex(function(b){return b.id==id}),j=i+d;if(i<0||j<0||j>=a.length)return;var t=a[i];a[i]=a[j];a[j]=t;save()}
@@ -548,6 +569,7 @@ function crItemPick(t){var v=t.value;if(v=="__new"){var n=prompt("Nom du nouvel 
 function crAtList(b,pp){if(pp===""||pp==null)return b.ing=b.ing||[];var x=crAtItem(b,pp);return x.sub=x.sub||[]}
 function crAtItem(b,p){var ps=String(p).split("/").map(Number),list=b.ing,x=null;for(var i=0;i<ps.length;i++){x=list[ps[i]];if(!x)return null;if(i<ps.length-1)list=x.sub||[]}return x}
 function crChange(t){var f=t.dataset.f,b=crM&&crBlock(crM.id),num=function(v){return parseFloat(String(v).replace(",","."))};
+  if(f=="odm"){if(!ED)return true;db.cr2=db.cr2||{blocks:[]};var o2=db.cr2.od=db.cr2.od||{};o2.m=o2.m||{};var cur=crOdCfg().m;for(var q=0;q<5;q++)if(o2.m[q]==null)o2.m[q]=cur[q];o2.m[t.dataset.r]=t.value;save();render();return true}
   if(f=="lst"){var lv2=num(t.value);crL.lst=isFinite(lv2)?Math.min(99,Math.max(0,Math.round(lv2*10)/10)):0;crSave();render();return true}
   if(f=="fee"){var fv=num(t.value);crL.fee=isFinite(fv)?Math.min(99,Math.max(0,Math.round(fv*10)/10)):0;crSave();render();return true}
   if(f=="att"){if(b){crL.att[b.id]=Math.max(1,Math.round(num(t.value)||1));crSave();render()}return true}
@@ -568,6 +590,8 @@ function crChange(t){var f=t.dataset.f,b=crM&&crBlock(crM.id),num=function(v){re
   if(t.classList.contains("crsl")){var id3=crItemPick(t);if(t.value==""||id3){if(id3)b[t.dataset.k]=id3;else delete b[t.dataset.k];save()}render();return true}
   return t.classList.contains("crf")}
 function crAct(a,v,el,e){
+  if(a=="crod"){crOdOpen=!crOdOpen;return}
+  if(a=="crodc"){db.cr2=db.cr2||{blocks:[]};var o=db.cr2.od=db.cr2.od||{},cs=crOdCfg().cats.slice(),ix=cs.indexOf(v);if(ix>=0)cs.splice(ix,1);else cs.push(v);o.c=cs;save();return}
   if(a=="crbg"){if(e.target===el){crM=null}return}
   if(a=="cropen"){crM={m:"calc",id:v}}
   else if(a=="crcalc"){crM={m:"calc",id:v}}
@@ -590,7 +614,7 @@ function crAct(a,v,el,e){
   else if(a=="crimg"){crIT=v;crIf.value="";crIf.click();return}
   else if(a=="crimgdel"){var b3=crBlock(v);if(b3){delete b3.img;save()}}
   else if(a=="crren"){var it=findIt(v);if(it){var nv=prompt("Nouveau nom de l’objet :",it.name);if(nv&&nv.trim()&&nv.trim()!==it.name){it.name=nv.trim();save()}}}}
-var CRA={crset:1,crdet:1,crben:1,crlot:1,crsub:1,crx:1,crbg:1,cropen:1,crcalc:1,cred:1,crclose:1,crgrp:1,crnew:1,crnewt:1,crdup:1,crup:1,crdn:1,crdelb:1,crdeli:1,crimg:1,crimgdel:1,crren:1};
+var CRA={crod:1,crodc:1,crset:1,crdet:1,crben:1,crlot:1,crsub:1,crx:1,crbg:1,cropen:1,crcalc:1,cred:1,crclose:1,crgrp:1,crnew:1,crnewt:1,crdup:1,crup:1,crdn:1,crdelb:1,crdeli:1,crimg:1,crimgdel:1,crren:1};
 function buildDoc(){var css=document.getElementById("css").textContent,code=document.getElementById("code").textContent,data=JSON.stringify(db).replace(/</g,"\\u003c");
   return'<!DOCTYPE html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n<meta name="color-scheme" content="dark">\n<title>HDV Nano</title>\n<style id="css">'+css+'</style>\n</head>\n<body class="ro">\n<div class="wrap" id="app"></div>\n<script id="data" type="application/json">'+data+'<\/script>\n<script id="code">'+code+'<\/script>\n</body>\n</html>'}
 function dl(){save();var b=new Blob([buildDoc()],{type:"text/html"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="index.html";document.body.appendChild(a);a.click();setTimeout(function(){a.remove()},500);showToast("Fichier index.html téléchargé : mets-le en ligne pour que la guilde voie les changements.")}
@@ -631,7 +655,7 @@ function icoLoad(file,id){var r=new FileReader();r.onload=function(){var im=new 
     var it=db.items.filter(function(i){return i.id==id})[0];if(it){it.img=u;save();render()}};
   im.src=r.result};r.onerror=function(){showToast("Image illisible.")};r.readAsDataURL(file)}
 function stale(){return db.stale||60}
-var TAX=12,prevSig=null,page="market",ED=false,pnFoc=false,pseudo="",sent={},props=[],propOpen=false,pnOpen=false,pnThen=false,fbMsg="",pubRev=0,EDIT={crsub:1,crnew:1,crnewt:1,cred:1,crdup:1,crup:1,crdn:1,crdelb:1,crdeli:1,crimg:1,crimgdel:1,crren:1,qmake:1,prop:1,propok:1,propno:1,propall:1,propnone:1,fbgo:1,fboff:1,fbcopy:1,undo:1,rencat:1,savecr:1,cancelcr:1,newsub:1,savesub:1,mansub:1,rensub:1,savesr:1,cancelsr:1,delsub:1,psmode:1,psadd:1,psdel:1,psok:1,pst:1,pstx:1,pstgo:1,pstback:1,pstok:1,syn:1,synx:1,syngo:1,synoff:1,synnow:1,add:1,create:1,newcat:1,mancat:1,delcat:1,savecat:1,addpt:1,delpt:1,saveinfo:1,delitem:1,io:1,reset:1,fav:1,clean:1,ioload:1,chk:1,ico:1,icodel:1};
+var TAX=12,prevSig=null,page="market",ED=false,pnFoc=false,pseudo="",sent={},props=[],propOpen=false,pnOpen=false,pnThen=false,fbMsg="",pubRev=0,EDIT={crodc:1,crsub:1,crnew:1,crnewt:1,cred:1,crdup:1,crup:1,crdn:1,crdelb:1,crdeli:1,crimg:1,crimgdel:1,crren:1,qmake:1,prop:1,propok:1,propno:1,propall:1,propnone:1,fbgo:1,fboff:1,fbcopy:1,undo:1,rencat:1,savecr:1,cancelcr:1,newsub:1,savesub:1,mansub:1,rensub:1,savesr:1,cancelsr:1,delsub:1,psmode:1,psadd:1,psdel:1,psok:1,pst:1,pstx:1,pstgo:1,pstback:1,pstok:1,syn:1,synx:1,syngo:1,synoff:1,synnow:1,add:1,create:1,newcat:1,mancat:1,delcat:1,savecat:1,addpt:1,delpt:1,saveinfo:1,delitem:1,io:1,reset:1,fav:1,clean:1,ioload:1,chk:1,ico:1,icodel:1};
 function sigp(){return db.sig||15}
 function sg(it){var s=stats(it),p=s.p,lo=it.lo,hi=it.hi;if(lo||hi)return lo&&p<=lo?-1:hi&&p>=hi?1:0;if(s.n<3||!s.med)return 0;var x=sigp()/100;return p<=s.med*(1-x)?-1:p>=s.med*(1+x)?1:0}
 function isAl(it){return sg(it)!=0}
