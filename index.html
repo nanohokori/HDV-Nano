@@ -726,7 +726,7 @@ function icoLoad(file,id){var r=new FileReader();r.onload=function(){var im=new 
     var it=db.items.filter(function(i){return i.id==id})[0];if(it){it.img=u;save();render()}};
   im.src=r.result};r.onerror=function(){showToast("Image illisible.")};r.readAsDataURL(file)}
 function stale(){return db.stale||60}
-var TAX=12,prevSig=null,page="market",ED=false,pnFoc=false,pseudo="",sent={},props=[],propOpen=false,pnOpen=false,pnThen=false,fbMsg="",pubRev=0,EDIT={jrp:1,jrz:1,crods:1,crodx:1,crodc:1,crsub:1,crnew:1,crnewt:1,cred:1,crdup:1,crup:1,crdn:1,crdelb:1,crdeli:1,crimg:1,crimgdel:1,crren:1,qmake:1,prop:1,propok:1,propno:1,propall:1,propnone:1,fbgo:1,fboff:1,fbcopy:1,undo:1,rencat:1,savecr:1,cancelcr:1,newsub:1,savesub:1,mansub:1,rensub:1,savesr:1,cancelsr:1,delsub:1,psmode:1,psadd:1,psdel:1,psok:1,pst:1,pstx:1,pstgo:1,pstback:1,pstok:1,syn:1,synx:1,syngo:1,synoff:1,synnow:1,add:1,create:1,newcat:1,mancat:1,delcat:1,savecat:1,addpt:1,delpt:1,saveinfo:1,delitem:1,io:1,reset:1,fav:1,clean:1,ioload:1,chk:1,ico:1,icodel:1};
+var TAX=12,prevSig=null,page="market",ED=false,pnFoc=false,pseudo="",sent={},props=[],propOpen=false,pnOpen=false,pnThen=false,fbMsg="",pubRev=0,EDIT={jrp:1,jrz:1,crods:1,crodx:1,crodc:1,crsub:1,crnew:1,crnewt:1,cred:1,crdup:1,crup:1,crdn:1,crdelb:1,crdeli:1,crimg:1,crimgdel:1,crren:1,qmake:1,prop:1,propok:1,propno:1,propall:1,propnone:1,fbgo:1,fboff:1,fbcopy:1,undo:1,rencat:1,savecr:1,cancelcr:1,newsub:1,savesub:1,mansub:1,rensub:1,savesr:1,cancelsr:1,delsub:1,psmode:1,nwgo:1,nwback:1,nwok:1,psadd:1,psdel:1,psok:1,pst:1,pstx:1,pstgo:1,pstback:1,pstok:1,syn:1,synx:1,syngo:1,synoff:1,synnow:1,add:1,create:1,newcat:1,mancat:1,delcat:1,savecat:1,addpt:1,delpt:1,saveinfo:1,delitem:1,io:1,reset:1,fav:1,clean:1,ioload:1,chk:1,ico:1,icodel:1};
 function sigp(){return db.sig||15}
 function sg(it){var s=stats(it),p=s.p,lo=it.lo,hi=it.hi;if(lo||hi)return lo&&p<=lo?-1:hi&&p>=hi?1:0;if(s.n<3||!s.med)return 0;var x=sigp()/100;return p<=s.med*(1-x)?-1:p>=s.med*(1+x)?1:0}
 function isAl(it){return sg(it)!=0}
@@ -844,6 +844,9 @@ document.addEventListener("click",function(e){
   else if(a=="pstx"){pst.open=false;pst.rows=null;pst.txt=""}
   else if(a=="pstgo"){pst.txt=val("ptx");pst.rows=pParse(pst.txt)}
   else if(a=="pstback"){pst.rows=null}
+  else if(a=="nwgo"){pst.nw.txt=val("nwt");pst.nw.cat=val("nwcat")||db.cats[0];pst.nw.rows=nwParse(pst.nw.txt,pst.nw.cat)}
+  else if(a=="nwback"){pst.nw.rows=null}
+  else if(a=="nwok"){nwApply()}
   else if(a=="pstok"){pApply()}
   else if(a=="chk"){db.chk=Date.now();save()}
   else if(a=="ico"){icoT=v;icf.value="";icf.click();return}
@@ -932,7 +935,7 @@ function admGo(){var p=val("apw");admMsg="";
   render();var f=document.getElementById("apw");if(f&&f.focus)f.focus()}
 function admOut(){try{localStorage.removeItem("hdv_admin")}catch(e){}ED=false;document.body.classList.add("ro");load();render()}
 
-var pst={open:false,rows:null,txt:"",mode:"menu",lines:[],fi:null};
+var pst={open:false,rows:null,txt:"",mode:"menu",lines:[],fi:null,nw:{txt:"",cat:"",rows:null}};
 function nrm(t){return String(t).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[’‘´`]/g,"'").replace(/[^a-z0-9' ]+/g," ").replace(/\s+/g," ").trim()}
 function pNum(t){var re=/\d+[.,]\d+(?=\s*[km](?![a-z]))|\d{1,3}(?:[   .,]\d{3})+(?!\d)|\d+/g,m=re.exec(t);if(!m)return null;
   var x=m[0],suf=t.charAt(m.index+x.length),sp=t.slice(m.index+x.length).match(/^\s*([km])(?![a-z])/),mul=sp?(sp[1]=="k"?1e3:1e6):1,v;
@@ -947,6 +950,28 @@ function pParse(txt){var names=db.items.map(function(i){return{i:i,n:nrm(i.name)
     if(p==null){unk.push(line.trim()+" (pas de prix)");return}
     if(!ok[best.i.id])order.push(best.i.id);ok[best.i.id]={it:best.i,p:p,q:qv}});
   return{ok:order.map(function(id){return ok[id]}),unk:unk}}
+
+function nwRar(n){n=nrm(n);return /eclatant/.test(n)?3:/grande purete/.test(n)?1:/(^| )pur( |$)/.test(n)?2:0}
+function nwCat(n,def){n=nrm(n);var b=null;db.items.forEach(function(i){var m=nrm(i.name);if(m&&(n.indexOf(m)>-1||m.indexOf(n)>-1)&&(!b||m.length>b.m.length))b={m:m,i:i}});return b?b.i.cat:def}
+function nwParse(txt,def){var have={},seen={},rows=[],dup=[];db.items.forEach(function(i){have[nrm(i.name)]=1});
+  String(txt).split(/\r?\n/).forEach(function(line){line=line.replace(/\t/," ").trim();if(!line)return;var q=null,p=null,qm=line.match(/(?:^|\s)[x×]\s*(\d{1,7})\s*$/i);if(qm){q=+qm[1];line=line.slice(0,qm.index).trim()}
+    var pm=line.match(/^(.*?[^\d\s.,])\s+(\d{1,3}(?:[   .,]\d{3})+|\d+)\s*$/);if(pm){p=pNum(pm[2]);line=pm[1].trim()}
+    var k=nrm(line);if(!k||!/[a-z]/.test(k))return;if(have[k]||seen[k]){dup.push(line);return}seen[k]=1;
+    rows.push({n:line,p:p,q:q,r:nwRar(line),c:nwCat(line,def)})});
+  return{rows:rows,dup:dup}}
+function nwPanel(){var N=pst.nw;
+  if(!N.rows){var co=db.cats.map(function(c){return'<option'+(c==N.cat?" selected":"")+">"+esc(c)+"</option>"}).join("");
+    return'<div class="cat">Colle <b>un nom par ligne</b>. Le prix et la quantité sont facultatifs (<b>Nom 1 500 x12</b>). Les objets qui existent déjà sont ignorés. Tu vérifies l\'aperçu avant de créer.</div><div class="cat">Catégorie par défaut : <select id="nwcat">'+co+'</select> <span style="opacity:.7">(si le nom ressemble à un objet existant, sa catégorie est reprise)</span></div><textarea id="nwt" rows="8" placeholder="Intention de rage&#10;Anneau du Roi dragon blanc 1 500 000 x3" style="width:100%;font:13px monospace;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:8px">'+esc(N.txt)+'</textarea><div class="bar" style="margin:0"><button class="pri" data-a="nwgo">Analyser</button><button data-a="pstx">Fermer</button></div>'}
+  var r=N.rows,h="";
+  h+=r.rows.length?'<div class="scroll"><table><thead><tr><th style="text-align:left">Nom</th><th>Catégorie</th><th>Rareté</th><th>Prix</th><th>Qté</th><th>Créer</th></tr></thead><tbody>'+r.rows.map(function(x,i){return'<tr><td style="text-align:left"><input class="nwn" data-i="'+i+'" value="'+esc(x.n)+'" style="width:250px"></td><td><select class="nwc" data-i="'+i+'">'+db.cats.map(function(c){return'<option'+(c==x.c?" selected":"")+">"+esc(c)+"</option>"}).join("")+'</select></td><td><select class="nwr" data-i="'+i+'">'+rarOpts(x.r)+'</select></td><td><input class="nwp" type="number" min="0" data-i="'+i+'" value="'+(x.p!=null?x.p:"")+'" placeholder="—" style="width:110px"></td><td><input class="nwq" type="number" min="0" data-i="'+i+'" value="'+(x.q!=null?x.q:"")+'" placeholder="—" style="width:70px"></td><td><input class="nwk" type="checkbox" data-i="'+i+'" checked></td></tr>'}).join("")+'</tbody></table></div>':'<div class="cat">Rien de nouveau à créer.</div>';
+  if(r.dup.length)h+='<div class="cat"><b>Déjà présents / doublons ('+r.dup.length+')</b> : '+r.dup.slice(0,8).map(esc).join(" · ")+(r.dup.length>8?" …":"")+"</div>";
+  return h+'<div class="bar" style="margin:0">'+(r.rows.length?'<button class="pri" data-a="nwok">Créer '+r.rows.length+' objet'+(r.rows.length>1?"s":"")+"</button>":"")+'<button data-a="nwback">Modifier le texte</button><button data-a="pstx">Fermer</button></div>'}
+function nwApply(){var n=0,now=Date.now(),g=function(c,i){return document.querySelector("."+c+'[data-i="'+i+'"]')};
+  (pst.nw.rows?pst.nw.rows.rows:[]).forEach(function(x,i){var k=g("nwk",i);if(!k||!k.checked)return;var nm=g("nwn",i).value.trim();if(!nm)return;
+    if(db.items.some(function(t){return nrm(t.name)==nrm(nm)}))return;
+    var pv=g("nwp",i).value,qv=g("nwq",i).value,p=pv!==""&&+pv>=0?Math.round(+pv):0,q=qv!==""&&+qv>=0?Math.round(+qv):undefined;
+    db.items.push({id:"i"+now+"_"+i,name:nm,cat:g("nwc",i).value,rar:+g("nwr",i).value,h:[pt(now,p,undefined,q)]});n++});
+  pst.open=false;pst.nw={txt:"",cat:"",rows:null};if(n)save();showToast(n?n+" objet"+(n>1?"s créés":" créé")+". Mets leurs prix avec l'Ajout rapide.":"Aucun objet créé.")}
 function pApply(){var n=0,now=Date.now();[].slice.call(document.querySelectorAll(".pp")).forEach(function(inp){var it=db.items.filter(function(i){return i.id==inp.dataset.id})[0],p=+inp.value;if(!it||inp.value===""||!(p>=0))return;
     var qi=document.querySelector('.pq[data-id="'+it.id+'"]'),qq=qi&&qi.value!==""&&+qi.value>=0?Math.round(+qi.value):null;var last=it.h.length?Math.max.apply(0,it.h.map(function(x){return x.t})):0;if(p!==stats(it).p||now-last>36e5){it.h.push(pt(now,p,undefined,qq==null?undefined:qq));n++}else if(qq!=null){qSet(it,qq);n++}});
   pst.open=false;pst.rows=null;pst.txt="";if(n)save();showToast(n?n+" objet"+(n>1?"s":"")+" mis à jour.":"Rien à changer : les prix collés sont déjà à jour.")}
@@ -965,7 +990,8 @@ function pMenu(){var opts=function(sel){var o="";db.cats.concat(db.items.some(fu
       return'<div class="qe"><label>Objet<select class="rs" data-i="'+k+'" style="color:var(--r'+(it?+it.rar||0:0)+')">'+opts(l.id)+'</select></label><label>Nouveau prix<input class="rp" type="number" min="0" inputmode="numeric" data-i="'+k+'" value="'+esc(l.p)+'" placeholder="'+(cur?fmt(cur):"")+'" aria-label="Nouveau prix"></label><span class="cat" style="min-width:150px;padding-bottom:10px">Actuel : <b>'+fmt(cur)+"</b>"+(d==null?"":' · <span class="'+(d>.05?"dn":d<-.05?"up":"")+'">'+(p==cur?"inchangé":(d>0?"+":"")+d.toFixed(1).replace(".",",")+" %")+"</span>")+'</span><button class="del" data-a="psdel" data-v="'+k+'" title="Retirer cette ligne" aria-label="Retirer cette ligne">✕</button></div>'}).join("")+
     '<div class="bar" style="margin:0"><button data-a="psadd">+ Ajouter une ligne</button><button class="pri" data-a="psok">Appliquer'+(n?" ("+n+")":"")+'</button><button data-a="pstx">Fermer</button></div>'}
 function pstPanel(){if(!(ED&&pst.open))return"";
-  var h='<div class="panel form" style="margin-bottom:12px;flex-direction:column"><div class="cat"><b>Ajout rapide</b> : mets à jour plusieurs prix d\'un coup.</div><div class="tabs" style="align-self:flex-start"><button data-a="psmode" data-v="menu" class="'+(pst.mode=="menu"?"on":"")+'">Menu déroulant</button><button data-a="psmode" data-v="texte" class="'+(pst.mode=="texte"?"on":"")+'">Coller du texte</button></div>';
+  var h='<div class="panel form" style="margin-bottom:12px;flex-direction:column"><div class="cat"><b>Ajout rapide</b> : mets à jour plusieurs prix d\'un coup.</div><div class="tabs" style="align-self:flex-start"><button data-a="psmode" data-v="menu" class="'+(pst.mode=="menu"?"on":"")+'">Menu déroulant</button><button data-a="psmode" data-v="texte" class="'+(pst.mode=="texte"?"on":"")+'">Coller du texte</button><button data-a="psmode" data-v="nouv" class="'+(pst.mode=="nouv"?"on":"")+'">Nouveaux objets</button></div>';
+  if(pst.mode=="nouv")return h+nwPanel()+"</div>";
   if(pst.mode=="menu")return h+pMenu()+"</div>";
   if(!pst.rows)return h+'<div class="cat">Colle une liste avec <b>une ligne par objet</b> (le nom, puis le prix, et en option la quantité en vente écrite <b>x148</b> à la fin de la ligne), ou un tableau copié. Les objets sont reconnus par leur nom. Tu vérifies l\'aperçu avant d\'appliquer.</div><textarea id="ptx" rows="8" placeholder="Pierre de raffinage 2 000 x148&#10;Bois d\'Yggdrasil pur 59 995 x25" style="width:100%;font:13px monospace;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:8px">'+esc(pst.txt)+'</textarea><div class="bar" style="margin:0"><button class="pri" data-a="pstgo">Analyser</button><button data-a="pstx">Fermer</button></div></div>';
   var r=pst.rows;
