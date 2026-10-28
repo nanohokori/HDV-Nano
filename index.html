@@ -447,7 +447,7 @@ function visN(){return["3","6","12","24","7","tr"].filter(col).length}
 var mnOpen=false,mkSet=false;
 function cb(){return'<div class="bar"><span class="cat">Colonnes</span>'+[["3","3h"],["6","6h"],["12","12h"],["24","24h"],["7","7j"],["tr","Tendance"]].map(function(c){return'<button data-a="col" data-v="'+c[0]+'" class="'+(col(c[0])?"on":"")+'">'+c[1]+"</button>"}).join("")+"</div>"}
 function cells(s){var o="";["3","6","12","24","7"].forEach(function(k){if(col(k))o+='<td data-l="'+(k=="7"?"7j":k+"h")+'">'+pct(s["d"+k])+pa(s["a"+k])+"</td>"});if(col("tr"))o+='<td class="sp">'+spark(s.h)+"</td>";return o}
-function nav(){return'<div class="tabs">'+[["market","Marché"],["quna","Quna"],["craft","Craft"]].concat(ED?[["journal","Journal"]]:[]).map(function(p){return'<button data-a="page" data-v="'+p[0]+'" class="'+(page==p[0]?"on":"")+'">'+p[1]+"</button>"}).join("")+"</div>"}
+function nav(){return'<div class="tabs">'+[["market","Marché"],["quna","Quna"],["craft","Craft"],["craft2","Craft 2"]].concat(ED?[["journal","Journal"]]:[]).map(function(p){return'<button data-a="page" data-v="'+p[0]+'" class="'+(page==p[0]?"on":"")+'">'+p[1]+"</button>"}).join("")+"</div>"}
 var QC=[{v:4e5},{v:2e6},{v:1e7}];
 function qName(k){return"Coffre de "+fmt(+k)+" Kinah"}
 function findIt(id){return db.items.filter(function(i){return i.id==id})[0]}
@@ -486,7 +486,9 @@ var CRLV=[1,25,50,51,75,100];
 try{var crl0=JSON.parse(localStorage.getItem("hdv_craft2")||"null");if(crl0){if(crl0.att&&typeof crl0.att=="object")crL.att=crl0.att;if(+crl0.lvl>=1&&+crl0.lvl<=100)crL.lvl=Math.round(+crl0.lvl);if(crl0.lst!=null&&isFinite(+crl0.lst)&&crl0.fee!=null&&isFinite(+crl0.fee)){crL.fee=Math.min(99,Math.max(0,+crl0.fee));crL.lst=Math.min(99,Math.max(0,+crl0.lst))}}}catch(e){}
 function crSave(){try{localStorage.setItem("hdv_craft2",JSON.stringify({att:crL.att,lvl:crL.lvl,fee:crL.fee,lst:crL.lst}))}catch(e){}}
 function crLotsArr(id){var str=String(crL.lots[id]||""),o=[];str.split(/[;,\s]+/).forEach(function(t){var m=t.match(/^(?:(\d{1,3})[x×*])?(.+)$/i);if(!m)return;var q=m[1]?+m[1]:1,v=parseK(m[2]);if(v>0)for(var i=0;i<q&&o.length<500;i++)o.push(v)});return o}
-function crBl(){return db.cr2&&db.cr2.blocks||[]}
+function crK(){return page=="craft2"?"cr3":"cr2"}
+function crArr(){var k=crK();db[k]=db[k]||{blocks:[]};return db[k].blocks||(db[k].blocks=[])}
+function crBl(){var d=db[crK()];return d&&d.blocks||[]}
 function crBlock(id){return crBl().filter(function(b){return b.id==id})[0]||null}
 function nsOf(it){var h=it&&it.h||[];if(!h.length)return false;var l=h.reduce(function(a,b){return b.t>=a.t?b:a});return l.q===0}
 function crP(id){var m=+crL.me[id];if(m>0)return m;var it=findIt(id);return it&&!nsOf(it)?stats(it).p:0}
@@ -650,7 +652,7 @@ function crPage(){crBuildOpts();var all0=crBl(),all=all0.filter(function(b){retu
   var trh=trs0.length||ED?'<div class="crtrh"><h2>Transfer crafting</h2><span class="crok">réussite 100 %</span></div><p class="cat" style="margin:0 0 10px">Réussite garantie : on améliore l’arme qu’on possède déjà.</p>'+(gt.length?'<div class="crg" style="margin:0 0 10px"><b>Étiquette</b><button data-a="crtgrp" data-v="" class="'+(crTG?"":"on")+'">Toutes</button>'+gt.map(function(g){return'<button data-a="crtgrp" data-v="'+esc(g)+'" class="'+(crTG==g?"on":"")+'">'+esc(g)+"</button>"}).join("")+"</div>":"")+(trs.length?'<div class="crbs2 crbs3">'+trs.map(crTrCard).join("")+"</div>":'<div class="panel crp"><p class="cat" style="margin:0">'+(trs0.length?"Aucun transfer craft avec cette étiquette.":"Aucun transfer craft pour l’instant.")+(ED?" Clique sur « + Transfer craft ».":"")+"</p></div>"):"";
   var b=crM&&crBlock(crM.id),modal=b?(crM.m=="edit"&&ED?crEdModal(b):crCalcModal(b)):"";
   return'<header><div><h1 class="brand">HDV Nano</h1><p>Calcule le coût de tes crafts avec les prix de la liste.</p>'+upd()+'</div></header><div class="bar">'+nav()+"</div>"+
-   (ED||chips?'<div class="panel crp crtool">'+chips+(ED?'<button class="pri" data-a="crnew">+ Nouveau bloc</button><button class="pri" data-a="crnewt">+ Transfer craft</button>':"")+"</div>":"")+crOdHtml()+body+trh+modal}
+   (ED||chips?'<div class="panel crp crtool">'+chips+(ED?'<button class="pri" data-a="crnew">+ Nouveau bloc</button><button class="pri" data-a="crnewt">+ Transfer craft</button>':"")+"</div>":"")+(page=="craft2"?"":crOdHtml())+body+trh+modal}
 function crImgLoad(file,id){var r=new FileReader();r.onload=function(){var im=new Image();im.onerror=function(){showToast("Image illisible.")};im.onload=function(){var S=96,c=document.createElement("canvas");c.width=S;c.height=S;var x=c.getContext("2d"),m=Math.min(im.width,im.height);x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,S,S);var u;try{u=c.toDataURL("image/webp",.85);if(u.indexOf("data:image/webp")!=0)u=c.toDataURL("image/png")}catch(e){u=c.toDataURL("image/png")}var b=crBlock(id);if(b){b.img=u;save();render()}};im.src=r.result};r.readAsDataURL(file)}
 var crIT=null,crIf=document.createElement("input");crIf.type="file";crIf.accept="image/*";crIf.style.display="none";document.body.appendChild(crIf);crIf.addEventListener("change",function(){var f=crIf.files&&crIf.files[0];if(f&&crIT)crImgLoad(f,crIT)});
 function crMv(id,d){var a=crBl(),i=a.findIndex(function(b){return b.id==id}),j=i+d;if(i<0||j<0||j>=a.length)return;var t=a[i];a[i]=a[j];a[j]=t;save()}
@@ -696,12 +698,12 @@ function crAct(a,v,el,e){
   else if(a=="crben"){crBenMore=!crBenMore}
   else if(a=="crgrp"){crG=v}
   else if(a=="crtgrp"){crTG=v}
-  else if(a=="crnew"){var b={id:crUid(),name:"Nouveau bloc",ing:[],c:25,s:100};db.cr2=db.cr2||{blocks:[]};db.cr2.blocks.push(b);save();crM={m:"edit",id:b.id}}
-  else if(a=="crnewt"){var t={id:crUid(),name:"Nouveau transfer",tr:true,ing:[],c:25,s:100,tb:""};db.cr2=db.cr2||{blocks:[]};db.cr2.blocks.push(t);save();crM={m:"edit",id:t.id}}
-  else if(a=="crdup"){var o=crBlock(v);if(o){var c=JSON.parse(JSON.stringify(o));c.id=crUid();c.name=(o.name||"")+" (copie)";var i=db.cr2.blocks.indexOf(o);db.cr2.blocks.splice(i+1,0,c);save()}}
+  else if(a=="crnew"){var b={id:crUid(),name:"Nouveau bloc",ing:[],c:25,s:100};crArr().push(b);save();crM={m:"edit",id:b.id}}
+  else if(a=="crnewt"){var t={id:crUid(),name:"Nouveau transfer",tr:true,ing:[],c:25,s:100,tb:""};crArr().push(t);save();crM={m:"edit",id:t.id}}
+  else if(a=="crdup"){var o=crBlock(v);if(o){var c=JSON.parse(JSON.stringify(o));c.id=crUid();c.name=(o.name||"")+" (copie)";var ar=crArr(),i=ar.indexOf(o);ar.splice(i+1,0,c);save()}}
   else if(a=="crup"){crMv(v,-1)}
   else if(a=="crdn"){crMv(v,1)}
-  else if(a=="crdelb"){if(confirm("Supprimer ce bloc ?")){db.cr2.blocks=db.cr2.blocks.filter(function(b){return b.id!=v});save();crM=null}}
+  else if(a=="crdelb"){if(confirm("Supprimer ce bloc ?")){db[crK()].blocks=crArr().filter(function(b){return b.id!=v});save();crM=null}}
   else if(a=="crdeli"){var b2=crBlock(crM&&crM.id);if(b2){var ps=String(v).split("/"),last=+ps.pop(),lst=ps.length?crAtItem(b2,ps.join("/")).sub:b2.ing;lst.splice(last,1);save()}}
   else if(a=="crsub"){var b4=crBlock(crM&&crM.id),x4=b4&&crAtItem(b4,v);if(x4){if(x4.sub)delete x4.sub;else x4.sub=[];save()}}
   else if(a=="crx"){crXp[v]=!crXp[v]}
@@ -807,11 +809,11 @@ function render(){
   if(bx&&lsc>=0)lsc=bx.scrollTop;if(lsc<0)lsc=0;if(vk&&vk!==lastV)wyl=wy;
   var cs0=document.querySelector(".crmd");cs0=cs0?cs0.scrollTop:0;var co0=document.querySelector(".crov"),co1=co0?co0.scrollTop:0;
   var ae=document.activeElement,ak=null;if(ae&&ae.closest&&ae.closest(".crmd")&&ae.tagName=="INPUT"&&ae.dataset&&ae.dataset.f){var q0='input[data-f="'+ae.dataset.f+'"]';["p","it","k"].forEach(function(a){if(ae.dataset[a]!=null)q0+='[data-'+a+'="'+String(ae.dataset[a]).replace(/"/g,'\\"')+'"]'});ak={q:q0,v:ae.value,s:ae.selectionStart,e:ae.selectionEnd}}
-  app.innerHTML=it?detail(it):page=="quna"?qunaPage():page=="craft"?crPage():page=="journal"&&ED?jrPage():list();initChart();initQChart();notify();
+  app.innerHTML=it?detail(it):page=="quna"?qunaPage():(page=="craft"||page=="craft2")?crPage():page=="journal"&&ED?jrPage():list();initChart();initQChart();notify();
   if(cs0){var cs1=document.querySelector(".crmd");if(cs1)cs1.scrollTop=cs0}
   if(co1){var co2=document.querySelector(".crov");if(co2)co2.scrollTop=co1}
   if(ak){try{var ne=document.querySelector(".crmd "+ak.q.replace(/^input/,"input"));if(ne){ne.value=ak.v;ne.focus({preventScroll:true});if(ak.s!=null)ne.setSelectionRange(ak.s,ak.e)}}catch(e){}}
-  document.body.style.overflow=(page=="craft"&&crM&&!it)?"hidden":"";
+  document.body.style.overflow=((page=="craft"||page=="craft2")&&crM&&!it)?"hidden":"";
   var nb=document.querySelector(".cards.panel");setChh();if(nb&&lsc)nb.scrollTo({top:lsc,behavior:"instant"});
   if(vk!==lastV){window.scrollTo({top:vk?0:wyl,behavior:"instant"});lastV=vk}else if(Math.abs(window.scrollY-wy)>1)window.scrollTo({top:wy,behavior:"instant"});
   if(pnFoc){pnFoc=false;var pi=document.getElementById("pni");if(pi){pi.focus();pi.select&&pi.select();pi.scrollIntoView({block:"center",behavior:"instant"})}}
@@ -889,7 +891,7 @@ document.addEventListener("click",function(e){
   else if(a=="sort"){lsc=-1;if(sort.k==v)sort.d*=-1;else{sort.k=v;sort.d=v=="name"?1:-1}}
   else if(a=="snd"){db.snd=!db.snd;save();if(db.snd){try{Notification.requestPermission()}catch(x){}beep()}}
   else if(a=="pub"){pub();return}
-  else if(a=="page"){page=v;lsc=-1}
+  else if(a=="page"){page=v;lsc=-1;crM=null;crG="";crTG=""}
   else if(a=="hb"){db.hb=+v;save()}
   else if(a=="col"){var al=["3","6","12","24","7","tr"],cc=db.cols||al.slice();db.cols=cc.indexOf(v)>-1?cc.filter(function(k){return k!=v}):cc.concat(v);save()}
   else if(a=="io"){io=!io;ioMsg=""}
@@ -1056,7 +1058,7 @@ document.addEventListener("pointermove",function(e){if(!dg)return;if(!dg.on){if(
 document.addEventListener("pointerup",function(){if(!dg)return;var d=dg;dg=null;if(!d.on)return;dgSkip=true;setTimeout(function(){dgSkip=false},0);dgClear();
   if(d.to!==null){var l=d.t.l,i=l.indexOf(d.t.v);l.splice(i,1);var j=l.indexOf(d.to);l.splice(d.after?j+1:j,0,d.t.v);save();render()}});
 document.addEventListener("click",function(e){if(dgSkip){e.stopPropagation();e.preventDefault()}},true);
-document.addEventListener("keydown",function(e){if(e.key=="Escape"&&dg){dg=null;dgClear()}if(e.key=="Escape"&&crM&&page=="craft"){crM=null;render()}if((e.key=="Enter"||e.key==" ")&&e.target.classList&&e.target.classList.contains("crb")){e.preventDefault();crM={m:"calc",id:e.target.dataset.v};render()}});
+document.addEventListener("keydown",function(e){if(e.key=="Escape"&&dg){dg=null;dgClear()}if(e.key=="Escape"&&crM&&(page=="craft"||page=="craft2")){crM=null;render()}if((e.key=="Enter"||e.key==" ")&&e.target.classList&&e.target.classList.contains("crb")){e.preventDefault();crM={m:"calc",id:e.target.dataset.v};render()}});
 var nh=document.createElement("div");nh.id="numhint";document.body.appendChild(nh);
 function nhShow(t){if(!(t&&t.tagName=="INPUT"&&t.type=="number")){nh.style.display="none";return}var v=+t.value;if(!t.value||!isFinite(v)||Math.abs(v)<1000){nh.style.display="none";return}nh.textContent=fmt(v);nh.style.display="block";var r=t.getBoundingClientRect();nh.style.left=Math.max(4,Math.min(r.left,innerWidth-nh.offsetWidth-4))+"px";nh.style.top=(r.top>44?r.top-nh.offsetHeight-6:r.bottom+6)+"px"}
 document.addEventListener("input",function(e){nhShow(e.target)});document.addEventListener("focusin",function(e){nhShow(e.target)});document.addEventListener("focusout",function(){nhShow(null)});window.addEventListener("scroll",function(){nhShow(document.activeElement)},true);
