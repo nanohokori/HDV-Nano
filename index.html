@@ -593,6 +593,16 @@ function crProf(b){if(!ED||!(b.out||b.combo))return"";var c=crCalc(b,1),f=functi
   if(miss)return'<div class="crprof na"><h3 class="crh3" style="margin-top:0">Bénéfice HDV <span class="cat">admin</span></h3><p class="cat" style="margin:0">Il manque un prix ('+(nsn.length?"aucun en vente : "+nsn.map(esc).join(", "):"matériaux ou objets vendus")+') pour calculer le bénéfice.</p></div>';
   var blk=function(lab,it,cost,price){var net=price*k,pf=net-cost;return'<div class="crpi"><div class="crpt">'+lab+" · "+esc(it?it.name:"?")+'</div><div class="crl"><span>Il te coûte en moyenne</span><b>'+f(cost)+'</b></div><div class="crl"><span>Prix de vente</span><b>'+f(price)+'</b></div>'+(fe>0?'<div class="crl"><span>Prix de vente avec frais ('+fe+' %)</span><b>'+f(net)+'</b></div>':"")+'<div class="crl big"><span>Bénéfice</span><b class="'+(pf>=0?"up":"dn")+'">'+sg(pf)+"</b></div></div>"};
   var h='<div class="crprof"><h3 class="crh3" style="margin-top:0">Bénéfice HDV <span class="cat">admin · matériaux achetés à l’HDV</span></h3>';
+  var NA=Math.max(1,Math.round(+crL.att[b.id]||1)),cN=crCalc(b,NA),rev=cN.rP+cN.rC,pfN=rev-cN.cost,o1=function(v){return(Math.round(v*10)/10).toString().replace(".",",")},
+    stk=Object.keys(crL.stock||{}).some(function(k){return k.indexOf(b.id+"|")==0&&+crL.stock[k]>0});
+  h+='<div class="crpi crpn"><div class="crpt">Pour tes '+NA+' tentative'+(NA>1?"s":"")+'</div>'+
+    '<div class="crl"><span>Matériaux à acheter'+(stk?" (avec « J’en ai »)":"")+'</span><b>'+f(cN.cost)+'</b></div>'+
+    (b.out&&cN.pN>0?'<div class="crl"><span>Objets obtenus sans combo (en moyenne)</span><b>'+o1(cN.pN)+" × "+f(cN.pp)+'</b></div>':"")+
+    (b.combo&&cN.cN>0?'<div class="crl"><span>Objets obtenus avec combo (en moyenne)</span><b>'+o1(cN.cN)+" × "+f(cN.pc)+'</b></div>':"")+
+    '<div class="crl"><span>Ventes'+(fe>0?" après frais ("+fe+" %)":"")+'</span><b>'+f(rev)+'</b></div>'+
+    '<div class="crl big"><span>Bénéfice total</span><b class="'+(pfN>=0?"up":"dn")+'">'+sg(pfN)+'</b></div>'+
+    (NA>1?'<div class="crl"><span>Soit par tentative</span><b>'+sg(pfN/NA)+'</b></div>':"")+
+    '<div class="crnote">Moyenne sur '+NA+' tentatives : le résultat réel peut varier. Change le nombre de tentatives en haut de la fenêtre.</div></div>';
   if(b.out&&c.pN>0)h+=blk("Sans combo",findIt(b.out),c.cost/c.pN,c.pp);
   if(b.combo&&c.cN>0)h+=blk("Avec combo",findIt(b.combo),c.cost/c.cN,c.pc);
   if(b.combo&&c.pc>0){var q=crProb(b).q,cum=0,rows="",cl=function(v){return'<b class="'+(v>=0?"up":"dn")+'">'+sg(v)+"</b>"},hasP=b.out&&c.pp>0;
