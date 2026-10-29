@@ -673,7 +673,11 @@ function crChange(t){var f=t.dataset.f,b=crM&&crBlock(crM.id),num=function(v){re
   if(f=="stk"){var sv0=Math.max(0,Math.round(num(t.value)||0));if(b){if(sv0>0)crL.stock[b.id+"|"+t.dataset.p]=sv0;else delete crL.stock[b.id+"|"+t.dataset.p]}render();return true}
   if(f=="lot"){var lv0=t.value.trim();if(lv0)crL.lots[t.dataset.it]=lv0;else delete crL.lots[t.dataset.it];render();return true}
   if(!ED||!b)return t.classList.contains("crf");
-  if(f=="name"||f=="sub"||f=="grp"){b[f]=t.value.trim();if(!b[f]&&f!="name")delete b[f];save();render();return true}
+  if(f=="name"||f=="sub"||f=="grp"){b[f]=t.value.trim();if(!b[f]&&f!="name")delete b[f];var nm=[];
+    if(f=="name"&&b.name){var k=crNrm(b.name),ex=db.items.filter(function(i){return crNrm(i.name)==k})[0];
+      if(ex&&!b.out&&!b.tr){b.out=ex.id;nm.push("Résultat réglé sur « "+ex.name+" » (prix du marché repris).")}
+      [["cr2","Craft"],["cr3","Craft 2"]].forEach(function(c){var a=db[c[0]]&&db[c[0]].blocks||[];if(a.some(function(o){return o.id!=b.id&&crNrm(o.name)==k}))nm.push("Un bloc du même nom existe déjà dans "+c[1]+".")})}
+    save();render();if(nm.length)showToast(nm.join(" "));return true}
   if(f=="s"||f=="c"){var n=Math.min(100,Math.max(0,num(t.value)));if(isFinite(n))b[f]=n;save();render();return true}
   if(f=="tb"){if(t.value)b.tb=t.value;else delete b.tb;save();render();return true}
   if(f=="rlg"||f=="rln"){var P2=t.closest(".crlp"),v2=P2.querySelector("input").value,n2=Math.round(num(v2)),g2=+P2.querySelector("select").value;if(v2!==""&&isFinite(n2)){b.rl=g2*50+Math.min(50,Math.max(1,n2))}else delete b.rl;save();render();return true}
