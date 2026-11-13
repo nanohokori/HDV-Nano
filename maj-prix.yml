@@ -1,0 +1,43 @@
+name: Maj prix QuestLog
+
+on:
+  schedule:
+    - cron: "10 * * * *"   # toutes les heures à hh:10 (UTC, donc aussi à hh:10 heure de Paris)
+  workflow_dispatch:        # bouton « Run workflow » pour le lancer à la main
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: maj-prix
+  cancel-in-progress: false
+
+jobs:
+  maj:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Relevé QuestLog et publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "hdv-nano-bot"
+          git config user.email "hdv-nano-bot@users.noreply.github.com"
+          for i in 1 2 3; do
+            git fetch origin "${GITHUB_REF_NAME}" && git reset --hard "origin/${GITHUB_REF_NAME}"
+            node scripts/maj-prix.mjs
+            git add data.json
+            if git diff --cached --quiet; then echo "Rien à publier."; exit 0; fi
+            git commit -m "Mise à jour des prix (auto)"
+            if git push origin "HEAD:${GITHUB_REF_NAME}"; then
+              gh api -X POST "repos/${GITHUB_REPOSITORY}/pages/builds" >/dev/null 2>&1 || true
+              exit 0
+            fi
+            echo "Push refusé (data.json modifié entre-temps), nouvel essai $i/3"; sleep 5
+          done
+          exit 1
